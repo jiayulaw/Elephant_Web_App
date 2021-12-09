@@ -1,0 +1,58 @@
+  <!-- Sidebar Holder -->
+  <nav id="sidebar">
+    <div class="sidebar-header">
+        <h3>Project Elephant</h3>
+    </div>
+
+    <ul class="list-unstyled components">
+        <p>by The Quadros</p>
+        {% if current_user.is_authenticated == True %}
+        <li class="{% if 'dashboard' in active_state %} active {% endif %}">
+            <a href="{{ url_for('dashboard') }}">Home</a>
+        </li>
+        <li class="{% if 'about_us' in active_state %} active {% endif %}">
+            <a href="{{ url_for('about_us') }}">About Us</a>
+        </li>
+        {% if current_user.has_role('admin') == True %}
+        <li class="{% if 'admin' in active_state %} active {% endif %}">
+            <a href="#AdminSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Admin Panel</a>
+            <ul class="collapse list-unstyled" id="AdminSubmenu">
+                <li>
+                    <a href="/admin">Admin home</a>
+                </li>
+                <li>
+                    <a href="/admin/user">Manage Users</a>
+                </li>
+                <li>
+                    <a href="/admin/register">Create Account</a>
+                </li>
+            </ul>
+        </li>
+        {% endif %} 
+       <li class="{% if 'data' in active_state %} active {% endif %}">
+            <a href="{{ url_for('display_image') }}">Data Center</a>
+        </li>
+
+        <li>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </li>
+
+        {% else %}
+        <li>
+            <a href="#">Please log in</a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <ul class="list-unstyled CTAs">
+        <li>
+            <a href="{{ url_for('debug') }}" class="download">Debug</a>
+        </li>
+        <!--
+        <li>
+            <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Back to article</a>
+        </li>
+        -->
+
+    </ul>
+</nav>

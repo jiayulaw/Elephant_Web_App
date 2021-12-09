@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %} Login {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+crossorigin=""/>
+ <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class = "row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title"> End devices</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table tablesorter " id="">
+            <thead class=" text-primary">
+              <tr>
+                <th>
+                  Name
+                </th>
+                <th>
+                  Location
+                </th>
+                <th>
+                  Message
+                </th>
+                <th class="text-center">
+                  Status
+                </th>
+
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  {{sensor_name}}
+                </td>
+                <td>
+                  Latitude Longitude
+                </td>
+          
+                <td>
+                  ??
+                </td>
+                <td class="text-center">
+                    <label for="progress_bar">Online</label>
+                    <progress id="progress_bar" value="100" max="100"> 100% </progress>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Mark 2
+                </td>
+                <td>
+                  Latitude Longitude
+                </td>
+            
+                <td>
+                  ??
+                </td>
+                <td class="text-center">
+                    <label for="progress_bar">Online</label>
+                    <progress id="progress_bar" value="100" max="100" style = "background-color: greenyellow;"> 100% </progress>
+                    <style>
+                      #redprogress_bar{
+                        background-color: rgb(219, 26, 26) !important;
+                        color: red !important;
+                      }
+                    </style>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Mark 3
+                </td>
+                <td>
+                  Johor
+                </td>
+            
+                <td>
+                  ??
+                </td>
+                <td class="text-center">
+                    <label for="redprogress_bar">Online</label>
+                    <progress id="redprogress_bar" value="100" max="100" > 100% </progress>
+
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="row">
+  
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-category">Aerial map</h5>
+        <h3 class="card-title"><i class="tim-icons icon-bell-55 text-primary"></i> End devices distribution</h3>
+        <div id="mapid"></div>
+        <style>
+          #mapid{
+            height: 300px;
+            width: 99%;
+          }
+        </style>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+{{ super() }}
+
+<!--
+  =======================================Leaflet Map API=======================================
+-->
+  <script>
+    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: 'mapbox/streets-v11', //mapbox/satellite-v9
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
+    }).addTo(mymap);
+    var marker = L.marker([1.818, 103.843]).addTo(mymap);
+    var marker2 = L.marker([1.788, 103.928]).addTo(mymap);
+    var marker3 = L.marker([1.863, 103.89]).addTo(mymap);
+    var marker3 = L.marker([1.833, 103.951]).addTo(mymap);
+    var circle = L.circle([1.833, 103.951], {
+    color: 'red',
+    fillColor: '#f03',
+    fillOpacity: 0.5,
+    radius: 500
+}).addTo(mymap);
+var polygon = L.polygon([
+    [1.818, 103.843],
+    [1.788, 103.928],
+    [1.863, 103.89]
+]).addTo(mymap);
+
+marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+marker2.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+marker3.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+circle.bindPopup("I am a circle.");
+polygon.bindPopup("I am a polygon.");
+  </script>
+{% endblock javascripts %}   

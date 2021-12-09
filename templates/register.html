@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %} Login {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{{ super() }}
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+<!--
+==============================================================
+=============================Form=============================
+==============================================================
+-->
+      <form role="form" method="POST" action="">
+  
+        {{ form.hidden_tag() }} 
+
+        <div class="card-header">
+          <h1 class="title">Account Registration</h1>
+
+          <h6 class="card-category">
+              {% if msg %}
+                <span class="text-danger">{{ msg | safe }}</span>
+              {% else %}
+                Complete your credentials
+              {% endif %}  
+          </h6>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+              <div class="col-md-3 px-md-1">
+                <div class="form-group">
+                  <label>Username</label>
+                  {{ form.username(class="form-control") }}
+                </div>
+                <div>
+                  {% for error in form.username.errors %}
+                  <p>{{error}}</p>
+                  {% endfor %}
+
+                </div>
+
+              </div>
+            </div>
+
+
+            <div class="row">
+              <div class="col-md-3 px-md-1">
+                <div class="form-group">
+                  <label>Password</label>
+                  {{ form.password(class="form-control", type="password") }}
+                </div>
+                {% for error in form.password.errors %}
+                <p>{{error}}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3 px-md-1">
+                <div class="form-group">
+                  <label>Access code</label>
+                  {{ form.access_level(class="form-control") }}
+                </div>
+                {% for error in form.access_level.errors %}
+                <p>{{error}}</p>
+                {% endfor %}
+              </div>
+            </div>
+            
+        </div>
+        <div class="card-footer">
+          <button type="submit" name="register" class="btn btn-fill btn-primary">Register</button>
+          &nbsp; &nbsp;
+          Have an account? <a href="{{ url_for('login') }}" class="text-primary">Login</a>
+        </div>
+
+      </form>
+<!--
+==============================================================
+==============================================================
+==============================================================
+-->
+<!--
+
+
+    <form method="POST" action="">
+      {{form.hidden_tag()}}
+      {{form.username}}
+      {{form.password}}
+      {{form.submit}}
+
+    </form>
+    <div>
+      
+      <br><p>Have an account?</p>
+      <a href = "/login"> 
+        <p><mark>Login here</mark></p>
+      </a>
+    
+    </div>
+    {% for error in form.username.errors %}
+    <p>{{error}}</p>
+    {% endfor %}
+   
+-->    
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock content %}
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+{{ super() }}
+
+{% endblock javascripts %}   
+
+
+

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %} Login {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{{ super() }}
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <!--==========Form=========-->
+    <form role="form" method="POST" action="">    
+      {{ form.hidden_tag() }} 
+      <div class="card-header">
+        <h1 class="title">Login</h1>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              <h4 style = "color:rgb(212, 145, 243)" class=flashes>
+            {% for message in messages %}
+              {{ message }}
+              {% endfor %}
+              </h4>
+          {% endif %}
+        {% endwith %}
+
+        <h6 class="card-category">
+          Login with your credentials
+          </h6>
+      </div>
+
+      <div class="card-body">
+
+          <div class="row gx-5">
+            <div class="col-md-3 px-md-1">
+              <div class="form-group">
+                <label>Username</label>
+                {{ form.username(class="form-control") }}
+              </div>
+              <div>
+                {% for error in form.username.errors %}
+                <p>{{error}}</p>
+                {% endfor %}
+
+              </div>
+
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3 px-md-1">
+              <div class="form-group">
+                <label>Password</label>
+                {{ form.password(class="form-control", type="password") }}
+              </div>
+              {% for error in form.password.errors %}
+              <p>{{error}}</p>
+              {% endfor %}
+            </div>
+          </div>
+          
+      </div>
+      <div class="card-footer">
+        <button type="submit" name="login" class="btn btn-fill btn-primary">Login</button>
+        &nbsp; &nbsp;
+        Don't have an account? Please contact admin for account creation.
+        
+      </div>
+    </form>
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+{{ super() }}
+
+{% endblock javascripts %}   
+
+
+
