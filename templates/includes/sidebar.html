@@ -7,6 +7,10 @@
     <ul class="list-unstyled components">
         <p>by The Quadros</p>
         {% if current_user.is_authenticated == True %}
+
+        <li>
+            <a href="#">{{current_user.username}}</a>
+        </li>
         <li class="{% if 'dashboard' in active_state %} active {% endif %}">
             <a href="{{ url_for('dashboard') }}">Home</a>
         </li>
@@ -18,13 +22,17 @@
             <a href="#AdminSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Admin Panel</a>
             <ul class="collapse list-unstyled" id="AdminSubmenu">
                 <li>
-                    <a href="/admin">Admin home</a>
+                    <a href="/admin">Admin Home</a>
                 </li>
                 <li>
                     <a href="/admin/user">Manage Users</a>
                 </li>
                 <li>
                     <a href="/admin/register">Create Account</a>
+                </li>
+
+                <li>
+                    <a href="/admin/update_status">Status Update</a>
                 </li>
             </ul>
         </li>
@@ -39,7 +47,7 @@
 
         {% else %}
         <li>
-            <a href="#">Please log in</a>
+            <a href="{{ url_for('login') }}">Please log in</a>
         </li>
         {% endif %}
     </ul>
