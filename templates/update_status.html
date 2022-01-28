@@ -53,7 +53,7 @@
               <div class = "form-group row ml-1">
                 <label for="to" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
                 <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to" required>
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker3" type="text" value="{{to_date}}" name="to" required>
                 </div> 
                 
               </div>
@@ -157,10 +157,6 @@
  
 </div>
 
-
-
-
-
 {% endblock content %}
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
@@ -170,7 +166,7 @@
 <script src="//code.jquery.com/jquery-3.5.0.min.js"></script>
 
 <!-- Datetimepicker files start, copy from cdnjs.com (easier to maintain), instead of downloading -->
-<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"/ >
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"/>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
 
 <!-- jstimezonedetect script start -->
@@ -184,13 +180,7 @@ jQuery( "#datetime_range" ).submit(function( event ) {
   jQuery(".timezone").val(timezone.name());
 });
 
-jQuery('#datetimepicker1').datetimepicker(
-  {
-  format:'Y-m-d H:i',
-
-  defaultDate:'{{from_date}}' 
-  });
-jQuery('#datetimepicker2').datetimepicker({
+jQuery('#datetimepicker3').datetimepicker({
   format:'Y-m-d H:i',
   theme: 'dark',
   defaultDate:'{{to_date}}'

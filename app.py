@@ -308,7 +308,7 @@ def upload_image():
 
         #=============== Get other user input =============== 
         timestamp_str   = request.args.get('from',time.strftime("%Y-%m-%d 00:00")) #Get the from date value from the URL
-        timezone 		= request.args.get('timezone','Etc/UTC');
+        timezone 		= request.args.get('timezone','Etc/UTC')
 
         if not validate_date(timestamp_str):			# Validate date format
             timestamp_str 	= time.strftime("%Y-%m-%d 00:00")
@@ -408,7 +408,7 @@ def end_devices():
 
     return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
     
-@app.route("/display_image", methods = ['GET'])
+@app.route("/display_image")
 @login_required
 @require_role(role="admin")
 def display_image():
@@ -430,7 +430,7 @@ def display_image():
                 if result:
                     print("the file with same name already saved")
                 else:
-                    new_image = Images(timestamp = date_time, path = path, source=f"{'station '}{station}", tag = "hello", latitude = 90, longitude = 90)
+                    new_image = Images(timestamp = date_time, path = path, source=station, tag = "new image", latitude = 999, longitude = 999)
                     db.session.add(new_image)
                     db.session.commit()
             else:
@@ -474,8 +474,7 @@ def display_image():
                             image_latitude = image_latitude,
                             image_uploader = image_uploader,
                             image_source = image_source,
-                            image_id = image_id
-                            )
+                            image_id = image_id)
 
 def get_records():
     """getting records from users at website's form"""
@@ -522,8 +521,6 @@ def get_records():
 	
     return [timezone, from_date_str, to_date_str, station]
 
-
- 
 
 def validate_date(d):
     try:
