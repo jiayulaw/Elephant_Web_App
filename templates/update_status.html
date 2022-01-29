@@ -36,7 +36,7 @@
   
                   <img src="{{ url_for('display_img', filename=filename) }}">
           {% endif %}
-          <form method="POST" action="/admin/update_status" enctype="multipart/form-data" autocomplete="off">
+          <form method="POST" action="/data_center/update_status" enctype="multipart/form-data" autocomplete="off">
             <div class="form-group ml-3 ">
               <label for="exampleFormControlFile1">Choose image to upload <span style="color:red;">*</span></label>
               <input type="file" class="form-control-file" id="customFile" name = "file">
@@ -182,7 +182,7 @@ jQuery( "#datetime_range" ).submit(function( event ) {
 
 jQuery('#datetimepicker3').datetimepicker({
   format:'Y-m-d H:i',
-  theme: 'dark',
+  theme: 'light',
   defaultDate:'{{to_date}}'
   });
 

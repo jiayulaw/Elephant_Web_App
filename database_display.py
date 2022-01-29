@@ -21,7 +21,7 @@ print(cursor.fetchall())
 #===========SELECT specific label from table with condition================
 #=======================================================
 #Cursor selection
-cursor = conn.execute("SELECT path from images WHERE uploader='jyjy';")
+cursor = conn.execute("SELECT path from images WHERE source='station 1';")
 
 #print out using cursor
 for row in cursor:

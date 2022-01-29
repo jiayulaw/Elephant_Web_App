@@ -70,12 +70,12 @@ class User(db.Model, UserMixin):
 
     
 #db.create_all()
-def require_role(role):
+def require_role(role, role2):
     """make sure user has this role"""
     def decorator(func):
         @wraps(func)
         def wrapped_function(*args, **kwargs):
-            if not current_user.has_role(role):
+            if not (current_user.has_role(role) or current_user.has_role(role2)):
                 return redirect("/")
             else:
                 return func(*args, **kwargs)
@@ -84,6 +84,14 @@ def require_role(role):
 #------------------------------------------------------------
 #-------------------------Initialization of variables-------------------------
 #------------------------------------------------------------
+
+class DataStorage():
+    dontRequest = None
+    station = "station 1"
+    from_date_str = None
+    to_date_str = None
+
+data = DataStorage()
 
 #------------------------------------------------------------
 #-------------------------Device status query-------------------------
@@ -260,7 +268,7 @@ def logout():
 
 @app.route("/admin/register", methods = ['GET', 'POST'])
 @login_required
-@require_role(role="admin")
+@require_role(role="admin", role2 = "admin")
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -270,7 +278,7 @@ def register():
         db.session.commit()
         flash('Registration Success')
         return redirect("/admin")
-    return render_template("register.html", form = form, msg = None)
+    return render_template("register.html", form = form, msg = None, active_state = "admin")
 
 #------------------------------------------------------------
 #-------------------------Image upload-------------------------
@@ -283,15 +291,15 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route("/admin/update_status")
+@app.route("/data_center/update_status")
 @login_required
-@require_role(role="admin")
+@require_role(role="admin", role2 ="explorer")
 def update_status():
-    return render_template('update_status.html')
+    return render_template('update_status.html', active_state = "data_center")
 
-@app.route("/admin/update_status", methods=['POST'])
+@app.route("/data_center/update_status", methods=['POST'])
 @login_required
-@require_role(role="admin")
+@require_role(role="admin", role2 = "explorer")
 def upload_image():
     if 'file' not in request.files:
         flash('No file part')
@@ -318,9 +326,6 @@ def upload_image():
 
         # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
     
-
-
-
         img_tag_input = request.form['img_tag_input']
         img_source = request.form['img_source']
         img_latitude = request.form['img_latitude']
@@ -344,7 +349,7 @@ def upload_image():
         new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
         db.session.add(new_image)
         db.session.commit()
-        return render_template('update_status.html', filename=filename)
+        return render_template('update_status.html', filename=filename,  active_state = "data_center")
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif')
         return redirect(request.url)
@@ -357,17 +362,22 @@ def display_img(filename):
 
 @app.route('/delete_img/<img_id>')
 def delete_img(img_id):
+    stationhaha = request.args.get('source_reference','station 1')  
     conn = sqlite3.connect(db_path)
-    cursor = conn.execute("SELECT path from images WHERE id=" + str(img_id) + ";")
+    cursor = conn.execute("SELECT path from images WHERE id=\'" + str(img_id) + "\';")
     for row in cursor:
         filepath = row[0]
         if os.path.exists(filepath):
             os.remove(filepath)
+            print("file deleted")
         else:
             print("The file does not exist")
 
 
-    cursor = conn.execute("DELETE FROM Images WHERE id=" + str(img_id) +";")
+    # after deleting image, do not request new user input so the previous inputs remain
+    # more user-friendly
+    data.dontRequest = 1
+    cursor = conn.execute("DELETE FROM Images WHERE id= \'" + str(img_id) +"\';")
     conn.commit()
     conn.close()
     return redirect(url_for('display_image'))
@@ -382,36 +392,6 @@ def debug():
 
 @app.route("/test")
 def test():
-    return render_template("test.html")
-
-@app.route("/about_us")
-def about_us():
-    return render_template("about_us.html", active_state = "about_us")
-
-@app.route("/end_devices")
-@login_required
-@require_role(role="admin")
-def end_devices():
-    end_device_name1 = "?"
-    end_device_name2 = "?"
-    end_device_name3 = "?"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 1")
-    for row in cursor:
-        end_device_name1 = row[0]
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 2")
-    for row in cursor:
-        end_device_name2 = row[0]
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 3")
-    for row in cursor:
-        end_device_name3 = row[0]
-
-    return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
-    
-@app.route("/display_image")
-@login_required
-@require_role(role="admin")
-def display_image():
     timezone, from_date_str, to_date_str, station = get_records()
     start = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
     end = datetime.datetime.strptime( to_date_str, "%Y-%m-%d %H:%M")
@@ -461,12 +441,12 @@ def display_image():
           image_uploader.append(image[4])
           image_source.append(image[3])
 
-    return render_template( "display_image.html", 
+    return render_template("test.html",                            
                             from_date = from_date_str,
                             to_date = to_date_str,
                             query_string = request.query_string,
                             timezone = timezone,
-                            station = station,
+                           
                             active_state = "data_center",
                             image_paths = image_paths,
                             image_timestamps = image_timestamps,
@@ -476,15 +456,121 @@ def display_image():
                             image_source = image_source,
                             image_id = image_id)
 
+
+@app.route("/about_us")
+def about_us():
+    return render_template("about_us.html", active_state = "about_us")
+
+@app.route("/end_devices")
+@login_required
+@require_role(role="admin", role2="explorer")
+def end_devices():
+    end_device_name1 = "?"
+    end_device_name2 = "?"
+    end_device_name3 = "?"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.execute("SELECT name FROM end_device WHERE id = 1")
+    for row in cursor:
+        end_device_name1 = row[0]
+    cursor = conn.execute("SELECT name FROM end_device WHERE id = 2")
+    for row in cursor:
+        end_device_name2 = row[0]
+    cursor = conn.execute("SELECT name FROM end_device WHERE id = 3")
+    for row in cursor:
+        end_device_name3 = row[0]
+
+    return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
+    
+@app.route("/display_image")
+@login_required
+@require_role(role="admin", role2 = "explorer")
+def display_image():
+    if not data.dontRequest == 1:
+        timezone, data.from_date_str, data.to_date_str, data.station = get_records()
+    else:
+        timezone 		= request.args.get('timezone','Etc/UTC')
+        data.dontRequest = 0
+
+    start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
+    end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
+    
+    # check directory to update any new images added through SFTP or direct upload to server
+    directory = rf"static\image uploads\{data.station}" 
+    for filename in os.listdir(directory):
+        try:
+            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+                date_time = filename.split(".")[0]
+                #print(date_time)
+                date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+                path = os.path.join(directory, filename)
+                path = f"static/image uploads/{data.station}/"+filename
+                result = Images.query.filter_by(path=path).first()
+                if result:
+                    print("the file with same name already saved")
+                else:
+                    new_image = Images(timestamp = date_time, path = path, source=data.station, tag = "new image", latitude = 999, longitude = 999)
+                    db.session.add(new_image)
+                    db.session.commit()
+            else:
+                continue
+        except:
+            print("Filename is not formatted correctly, but it is ok, just ignore")
+
+    # Filter images from database
+    image_id = []
+    image_paths = []
+    image_timestamps = []
+    image_longitude = []
+    image_latitude = []
+    image_uploader = []
+    image_source = []
+    image_tag = []
+    command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
+
+    print("current source is:", data.station)
+    print("hello", "world")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.execute(command) 
+    for image in cursor:
+      date_time = image[1] 
+      date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+      if start <= date_time_obj <= end:
+          image_id.append(image[0])
+          image_timestamps.append(image[1])
+          image_paths.append(image[2])
+          image_source.append(image[3])
+          image_uploader.append(image[4])
+          image_tag.append(image[5])
+          image_latitude.append(image[6])
+          image_longitude.append(image[7])
+
+          
+
+    return render_template( "display_image.html", 
+                            from_date = data.from_date_str,
+                            to_date = data.to_date_str,
+                            query_string = request.query_string,
+                            timezone = timezone,
+                            active_state = "data_center",
+                            image_paths = image_paths,
+                            image_timestamps = image_timestamps,
+                            image_longitude = image_longitude,
+                            image_latitude = image_latitude,
+                            image_uploader = image_uploader,
+                            image_source = image_source,
+                            image_id = image_id,
+                            image_tag = image_tag,
+                            current_source = data.station)
+
 def get_records():
     """getting records from users at website's form"""
     from_date_str   = request.args.get('from',time.strftime("%Y-%m-%d 00:00")) #Get the from date value from the URL
     to_date_str     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
 
-    timezone 		= request.args.get('timezone','Etc/UTC');
+    timezone 		= request.args.get('timezone','Etc/UTC')
     range_h_form	= request.args.get('range_h','');  #This will return a string, if field range_h exists in the request
     range_h_int 	= "nan"  # initialise this variable with not a number
-    station       = request.args.get('station','station 1')                           #Get the sensor ID, or fall back to 1
+    img_source       = request.args.get('station','station 1')                           #Get img_source, or fall back to station 1
 
     print ("REQUEST:")
     print (request.args)
@@ -508,18 +594,8 @@ def get_records():
     from_date_obj       = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
     to_date_obj         = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
 
-    # If range_h is defined, we don't need the from and to times
-    if isinstance(range_h_int,int):
-        arrow_time_from = arrow.utcnow().shift(hours=-range_h_int)
-        arrow_time_to   = arrow.utcnow()
-        from_date_utc   = arrow_time_from.strftime("%Y-%m-%d %H:%M")
-        to_date_utc     = arrow_time_to.strftime("%Y-%m-%d %H:%M")
-        from_date_str   = arrow_time_from.to(timezone).strftime("%Y-%m-%d %H:%M")
-        to_date_str	    = arrow_time_to.to(timezone).strftime("%Y-%m-%d %H:%M")
-    else:
-        pass
 	
-    return [timezone, from_date_str, to_date_str, station]
+    return [timezone, from_date_str, to_date_str, img_source]
 
 
 def validate_date(d):

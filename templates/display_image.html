@@ -5,26 +5,83 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 {{ super() }}
+<style>
+  /* set z-index to prevent the modal box backdrop shadowing the box */
+  .modal-backdrop {
+  z-index: -1;
+}
 
+
+</style>
 
 {% endblock stylesheets %}
 
-{% block content %}  
+{% block content %}
+
+{% set counter = namespace(value = 0) %}
+  <!-- Modal box for user to confirm file deletion-->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the following image?
+          <input class = "text-primary" style = "border: 0; width: 100%;" type="text" name="imgName" id="imgName" value=""/>
+        </div>
+        <div class="modal-footer">
+          <form id="deleteImgId" action="deleteImgId" method="GET">
+            <input style = "float: right;" class="btn btn-fill btn-danger" type="submit" value="Delete"  id="deleteButton" />
+          </form>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="row">
     <!--Filter field-->
       <div class="col-lg-6 col-md-12">
         <div class="card card-chart ml-1">
           <div class="card-body">
             <h3 class="card-title">Image Filter</h3>
-            <form style = "width:100%;" id="datetime_range" action="/display_image" method="GET" autocomplete="off">
+            <form style = "width:100%;" id="datetime_range" action="{{ url_for('display_image') }}" method="GET" autocomplete="off">
               <div class = "form-group row ml-1"> 
                 <label for="station" class="col-sm-3 col-form-label">Image source</label>
                 <div class="col-sm-9">
-                  <select class="u-full-width" id="station" type="text" value="{{station}}" name="station">
+                  <select class="u-full-width" id="station" type="text" value="station 2" name="station">
+
+                    {% if current_source == "station 1" %}
+                    <option value = "station 1" selected>station 1</option>
+             
+                    {% else %}
                     <option value = "station 1">station 1</option>
+                    {% endif %}
+                    {% if current_source == "station 2" %}
+                    <option value = "station 2" selected>station 2</option>
+                 
+                    {% else %}
                     <option value = "station 2">station 2</option>
+                    {% endif %}
+                    {% if current_source == "station 3" %}
+                    <option value = "station 3" selected>station 3</option>
+                   
+                    {% else %}
                     <option value = "station 3">station 3</option>
+                    {% endif %}
+
+                    {% if current_source == "uploaded" %}
+                    <option value = "uploaded" selected>uploaded</option>
+                   
+                    {% else %}
                     <option value = "uploaded">uploaded</option>
+                    {% endif %}
+                    
+
                   </select>
 
                  </div>
@@ -50,7 +107,6 @@
               </div>
             
             </form>
-
           </div>
 
         </div>
@@ -66,21 +122,53 @@
   <div class="row">
     {% set counter = namespace(value = 0) %}
     {% for image in image_paths %}
-      <div class="col-lg-3 col-md-12">
+      <div class="col-lg-4 col-md-12">
         <div class="col">
           <div class="card border-dark mb-3">
             <div class="card-header">{{image_source[counter.value]}}</div>
             <img src="{{image}}">
             <div class="card-body">
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
-              <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Tag: <br> Latitude: {{image_latitude[counter.value]}} Longitude: {{image_longitude[counter.value]}}</p>
-              <button type="button">Edit</button>
+              <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
+              
             
-              <form style = "width:100%;" id="{{'deleteForm' + str(counter.value)}}" action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" method="GET">
-                <div class = "form-group ml-3">
-                  <input class="btn btn-fill btn-primary" type="submit" value="Delete"  id="{{'deleteButton' + str(counter.value)}}" /> 
+
+              {% if current_user.has_role('admin') %}
+              <div class="container">
+                <div class = "row">
+            
+                  <div class="col-sm-4 mb-2">
+                    <!-- Button trigger modal -->
+                    <button style = "width:100%; font-size: 0.8em;"  data-img_id="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button" class="open-AddBookDialog btn btn-fill btn-danger" data-toggle="modal" data-target="#exampleModalCenter" href="#addBookDialog">
+                      Delete
+                    </button>
+
+                  </div>
+                  <div class="col-sm-3 mb-2">
+                    <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-success">Edit</button>
+                  </div>
+                  <div class="col-sm-5 mb-2">
+                    <a href="{{image}}" download>
+                      <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
+                    </a>
+                  </div>
+  
+             
                 </div>
-              </form>
+
+              </div>
+
+              
+              {% elif current_user.has_role('explorer') %}
+                {% if current_user.username == image_uploader[counter.value] %}
+                <form style = "width:100%;" id="deleteForm" action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" method="GET">
+                  <div class = "form-group ml-3">
+                    <input class="btn btn-fill btn-primary" type="submit" value="Delete"  id="deleteButton" />
+                  </div>
+                </form>
+                {% endif %}
+              {% endif %} 
+
               
             </div>
           </div>
@@ -88,7 +176,8 @@
       </div>
       {% set counter.value = counter.value + 1 %}
     {% endfor %}
-  
+
+
   </div>
 
 {% endblock content %}
@@ -117,23 +206,50 @@ jQuery( "#datetime_range" ).submit(function( event ) {
 jQuery('#datetimepicker1').datetimepicker(
   {
   format:'Y-m-d H:i',
-  theme: 'dark',
+  theme: 'light',
   defaultDate:'{{from_date}}' 
   });
 jQuery('#datetimepicker2').datetimepicker({
   format:'Y-m-d H:i',
-  theme: 'dark',
+  theme: 'light',
   defaultDate:'{{to_date}}'
   });
 
 jQuery("#range_select input[type=radio]").click(function(){
   timezone = jstz.determine();
   jQuery(".timezone").val(timezone.name());
-  jQuery(".station").val({{station}});
+  // jQuery(".station").val({{station}});
   jQuery("#range_select").submit();
   });
 </script>
 
+<script>
+  // This script prevents user from downloading image by right-clicking
+  (function($){
+    $(document).on('contextmenu', 'img', function() {
+        return false;
+    })
+  })(jQuery);
+  </script>
+
+
+<script>
+  // This script passes variable to modal box
+  // https://stackoverflow.com/questions/10626885/passing-data-to-a-bootstrap-modal
+  $(document).on("click", ".open-AddBookDialog", function () {
+     
+     var img_name_delete = $(this).data('img_name');
+     var img_id_delete = $(this).data('img_id');
+    //  $(".modal-footer #deleteImgId").val( img_id_delete );
+     $(".modal-body #imgName").val( img_name_delete );
+     var deleteform = document.getElementById("deleteImgId");
+     deleteform.setAttribute("action", img_id_delete)
+     // As pointed out in comments, 
+     // it is unnecessary to have to manually call the modal.
+     // $('#addBookDialog').modal('show');
+
+});
+</script>
 {% endblock javascripts %}   
 
 
