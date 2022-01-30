@@ -342,7 +342,8 @@ def upload_image():
         filename = secure_filename(file.filename)
         str = img_source + "/" + filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-        file.save(file_path)
+        file_path2 = os.path.join(BASE_DIR, file_path)
+        file.save(file_path2)
         #print('upload_image filename: ' + filename)
 
 
@@ -495,8 +496,9 @@ def display_image():
     end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
     
     # check directory to update any new images added through SFTP or direct upload to server
-    directory = rf"static\image uploads\{data.station}" 
-    for filename in os.listdir(directory):
+    directory = rf"static/image uploads/{data.station}" 
+    directory2 = os.path.join(BASE_DIR, directory)
+    for filename in os.listdir(directory2):
         try:
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
                 date_time = filename.split(".")[0]
