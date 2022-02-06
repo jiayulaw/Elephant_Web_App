@@ -158,14 +158,31 @@
 
               </div>
 
-              
               {% elif current_user.has_role('explorer') %}
                 {% if current_user.username == image_uploader[counter.value] %}
-                <form style = "width:100%;" id="deleteForm" action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" method="GET">
-                  <div class = "form-group ml-3">
-                    <input class="btn btn-fill btn-primary" type="submit" value="Delete"  id="deleteButton" />
+                <div class="container">
+                  <div class = "row">
+              
+                    <div class="col-sm-4 mb-2">
+                      <!-- Button trigger modal -->
+                      <button style = "width:100%; font-size: 0.8em;"  data-img_id="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button" class="open-AddBookDialog btn btn-fill btn-danger" data-toggle="modal" data-target="#exampleModalCenter" href="#addBookDialog">
+                        Delete
+                      </button>
+  
+                    </div>
+                    <div class="col-sm-3 mb-2">
+                      <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-success">Edit</button>
+                    </div>
+                    <div class="col-sm-5 mb-2">
+                      <a href="{{image}}" download>
+                        <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
+                      </a>
+                    </div>
+    
+    
                   </div>
-                </form>
+  
+                </div>
                 {% endif %}
               {% endif %} 
 

@@ -113,17 +113,33 @@
 
 
 #progress_bar{
+  /* Just set something so that progress bar can work */
     background-color: greenyellow;
 
 }
+/* Adjusting color of 'progress' element */
+/* reference: http://html5doctor.com/the-progress-element/ */
+/* On Chrome and Safari */
+progress::-webkit-progress-bar { background: rgb(248, 0, 0); }
+progress::-webkit-progress-value { background: #03df15; }
+/* On Firefox */
+progress::-moz-progress-bar { background: #03df15; }
 
-#redprogress_bar{
-  background-color: rgb(255, 0, 0);
+#top_navbar{
+  z-index: 99999; 
+  width: 100%;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
   
-  
-
-
 }
+
+
+#mapid{
+  height: 300px;
+  width: 100%;
+}
+
 
 
 

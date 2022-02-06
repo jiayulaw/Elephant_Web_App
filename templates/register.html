@@ -66,8 +66,9 @@
             <div class="row">
               <div class="col-md-3 px-md-1">
                 <div class="form-group">
-                  <label>Access code</label>
-                  {{ form.access_level(class="form-control") }}
+                  <label>Account type</label>
+                  {{form.access_level(class="form-control")}}
+                 
                 </div>
                 {% for error in form.access_level.errors %}
                 <p>{{error}}</p>
