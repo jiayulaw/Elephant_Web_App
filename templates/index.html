@@ -12,6 +12,12 @@ crossorigin=""/>
  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
    crossorigin=""></script>
+
+<script>
+  
+  var myLat = {{image_latitude| tojson}};
+  
+</script>
 {% endblock stylesheets %}
 
 {% block content %}
@@ -22,6 +28,7 @@ crossorigin=""/>
         <h4 class="card-title"> End devices</h4>
       </div>
       <div class="card-body">
+        
         <div class="table-responsive">
           <table class="table tablesorter " id="">
             <thead class=" text-primary">
@@ -101,6 +108,9 @@ crossorigin=""/>
   </div>
 
 </div>
+<div class="row">
+  <button class = "btn" onclick="alert('Geocode: ' + myLat[0] + ' ' + myLat[1] + ' ' + myLat[2] + ' ' + myLat[20])" style = "height: 100px; width:200px;"/>
+</div>
 
 
 <div class="row">
@@ -127,6 +137,7 @@ crossorigin=""/>
   =======================================Leaflet Map API=======================================
 -->
   <script>
+    
     var mymap = L.map('mapid').setView([51.505, -0.09], 13);
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -166,4 +177,7 @@ marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
 circle.bindPopup("I am a circle.");
 polygon.bindPopup("I am a polygon.");
   </script>
+  
+
+
 {% endblock javascripts %}   

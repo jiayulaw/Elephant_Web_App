@@ -13,7 +13,7 @@ import os
 import sqlite3
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView 
-import git
+# import git
 from functools import wraps
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import urllib.request
@@ -231,7 +231,29 @@ admin.add_view(MyModelView(User, db.session))
 @app.route("/dashboard")
 @login_required #we can only access dashboard when logged in
 def dashboard():
-    return render_template('index.html', active_state = "dashboard")
+    # Filter images from database
+    image_id = []
+    image_paths = []
+    image_timestamps = []
+    image_longitude = []
+    image_latitude = []
+    image_uploader = []
+    image_source = []
+    image_tag = []
+    command = "SELECT * from images;"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.execute(command) 
+    for image in cursor:
+        image_id.append(image[0])
+        image_timestamps.append(image[1])
+        image_paths.append(image[2])
+        image_source.append(image[3])
+        image_uploader.append(image[4])
+        image_tag.append(image[5])
+        image_latitude.append(image[6])
+        image_longitude.append(image[7])
+
+    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude)
 
 
 @app.route('/update_server', methods=['POST'])
@@ -395,69 +417,7 @@ def debug():
 
 @app.route("/test")
 def test():
-    timezone, from_date_str, to_date_str, station = get_records()
-    start = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
-    end = datetime.datetime.strptime( to_date_str, "%Y-%m-%d %H:%M")
-    
-    # check directory to update any new images added through SFTP or direct upload to server
-    directory = rf"static\image uploads\{station}" 
-    for filename in os.listdir(directory):
-        try:
-            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                date_time = filename.split(".")[0]
-                #print(date_time)
-                date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
-                path = os.path.join(directory, filename)
-                path = f"static/image uploads/station {station}/"+filename
-                result = Images.query.filter_by(path=path).first()
-                if result:
-                    print("the file with same name already saved")
-                else:
-                    new_image = Images(timestamp = date_time, path = path, source=station, tag = "new image", latitude = 999, longitude = 999)
-                    db.session.add(new_image)
-                    db.session.commit()
-            else:
-                continue
-        except:
-            print("Filename is not formatted correctly, but it is ok, just ignore")
-
-    # Filter images from database
-    image_id = []
-    image_paths = []
-    image_timestamps = []
-    image_longitude = []
-    image_latitude = []
-    image_uploader = []
-    image_source = []
-    command = "SELECT * from images WHERE source = \'" + str(station) + "\';"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute(command) 
-    for image in cursor:
-      date_time = image[1] 
-      date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
-      if start <= date_time_obj <= end:
-          image_id.append(image[0])
-          image_paths.append(image[2])
-          image_timestamps.append(image[1])
-          image_longitude.append(image[6])
-          image_latitude.append(image[5])
-          image_uploader.append(image[4])
-          image_source.append(image[3])
-
-    return render_template("test.html",                            
-                            from_date = from_date_str,
-                            to_date = to_date_str,
-                            query_string = request.query_string,
-                            timezone = timezone,
-                           
-                            active_state = "data_center",
-                            image_paths = image_paths,
-                            image_timestamps = image_timestamps,
-                            image_longitude = image_longitude,
-                            image_latitude = image_latitude,
-                            image_uploader = image_uploader,
-                            image_source = image_source,
-                            image_id = image_id)
+    return render_template("test.html")
 
 
 @app.route("/about_us")
