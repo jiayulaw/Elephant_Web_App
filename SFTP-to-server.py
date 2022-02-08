@@ -5,10 +5,9 @@ import os
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
 
-HOST_NAME = "ssh.https://www.pythonanywhere.com/"
-PORT = 22
-USERNAME = "ElephantAnywhere"
-PASS_WORD = "$Qf2x7r7Ai.scAz"
+HOST_NAME = "13.213.160.244"
+USERNAME = "ubuntu"
+KEYFILE=r'C:\Users\user10\Desktop\lightsailtest\LightsailDefaultKey-ap-southeast-1.pem'
 datetime_now = ""
 
 
@@ -20,10 +19,11 @@ def get_datetime():
 
 datetime_now = get_datetime()
 
-with pysftp.Connection(HOST_NAME, port=PORT, username=USERNAME, password=PASS_WORD, cnopts=cnopts) as sftp:
+with pysftp.Connection(HOST_NAME, username=USERNAME, private_key=KEYFILE, cnopts=cnopts) as sftp:
     print("CONNECTED!!")
-    with sftp.cd(f'/home/pi/Desktop'):
-        sftp.put('C:\\Users\\user10\\Desktop\\Picture2.png', f'SFTP/sensor1/{datetime_now}', preserve_mtime=True)
+    with sftp.cd(f'/var/www'):
+        # sftp.put('C:\\Users\\user10\\Desktop\\testtPicture1.png', f'www', preserve_mtime=True)
+        sftp.put('C:\\Users\\user10\\Desktop\\testtPicture1.png')
     #sftp.put('helloo.txt')
         ## copy files from images, to remote static/images directory, preserving modification time
 
