@@ -32,9 +32,9 @@
 
         </div>
 
-          {% if filename %}
+          {% if file_path %}
   
-                  <img src="{{ url_for('display_img', filename=filename) }}">
+                  <img src="{{ "/" + file_path }}">
           {% endif %}
           <form method="POST" action="/data_center/update_status" enctype="multipart/form-data" autocomplete="off">
             <div class="form-group ml-3 ">
@@ -111,7 +111,6 @@
                 </div>
               </fieldset>
 
-
               <div class = "form-group row ml-1">
 
                 <label for="img_latitude" class="col-sm-2 col-form-label">Latitude:</label>
@@ -128,7 +127,6 @@
               <div class = "form-group row ml-3 mr-3">
                 <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
               </div>
-
 
             
              

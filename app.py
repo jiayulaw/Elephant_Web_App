@@ -332,24 +332,16 @@ def upload_image():
     if file.filename == '':
         flash('No image selected for uploading')
         return redirect(request.url)
-    if file and allowed_file(file.filename):
- 
-
-        
+    if file and allowed_file(file.filename): 
         flash('Image successfully uploaded and displayed below')
-
         #=============== Get other user input =============== 
         timestamp_str   = request.args.get('from',time.strftime("%Y-%m-%d 00:00")) #Get the from date value from the URL
         timezone 		= request.args.get('timezone','Etc/UTC')
-
         if not validate_date(timestamp_str):			# Validate date format
             timestamp_str 	= time.strftime("%Y-%m-%d 00:00")
-
         # Create datetime object so that we can convert to UTC from the browser's local time
         timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-
         # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
-    
         img_tag_input = request.form['img_tag_input']
         img_source = request.form['img_source']
         img_latitude = request.form['img_latitude']
@@ -369,20 +361,22 @@ def upload_image():
         file_path2 = os.path.join(BASE_DIR, file_path)
         file.save(file_path2)
         #print('upload_image filename: ' + filename)
+        print("filepath: ", file_path)
+        print("filepath2: ", file_path2)
 
 
         new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
         db.session.add(new_image)
         db.session.commit()
-        return render_template('update_status.html', filename=filename,  active_state = "data_center")
+        return render_template('update_status.html', file_path=file_path,  active_state = "data_center")
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif')
         return redirect(request.url)
         
-@app.route('/display/<filename>')
-def display_img(filename):
-    #print('display_image filename: ' + filename)
-    return redirect(url_for('static', filename='image uploads/uploaded/' + filename), code=301)
+# @app.route('/display/<file_path>')
+# def display_img(filename):
+#     #print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='image uploads/uploaded/' + filename), code=301)
 
 
 @app.route('/delete_img/<img_id>')
