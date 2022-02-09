@@ -23,7 +23,7 @@ with pysftp.Connection(HOST_NAME, username=USERNAME, private_key=KEYFILE, cnopts
     print("CONNECTED!!")
     with sftp.cd(f'/var/www'):
         # sftp.put('C:\\Users\\user10\\Desktop\\testtPicture1.png', f'www', preserve_mtime=True)
-        sftp.put('C:\\Users\\user10\\Desktop\\testtPicture1.png')
+        sftp.put('C:\\Users\\user10\\Desktop\\testttPicture1.png')
     #sftp.put('helloo.txt')
         ## copy files from images, to remote static/images directory, preserving modification time
 

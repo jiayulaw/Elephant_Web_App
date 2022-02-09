@@ -91,6 +91,8 @@ class DataStorage():
     from_date_str = None
     to_date_str = None
 
+    input_date_str = None
+
 data = DataStorage()
 
 #------------------------------------------------------------
@@ -321,7 +323,7 @@ def allowed_file(filename):
 def update_status():
     return render_template('update_status.html', active_state = "data_center")
 
-@app.route("/data_center/update_status", methods=['POST'])
+@app.route("/data_center/update_status", methods = ['POST'])
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def upload_image():
@@ -335,20 +337,24 @@ def upload_image():
     if file and allowed_file(file.filename): 
         flash('Image successfully uploaded and displayed below')
         #=============== Get other user input =============== 
-        timestamp_str   = request.args.get('from',time.strftime("%Y-%m-%d 00:00")) #Get the from date value from the URL
-        timezone 		= request.args.get('timezone','Etc/UTC')
+        # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
+        timestamp_str   = request.form['timestamp_input']
         if not validate_date(timestamp_str):			# Validate date format
-            timestamp_str 	= time.strftime("%Y-%m-%d 00:00")
+            timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
         # Create datetime object so that we can convert to UTC from the browser's local time
         timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
         # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
+
+        timestamp_str2 = request.form['timestamp_input2']
+        print("i got the valueeeeeee 2:  ", timestamp_str2)
+        img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
         img_tag_input = request.form['img_tag_input']
         img_source = request.form['img_source']
         img_latitude = request.form['img_latitude']
         img_longitude = request.form['img_longitude']
         
-        print(timestamp_str)
-        img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
         print(img_tag_input)
         print(current_user.username)
         print(img_source)
@@ -363,12 +369,11 @@ def upload_image():
         #print('upload_image filename: ' + filename)
         print("filepath: ", file_path)
         print("filepath2: ", file_path2)
-
-
         new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
         db.session.add(new_image)
         db.session.commit()
-        return render_template('update_status.html', file_path=file_path,  active_state = "data_center")
+        data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+        return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif')
         return redirect(request.url)
@@ -391,7 +396,6 @@ def delete_img(img_id):
             print("file deleted")
         else:
             print("The file does not exist")
-
 
     # after deleting image, do not request new user input so the previous inputs remain
     # more user-friendly
@@ -450,7 +454,6 @@ def display_image():
 
     start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
     end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
-    
     # check directory to update any new images added through SFTP or direct upload to server
     directory = rf"static/image uploads/{data.station}" 
     directory2 = os.path.join(BASE_DIR, directory)
@@ -503,7 +506,6 @@ def display_image():
           image_longitude.append(image[7])
 
           
-
     return render_template( "display_image.html", 
                             from_date = data.from_date_str,
                             to_date = data.to_date_str,
@@ -522,7 +524,7 @@ def display_image():
 
 def get_records():
     """getting records from users at website's form"""
-    from_date_str   = request.args.get('from',time.strftime("%Y-%m-%d 00:00")) #Get the from date value from the URL
+    from_date_str   = request.args.get('from',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
     to_date_str     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
 
     timezone 		= request.args.get('timezone','Etc/UTC')
@@ -542,7 +544,7 @@ def get_records():
     print ("Received from browser: %s, %s, %s, %s" % (from_date_str, to_date_str, timezone, range_h_int))
 
     if not validate_date(from_date_str):			# Validate date format
-        from_date_str 	= time.strftime("%Y-%m-%d 00:00")
+        from_date_str 	= time.strftime("%Y-%m-%d %H:%M")
     if not validate_date(to_date_str):
         to_date_str 	= time.strftime("%Y-%m-%d %H:%M")		# Validate date format
 
@@ -552,7 +554,6 @@ def get_records():
     from_date_obj       = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
     to_date_obj         = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
 
-	
     return [timezone, from_date_str, to_date_str, img_source]
 
 

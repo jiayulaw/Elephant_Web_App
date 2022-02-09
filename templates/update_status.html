@@ -51,11 +51,17 @@
                 <label class="custom-file-label" for="customFile">Choose file</label>
               </div> -->
               <div class = "form-group row ml-1">
-                <label for="to" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
+                <label for="timstamp_input" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
                 <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker3" type="text" value="{{to_date}}" name="to" required>
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker3" type="text" value="{{input_date_str}}" name="timestamp_input" required>
                 </div> 
-                
+              </div>
+
+              <div class = "form-group row ml-1">
+                <label for="timstamp_input2" class="col-sm-3 col-form-label">Image timestamp 2 <span style="color:red;">*</span></label>
+                <div class="col-sm-9">
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text"  name="timestamp_input2" required>
+                </div> 
               </div>
 
               <div class="form-group row ml-1 mr-1">
@@ -128,31 +134,15 @@
                 <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
               </div>
 
-            
-             
-          
-
-              
-
               <p>
                   <input type="submit" value="Submit" class="btn btn-info ml-3">
               </p>
 
-
-
-
           </form>
-
-
-
-        
-   
-          
       </div>
     </div>
 
   </div>
- 
 </div>
 
 {% endblock content %}
@@ -181,7 +171,14 @@ jQuery( "#datetime_range" ).submit(function( event ) {
 jQuery('#datetimepicker3').datetimepicker({
   format:'Y-m-d H:i',
   theme: 'light',
-  defaultDate:'{{to_date}}'
+  defaultDate:'{{input_date_str}}'
+  });
+
+
+  jQuery('#datetimepicker2').datetimepicker({
+  format:'Y-m-d H:i',
+  theme: 'light',
+  defaultDate:'{{input_date_str}}'
   });
 
 jQuery("#range_select input[type=radio]").click(function(){
@@ -191,6 +188,4 @@ jQuery("#range_select input[type=radio]").click(function(){
   jQuery("#range_select").submit();
   });
 </script>
-
 {% endblock javascripts %}   
-
