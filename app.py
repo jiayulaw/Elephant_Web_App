@@ -345,8 +345,6 @@ def upload_image():
         timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
         # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
 
-        timestamp_str2 = request.form['timestamp_input2']
-        print("i got the valueeeeeee 2:  ", timestamp_str2)
         img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
 
         img_tag_input = request.form['img_tag_input']

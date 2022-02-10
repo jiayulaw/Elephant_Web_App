@@ -57,13 +57,6 @@
                 </div> 
               </div>
 
-              <div class = "form-group row ml-1">
-                <label for="timstamp_input2" class="col-sm-3 col-form-label">Image timestamp 2 <span style="color:red;">*</span></label>
-                <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text"  name="timestamp_input2" required>
-                </div> 
-              </div>
-
               <div class="form-group row ml-1 mr-1">
                 <label for="inputTag" class="col-sm-2 col-form-label">Tag / Remark</label>
                 <div class="col-sm-10">
@@ -174,12 +167,6 @@ jQuery('#datetimepicker3').datetimepicker({
   defaultDate:'{{input_date_str}}'
   });
 
-
-  jQuery('#datetimepicker2').datetimepicker({
-  format:'Y-m-d H:i',
-  theme: 'light',
-  defaultDate:'{{input_date_str}}'
-  });
 
 jQuery("#range_select input[type=radio]").click(function(){
   timezone = jstz.determine();
