@@ -88,7 +88,7 @@ a, a:hover, a:focus {
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #000113;
+    background: #5125f0;
 }
 
 #sidebar ul.components {
@@ -219,7 +219,7 @@ a.article, a.article:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0);
+    background-color: rgba(0,0,0, .5);
     z-index: 99;
     cursor: pointer;
   }

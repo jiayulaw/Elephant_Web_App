@@ -18,13 +18,15 @@
           <h2>Image upload</h2>
     
           <p>
-              {% with messages = get_flashed_messages() %}
+              {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                  <ul>
-                  {% for message in messages %}
-                    <li>{{ message }}</li>
+           
+                  {% for category, message in messages %}
+                    <p>
+                      <div class="{{ category }}">{{ message }}</div>
+                    </p>
                   {% endfor %}
-                  </ul>
+                  
                 {% endif %}
               {% endwith %}
           </p>
@@ -32,14 +34,18 @@
 
         </div>
 
-          {% if file_path %}
-  
+          <!-- Uncomment this section to display img after form submission -->
+          <!-- {% if file_path %}
                   <img src="{{ "/" + file_path }}">
-          {% endif %}
+          {% endif %} -->
+
+          
           <form method="POST" action="/data_center/update_status" enctype="multipart/form-data" autocomplete="off">
             <div class="form-group ml-3 ">
               <label for="exampleFormControlFile1">Choose image to upload <span style="color:red;">*</span></label>
-              <input type="file" class="form-control-file" id="customFile" name = "file">
+              <input type="file" onchange = "readURL(this);" class="form-control-file" id="customFile" name = "file">
+              <!-- onchange function above will display img when user loaded -->
+              <img class = "mt-3" id="uploaded_img" src="#" alt="uploaded image" style = "height: 200px; width: auto; display: none;"/>
             </div>
               <!-- <dl>
                   <p>
@@ -174,5 +180,20 @@ jQuery("#range_select input[type=radio]").click(function(){
   jQuery(".station").val({{station}});
   jQuery("#range_select").submit();
   });
+</script>
+
+<!-- This Javascript section displays image immediately when user uploaded -->
+<script>
+  function readURL(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      $('#uploaded_img').attr('src', e.target.result);
+      document.getElementById("uploaded_img").style.display = "block";
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}
 </script>
 {% endblock javascripts %}   

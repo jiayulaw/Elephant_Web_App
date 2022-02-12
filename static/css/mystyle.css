@@ -146,5 +146,10 @@ progress::-moz-progress-bar { background: #03df15; }
 }
 
 
+.error_msg{
+  color: red;
+}
 
-
+.success_msg{
+  color: green;
+}

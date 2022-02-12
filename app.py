@@ -302,7 +302,7 @@ def register():
         new_user = User(username = form.username.data, password=hashed_password, access_level = form.access_level.data)
         db.session.add(new_user)
         db.session.commit()
-        flash('Registration Success')
+        flash('Registration Success', 'success_msg')
         return redirect("/admin")
     return render_template("register.html", form = form, msg = None, active_state = "admin")
 
@@ -328,52 +328,64 @@ def update_status():
 @require_role(role="admin", role2 = "explorer")
 def upload_image():
     if 'file' not in request.files:
-        flash('No file part')
+        flash('No file part', 'error_msg')
         return redirect(request.url)
     file = request.files['file']
     if file.filename == '':
-        flash('No image selected for uploading')
+        flash('No image selected for uploading', 'error_msg')
         return redirect(request.url)
+
     if file and allowed_file(file.filename): 
-        flash('Image successfully uploaded and displayed below')
-        #=============== Get other user input =============== 
-        # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
-        timestamp_str   = request.form['timestamp_input']
-        if not validate_date(timestamp_str):			# Validate date format
-            timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
-        # Create datetime object so that we can convert to UTC from the browser's local time
-        timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-        # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
-
-        img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
-
-        img_tag_input = request.form['img_tag_input']
         img_source = request.form['img_source']
-        img_latitude = request.form['img_latitude']
-        img_longitude = request.form['img_longitude']
-        
-
-        print(img_tag_input)
-        print(current_user.username)
-        print(img_source)
-        print(img_latitude)
-        print(img_longitude)
-
         filename = secure_filename(file.filename)
         str = img_source + "/" + filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
         file_path2 = os.path.join(BASE_DIR, file_path)
-        file.save(file_path2)
-        #print('upload_image filename: ' + filename)
-        print("filepath: ", file_path)
-        print("filepath2: ", file_path2)
-        new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
-        db.session.add(new_image)
-        db.session.commit()
-        data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-        return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
+        # checks whether file path is redundant
+        redundant_file_bool = Images.query.filter_by(path=file_path).first()
+
+        if redundant_file_bool:
+            flash('Image with same filename exist in database directory. Please rename.', 'error_msg')
+            return redirect(request.url)
+        else:
+            flash('Image successfully uploaded to database.', 'success_msg')
+            #=============== Get other user input =============== 
+            # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
+            timestamp_str   = request.form['timestamp_input']
+            if not validate_date(timestamp_str):			# Validate date format
+                timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
+            # Create datetime object so that we can convert to UTC from the browser's local time
+            timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+            # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
+
+            img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
+            img_tag_input = request.form['img_tag_input']
+            
+            img_latitude = request.form['img_latitude']
+            img_longitude = request.form['img_longitude']
+            
+            print(img_tag_input)
+            print(current_user.username)
+            print(img_source)
+            print(img_latitude)
+            print(img_longitude)
+
+            #save the file to server directory
+            file.save(file_path2)
+            #saving file requires different format, therefore denotes as file_path2
+            #print('upload_image filename: ' + filename)
+            print("filepath: ", file_path)
+            print("filepath2: ", file_path2)
+            
+            new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
+            db.session.add(new_image)
+            db.session.commit()
+            data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+            return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
+
     else:
-        flash('Allowed image types are - png, jpg, jpeg, gif')
+        flash('Allowed image types are - png, jpg, jpeg, gif', 'error_msg')
         return redirect(request.url)
         
 # @app.route('/display/<file_path>')

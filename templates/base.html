@@ -35,7 +35,9 @@
       <div id="content">
         {% include 'includes/navbar.html' %}
         {% block content %}{% endblock content %}
-        <div id="overlay"></div>
+        <div id="overlay" onclick="overlay_clicked();"></div>
+
+
       </div>
       
   </div>
@@ -71,21 +73,21 @@
                   document.getElementById("overlay").style.display = "none";
                 }
                 $('.overlay').addClass('active');
-                
 
-                // $('#sidebar').removeClass('active');
-                // $(this).removeClass('active');
-                // $('.overlay').addClass('active');
                 
             });
-            // $('#dismiss, .overlay').on('click', function () {
-            //     $('#sidebar').addClass('active');
-            //     $(this).addClass('active');
-            //     $('.overlay').removeClass('active');
 
-              
-            // });
+
+            
         });
+    </script>
+
+    <script>
+      function overlay_clicked() {
+        $('#sidebar').removeClass('active');
+        document.getElementById("overlay").style.display = "none";
+
+    }
     </script>
   {% endblock javascripts %}
 </body>
