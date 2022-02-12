@@ -148,8 +148,16 @@ progress::-moz-progress-bar { background: #03df15; }
 
 .error_msg{
   color: red;
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: rgba(219, 125, 125, 0.3);
 }
 
 .success_msg{
   color: green;
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: rgba(152, 219, 125, 0.3);
 }
