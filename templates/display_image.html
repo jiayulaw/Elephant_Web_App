@@ -53,25 +53,25 @@
               <div class = "form-group row ml-1"> 
                 <label for="station" class="col-sm-3 col-form-label">Image source</label>
                 <div class="col-sm-9">
-                  <select class="u-full-width" id="station" type="text" value="station 2" name="station">
+                  <select class="u-full-width" id="station" type="text" value="end device 2" name="station">
 
-                    {% if current_source == "station 1" %}
-                    <option value = "station 1" selected>station 1</option>
+                    {% if current_source == "end device 1" %}
+                    <option value = "end device 1" selected>End device 1</option>
              
                     {% else %}
-                    <option value = "station 1">station 1</option>
+                    <option value = "end device 1">End device 1</option>
                     {% endif %}
-                    {% if current_source == "station 2" %}
-                    <option value = "station 2" selected>station 2</option>
+                    {% if current_source == "end device 2" %}
+                    <option value = "end device 2" selected>End device 2</option>
                  
                     {% else %}
-                    <option value = "station 2">station 2</option>
+                    <option value = "end device 2">End device 2</option>
                     {% endif %}
-                    {% if current_source == "station 3" %}
-                    <option value = "station 3" selected>station 3</option>
+                    {% if current_source == "end device 3" %}
+                    <option value = "end device 3" selected>End device 3</option>
                    
                     {% else %}
-                    <option value = "station 3">station 3</option>
+                    <option value = "end device 3">End device 3</option>
                     {% endif %}
 
                     {% if current_source == "uploaded" %}
@@ -80,6 +80,35 @@
                     {% else %}
                     <option value = "uploaded">uploaded</option>
                     {% endif %}
+
+                  </select>
+                 </div>
+
+              </div>
+
+              <div class = "form-group row ml-1"> 
+                <label for="detection" class="col-sm-3 col-form-label">Image type</label>
+                <div class="col-sm-9">
+                  <select class="u-full-width" id="station" type="text" value="station 2" name="station">
+
+                    {% if current_source == "elephant" %}
+                    <option value = "elephant" selected>Elephant detection</option>
+             
+                    {% else %}
+                    <option value = "elephant">Elephant detection</option>
+                    {% endif %}
+                    {% if current_source == "human" %}
+                    <option value = "human" selected>Human detection</option>
+                 
+                    {% else %}
+                    <option value = "any">Human detection</option>
+                    {% endif %}
+                    {% if current_source == "any" %}
+                    <option value = "any" selected>Any</option>
+                   
+                    {% else %}
+                    <option value = "any">Any</option>
+                    {% endif %}
                     
 
                   </select>
@@ -87,6 +116,7 @@
                  </div>
 
               </div>
+
               <div class = "form-group row ml-1">
                 <label for="from" class="col-sm-3 col-form-label">Start time</label>
                 <div class="col-sm-9">
@@ -125,14 +155,15 @@
       <div class="col-lg-4 col-md-12">
         <div class="col">
           <div class="card border-dark mb-3">
-            <div class="card-header">{{image_source[counter.value]}}</div>
+
+              <strong class="card-header" style = "color:blue">{{image_source[counter.value]}}</strong>
+
             <img src="{{image}}">
             <div class="card-body">
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
               
-            
-
+          
               {% if current_user.has_role('admin') %}
               <div class="container">
                 <div class = "row">
@@ -152,8 +183,7 @@
                       <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
                     </a>
                   </div>
-  
-             
+
                 </div>
 
               </div>

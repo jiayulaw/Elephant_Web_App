@@ -87,7 +87,7 @@ def require_role(role, role2):
 
 class DataStorage():
     dontRequest = None
-    station = "station 1"
+    station = "end device 1"
     from_date_str = None
     to_date_str = None
 
@@ -323,16 +323,83 @@ def allowed_file(filename):
 def update_status():
     return render_template('update_status.html', active_state = "data_center")
 
+@app.route("/data_center/update_multiple_images", methods = ['POST'])
+@login_required
+@require_role(role="admin", role2 = "explorer")
+def upload_multiple_image():
+    if 'files' not in request.files:
+        flash('Upload Failed. No file part', 'error_msg_multipleimgupload')
+        return redirect('/data_center/update_status')
+
+    for file in request.files.getlist('files'):
+        if file.filename == '':
+            flash('Upload Failed. No image selected for uploading', 'error_msg_multipleimgupload')
+            return redirect(request.url)
+        if file and allowed_file(file.filename): 
+            img_source = request.form['img_source']
+            filename = secure_filename(file.filename)
+            str = img_source + "/" + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+            file_path2 = os.path.join(BASE_DIR, file_path)
+            # checks whether file path is redundant
+            redundant_file_bool = Images.query.filter_by(path=file_path).first()
+
+            if redundant_file_bool:
+                flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_multipleimgupload')
+                return redirect('/data_center/update_status')
+            else:
+                flash('Image successfully uploaded to database.', 'success_msg_multipleimgupload')
+                #=============== Get other user input =============== 
+                # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
+                timestamp_str   = request.form['timestamp_input']
+                if not validate_date(timestamp_str):			# Validate date format
+                    timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
+                # Create datetime object so that we can convert to UTC from the browser's local time
+                timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+                # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
+
+                img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
+                img_tag_input = request.form['img_tag_input']
+                
+                img_latitude = request.form['img_latitude']
+                img_longitude = request.form['img_longitude']
+                
+                print(img_tag_input)
+                print(current_user.username)
+                print(img_source)
+                print(img_latitude)
+                print(img_longitude)
+
+                #save the file to server directory
+                file.save(file_path2)
+                #saving file requires different format, therefore denotes as file_path2
+                #print('upload_image filename: ' + filename)
+                print("filepath: ", file_path)
+                print("filepath2: ", file_path2)
+                
+                new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
+                db.session.add(new_image)
+                db.session.commit()
+                data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+                return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
+
+        else:
+            flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_multipleimgupload')
+            return redirect('/data_center/update_status')
+        
+   
+
 @app.route("/data_center/update_status", methods = ['POST'])
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def upload_image():
     if 'file' not in request.files:
-        flash('No file part', 'error_msg')
+        flash('Upload Failed. No file part', 'error_msg_singleimgupload')
         return redirect(request.url)
     file = request.files['file']
     if file.filename == '':
-        flash('No image selected for uploading', 'error_msg')
+        flash('Upload Failed. No image selected for uploading', 'error_msg_singleimgupload')
         return redirect(request.url)
 
     if file and allowed_file(file.filename): 
@@ -345,10 +412,10 @@ def upload_image():
         redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
         if redundant_file_bool:
-            flash('Image with same filename exist in database directory. Please rename.', 'error_msg')
+            flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
             return redirect(request.url)
         else:
-            flash('Image successfully uploaded to database.', 'success_msg')
+            flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
             #=============== Get other user input =============== 
             # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
             timestamp_str   = request.form['timestamp_input']
@@ -385,7 +452,7 @@ def upload_image():
             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
 
     else:
-        flash('Allowed image types are - png, jpg, jpeg, gif', 'error_msg')
+        flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_singleimgupload')
         return redirect(request.url)
         
 # @app.route('/display/<file_path>')
@@ -393,10 +460,9 @@ def upload_image():
 #     #print('display_image filename: ' + filename)
 #     return redirect(url_for('static', filename='image uploads/uploaded/' + filename), code=301)
 
-
 @app.route('/delete_img/<img_id>')
 def delete_img(img_id):
-    stationhaha = request.args.get('source_reference','station 1')  
+   
     conn = sqlite3.connect(db_path)
     cursor = conn.execute("SELECT path from images WHERE id=\'" + str(img_id) + "\';")
     for row in cursor:
@@ -464,6 +530,8 @@ def display_image():
 
     start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
     end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
+
+
     # check directory to update any new images added through SFTP or direct upload to server
     directory = rf"static/image uploads/{data.station}" 
     directory2 = os.path.join(BASE_DIR, directory)
@@ -498,8 +566,6 @@ def display_image():
     image_tag = []
     command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
 
-    print("current source is:", data.station)
-    print("hello", "world")
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command) 
     for image in cursor:
@@ -540,7 +606,7 @@ def get_records():
     timezone 		= request.args.get('timezone','Etc/UTC')
     range_h_form	= request.args.get('range_h','');  #This will return a string, if field range_h exists in the request
     range_h_int 	= "nan"  # initialise this variable with not a number
-    img_source       = request.args.get('station','station 1')                           #Get img_source, or fall back to station 1
+    img_source       = request.args.get('station','end device 1')                           #Get img_source, or fall back to end device 1
 
     print ("REQUEST:")
     print (request.args)

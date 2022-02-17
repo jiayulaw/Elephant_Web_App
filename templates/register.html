@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-md-8">
+  <div class="col-md-4">
     <div class="card">
 <!--
 ==============================================================
@@ -21,13 +21,13 @@
         {{ form.hidden_tag() }} 
 
         <div class="card-header">
-          <h1 class="title">Account Registration</h1>
+          <h1 class="title">Account Creation</h1>
 
           <h6 class="card-category">
               {% if msg %}
                 <span class="text-danger">{{ msg | safe }}</span>
               {% else %}
-                Complete your credentials
+                Complete user credentials to create new account.
               {% endif %}  
           </h6>
         </div>
@@ -35,7 +35,7 @@
         <div class="card-body">
 
             <div class="row">
-              <div class="col-md-3 px-md-1">
+              <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Username</label>
                   {{ form.username(class="form-control") }}
@@ -52,7 +52,7 @@
 
 
             <div class="row">
-              <div class="col-md-3 px-md-1">
+              <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Password</label>
                   {{ form.password(class="form-control", type="password") }}
@@ -64,7 +64,7 @@
             </div>
 
             <div class="row">
-              <div class="col-md-3 px-md-1">
+              <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Account type</label>
                   {{form.access_level(class="form-control")}}

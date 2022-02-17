@@ -146,7 +146,7 @@ progress::-moz-progress-bar { background: #03df15; }
 }
 
 
-.error_msg{
+.error_msg_singleimgupload{
   color: red;
   box-sizing: border-box;
   border-radius: 5px;
@@ -154,7 +154,23 @@ progress::-moz-progress-bar { background: #03df15; }
   background-color: rgba(219, 125, 125, 0.3);
 }
 
-.success_msg{
+.success_msg_singleimgupload{
+  color: green;
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: rgba(152, 219, 125, 0.3);
+}
+
+.error_msg_multipleimgupload{
+  color: red;
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: rgba(219, 125, 125, 0.3);
+}
+
+.success_msg_multipleimgupload{
   color: green;
   box-sizing: border-box;
   border-radius: 5px;

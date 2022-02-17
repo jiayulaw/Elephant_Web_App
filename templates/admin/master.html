@@ -6,11 +6,12 @@
       {% set active_state = "admin"%}
     <title>{% block title %}{% if admin_view.category %}{{ admin_view.category }} - {% endif %}{{ admin_view.name }} - {{ admin_view.admin.name }}{% endblock %}</title>
     {% block head_meta %}
-        <meta charset="UTF-8">
+        <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="">
         <meta name="author" content="">
+        <meta name="mobile-web-app-capable" content="yes">
     {% endblock %}
     {% block head_css %}
         <link href="{{ admin_static.url(filename='bootstrap/bootstrap4/swatch/{swatch}/bootstrap.min.css'.format(swatch=config.get('FLASK_ADMIN_SWATCH', 'default')), v='4.2.1') }}"
@@ -42,8 +43,8 @@
 
     <!--     CSS for general stuff     -->
     <link href="{{ url_for('static', filename= 'css/mystyle.css')  }}" rel="stylesheet"/>
-
-
+    <!-- CSS for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     {% endblock %}
   </head>
 <body>
@@ -66,16 +67,12 @@
             {% set render_ctx = h.resolve_ctx() %}
     
             {% block body %}{% endblock %}
-        
 
             {% block content %}{% endblock content %}
 
+            <div id="overlay" onclick="overlay_clicked();"></div>
+
         </div>
-        
-  
-
-
-        
     </div>
 
     
@@ -110,14 +107,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+     <!-- jQuery Custom Scroller CDN -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+
+
+
 
     <script type="text/javascript">
         $(document).ready(function () {
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
                 $(this).toggleClass('active');
+
+                if (($("#sidebar").hasClass("active")) && ($(document).width() <= 768)){
+                  document.getElementById("overlay").style.display = "block";
+                  // document.getElementById("top_navbar").style.position = "absolute";
+
+                }
+                else{
+                  document.getElementById("overlay").style.display = "none";
+                }
+                $('.overlay').addClass('active');
+
+                
             });
+
+
+            
         });
+    </script>
+
+    <script>
+      function overlay_clicked() {
+        $('#sidebar').removeClass('active');
+        document.getElementById("overlay").style.display = "none";
+
+    }
     </script>
   </body>
 </html>
