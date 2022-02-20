@@ -18,20 +18,9 @@ from functools import wraps
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import urllib.request
 from werkzeug.utils import secure_filename
-# app = Flask(__name__, static_folder='static')
-# api = Api(app)
-# #need to set base dir to prevent path issue in pythonanywhere
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# db_path = os.path.join(BASE_DIR, "database.sqlite")
-# #------------------------------------------------------------
-# #-------------------------Database Config-------------------------
-# #------------------------------------------------------------
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
-# app.config['SECRET_KEY'] = 'thisisasecretkey'
-# db = SQLAlchemy(app)
 
 #Import database rows declaration, and also Flask app objects
-from DB_class import Images, end_device,User, app, api, db, db_path
+from DB_class import Images, end_device,User, app, api, db, db_path, BASE_DIR
 
 #------------------------------------------------------------
 #-------------------------User permission Config-------------------------

@@ -3,9 +3,9 @@
 
 import requests
 
-BASE = "http://127.0.0.1:5000/"
+# BASE = "http://127.0.0.1:5000/"
 
-
+BASE = "https://d3m318b1ejw1x6.cloudfront.net/"
 # set device_id to specify the device to update
 # i.e., 1 is for end device 1, 2 is for end device 2, and 3 is for ...
 # set status to modify time
@@ -13,7 +13,7 @@ BASE = "http://127.0.0.1:5000/"
 # the name will be what will be displayed on server
 device_id = "99"
 name = "base station"
-status = "8.10 pm 20-02-2022"
+status = "9.53 pm 20-02-2022"
 message  = "777 hello"
 
 # this is a function to send 
