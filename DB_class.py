@@ -1,21 +1,14 @@
+# Run this script as main to initialize database
+# default admin user will also be created
+
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField
-from wtforms.validators import InputRequired, Length, ValidationError
-from flask_bcrypt import Bcrypt
-import sys
-import time
-import datetime
-import arrow
+from flask_sqlalchemy import SQLAlchemy 
 import os
 import sqlite3
-from flask_admin import Admin, AdminIndexView
-from flask_admin.contrib.sqla import ModelView 
-import git
-from functools import wraps
+from flask_bcrypt import Bcrypt
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
+
 app = Flask(__name__, static_folder='static')
 api = Api(app)
 #need to set base dir to prevent path issue in pythonanywhere
@@ -41,11 +34,11 @@ class Images(db.Model):
 class end_device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    status = db.Column(db.Integer, nullable=False)
-    message = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
-        return f"Video(name = {name}, status = {status}, message = {message})"
+        return f"Device_Stat_pipeline(name = {name}, status = {status}, message = {message})"
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,11 +52,16 @@ class User(db.Model, UserMixin):
             return True
         else:
             return False
+            
 
-
-db.create_all()
-
-
-
+if __name__ == "__main__":
+    db.create_all()
+    # Create default admin user
+    bcrypt = Bcrypt(app)
+    hashed_password = bcrypt.generate_password_hash("pwpw")
+    new_user = User(username = "elephantking", password=hashed_password, access_level = "admin")
+    db.session.add(new_user)
+    db.session.commit()
+    print("Default admin user created successfully")
 
 

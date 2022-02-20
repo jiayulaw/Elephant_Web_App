@@ -16,15 +16,3 @@ cursor = conn.cursor()
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 print(cursor.fetchall())
 
-
-#=======================================================
-#===========SELECT specific label from table with condition================
-#=======================================================
-#Cursor selection
-cursor = conn.execute("SELECT path from images WHERE source='station 1';")
-
-#print out using cursor
-for row in cursor:
-   print(row)
-   print ("row 1 = ", row[0])
-print ("Operation done successfully")

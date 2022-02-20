@@ -40,66 +40,45 @@ crossorigin=""/>
                   Location
                 </th>
                 <th>
+                  Last Seen
+                </th>
+
+                <th>
                   Message
                 </th>
                 <th class="text-center">
-                  Status
+                  Health
                 </th>
 
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  {{sensor_name}}
-                </td>
-                <td>
-                  Latitude Longitude
-                </td>
-          
-                <td>
-                  Last seen : 12-00 17-02-2022
-                </td>
-                <td class="text-center">
-                    <label for="progress_bar">Online</label>
-                    <progress id="progress_bar" value="100" max="100"> 100% </progress>
-
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  End device 2
-                </td>
-                <td>
-                  Latitude Longitude
-                </td>
+              {% set counter = namespace(value = 0) %}
+              {% for name in devices_name %}
+                <tr>
+                  <td>
+                    {{name}}
+                  </td>
+                  <td>
+                    Latitude Longitude
+                  </td>
             
-                <td>
-                  Last seen : 12-00 17-02-2022
-                </td>
-                <td class="text-center">
-                    <label for="progress_bar">Online</label>
-                    <progress id="progress_bar" value="100" max="100"> 100% </progress>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  End device 3
-                </td>
-                <td>
-                  Johor
-                </td>
-            
-                <td>
-                  Last seen : 12-00 17-02-2022
-                </td>
-                <td class="text-center">
-                    <label for="progress_bar">Online</label>
-                    <progress id="progress_bar" value="50" max="100" > 50% </progress>
+                  <td>
+                    {{devices_status[counter.value]}}
+                  </td>
 
-                </td>
-              </tr>
-              
+                  <td>
+                    {{devices_message[counter.value]}}
+                  </td>
+
+                  <td class="text-center">
+                      <label for="progress_bar">Online</label>
+                      <progress id="progress_bar" value="100" max="100"> 100% </progress>
+
+                  </td>
+                </tr>
+                {% set counter.value = counter.value + 1 %}
+              {% endfor %}
             </tbody>
           </table>
         </div>

@@ -18,58 +18,24 @@ from functools import wraps
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import urllib.request
 from werkzeug.utils import secure_filename
+# app = Flask(__name__, static_folder='static')
+# api = Api(app)
+# #need to set base dir to prevent path issue in pythonanywhere
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# db_path = os.path.join(BASE_DIR, "database.sqlite")
+# #------------------------------------------------------------
+# #-------------------------Database Config-------------------------
+# #------------------------------------------------------------
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+# app.config['SECRET_KEY'] = 'thisisasecretkey'
+# db = SQLAlchemy(app)
 
-app = Flask(__name__, static_folder='static')
-api = Api(app)
+#Import database rows declaration, and also Flask app objects
+from DB_class import Images, end_device,User, app, api, db, db_path
 
-#need to set base dir to prevent path issue in pythonanywhere
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "database.sqlite")
 #------------------------------------------------------------
-#-------------------------Database Config-------------------------
+#-------------------------User permission Config-------------------------
 #------------------------------------------------------------
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
-app.config['SECRET_KEY'] = 'thisisasecretkey'
-db = SQLAlchemy(app)
-
-
-class Images(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.String(100), nullable=False)
-    path = db.Column(db.String(100), nullable=False, unique=True)
-    source = db.Column(db.String(100), nullable=False)
-    uploader = db.Column(db.String(100), nullable=True)
-    tag = db.Column(db.String(100), nullable=True)
-    latitude = db.Column(db.Integer, nullable=True)
-    longitude = db.Column(db.Integer, nullable=True)
-
-class end_device(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    status = db.Column(db.Integer, nullable=False)
-    message = db.Column(db.Integer, nullable=False)
-
-    def __repr__(self):
-        return f"Video(name = {name}, status = {status}, message = {message})"
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False, unique=True)#username must be unique
-    password = db.Column(db.String(80), nullable=False)
-    access_level = db.Column(db.String(20), nullable=False)
-    
-    def has_role(self, role_name):
-        #my_role = User.query.filter_by(access_level=role_name).first()
-        if role_name == self.access_level:
-            return True
-        else:
-            return False
-
-
-
-
-    
-#db.create_all()
 def require_role(role, role2):
     """make sure user has this role"""
     def decorator(func):
@@ -95,73 +61,6 @@ class DataStorage():
 
 data = DataStorage()
 
-#------------------------------------------------------------
-#-------------------------Device status query-------------------------
-#------------------------------------------------------------
-video_put_args = reqparse.RequestParser()
-#help parameter is similar to error message we send back to sender when there is no valid input
-#required parameter means the field is not optional
-video_put_args.add_argument("name", type=str, help="Name of the video is required", required=True)
-video_put_args.add_argument("status", type=int, help="Views of the video", required=True)
-video_put_args.add_argument("message", type=int, help="Likes on the video", required=True)
-
-video_update_args = reqparse.RequestParser()
-video_update_args.add_argument("name", type=str, help="Name of the video is required")
-video_update_args.add_argument("status", type=int, help="Views of the video")
-video_update_args.add_argument("message", type=int, help="Likes on the video")
-
-resource_fields = {
-	'id': fields.Integer,
-	'name': fields.String,
-	'status': fields.Integer,
-	'message': fields.Integer
-}
-
-#marshal_with to serialize object
-class Video(Resource):
-	@marshal_with(resource_fields)
-	def get(self, video_id):
-		result = end_device.query.filter_by(id=video_id).first()
-		if not result:
-			abort(404, message="Could not find video with that id")
-		return result
-
-	@marshal_with(resource_fields)
-	def put(self, video_id):
-		args = video_put_args.parse_args()
-		result = end_device.query.filter_by(id=video_id).first()
-		if result:
-			abort(409, message="Video id taken...")
-
-		video = end_device(id=video_id, name=args['name'], status=args['status'], message=args['message'])
-		db.session.add(video)
-		db.session.commit()
-		return video, 201 #this number is just a number in http protocol, can change to other num
-
-	@marshal_with(resource_fields)
-	def patch(self, video_id):
-		args = video_update_args.parse_args()
-		result = end_device.query.filter_by(id=video_id).first()
-		if not result:
-			abort(404, message="Video doesn't exist, cannot update")
-
-		if args['name']:
-			result.name = args['name']
-		if args['status']:
-			result.status = args['status']
-		if args['message']:
-			result.message = args['message']
-
-		db.session.commit()
-
-		return result
-
-	def delete(self, video_id):
-		abort_if_video_id_doesnt_exist(video_id)
-		del videos[video_id]
-		return '', 204
-
-api.add_resource(Video, "/video/<int:video_id>")
 #------------------------------------------------------------
 #-------------------------User Auth-------------------------
 #------------------------------------------------------------
@@ -229,6 +128,83 @@ admin.add_view(MyModelView(User, db.session))
 #------------------------------------------------------------
 #------------------------------------------------------------
 #------------------------------------------------------------
+
+#------------------------------------------------------------
+#-------------------------REST API-------------------------
+#------------------------------------------------------------
+device_stat_put_args = reqparse.RequestParser()
+#help parameter is similar to error message we send back to sender when there is no valid input
+#required parameter means the field is not optional
+device_stat_put_args.add_argument("name", type=str, help="Name of the video is required", required=True)
+device_stat_put_args.add_argument("status", type=str, help="Views of the video", required=True)
+device_stat_put_args.add_argument("message", type=str, help="Likes on the video", required=True)
+
+device_stat_update_args = reqparse.RequestParser()
+device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
+device_stat_update_args.add_argument("status", type=str, help="Views of the video", required=True)
+device_stat_update_args.add_argument("message", type=str, help="Likes on the video", required=True)
+
+resource_fields = {
+	'id': fields.Integer,
+	'name': fields.String,
+	'status': fields.String,
+	'message': fields.String
+}
+
+#marshal_with to serialize object
+class Device_Stat_pipeline(Resource):
+	@marshal_with(resource_fields)
+	def get(self, device_id):
+		result = end_device.query.filter_by(id=device_id).first()
+		if not result:
+			abort(404, message="Could not find device record in database")
+		return result
+
+	@marshal_with(resource_fields)
+	def put(self, device_id):
+		args = device_stat_put_args.parse_args()
+		result = end_device.query.filter_by(id=device_id).first()
+		if result:
+			abort(409, message="Device id taken...")
+
+		device_record = end_device(id=device_id, name=args['name'], status=args['status'], message=args['message'])
+		db.session.add(device_record)
+		db.session.commit()
+		return device_record, 201 #this number is just a number in http protocol, can change to other num
+
+	@marshal_with(resource_fields)
+	def patch(self, device_id):
+		args = device_stat_update_args.parse_args()
+		result = end_device.query.filter_by(id=device_id).first()
+		if not result:
+			abort(404, message="Device record doesn't exist, cannot update")
+
+		if args['name']:
+			result.name = args['name']
+
+		if args['status']:
+			result.status = args['status']
+			
+		if args['message']:
+			result.message = args['message']
+	
+
+		db.session.commit()
+		return result
+
+	# def delete(self, device_id):
+	# 	# need to abort if the database doesnt exist, else might cause error
+    #     # #abort_if_video_id_doesnt_exist(video_id)
+	# 	del end_device[device_id]
+	# 	return '', 204
+
+
+api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
+
+#------------------------------------------------------------
+#------------------------------------------------------------
+#------------------------------------------------------------
+
 @app.route("/")
 @app.route("/dashboard")
 @login_required #we can only access dashboard when logged in
@@ -242,6 +218,10 @@ def dashboard():
     image_uploader = []
     image_source = []
     image_tag = []
+    devices_name = []
+    devices_status = []
+    devices_message = []
+
     command = "SELECT * from images;"
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command) 
@@ -254,8 +234,19 @@ def dashboard():
         image_tag.append(image[5])
         image_latitude.append(image[6])
         image_longitude.append(image[7])
+    
+    command = "SELECT * from end_device;"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.execute(command)
+    
+    for device in cursor:
+        devices_name.append(device[1])
+        devices_status.append(device[2])
+        devices_message.append(device[3])
 
-    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude)
+    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_status = devices_status, devices_message = devices_message)
+
+    
 
 
 @app.route('/update_server', methods=['POST'])
@@ -547,7 +538,7 @@ def display_image():
                 if result:
                     print("the file with same name already saved")
                 else:
-                    new_image = Images(timestamp = date_time, path = path, source=data.station, tag = "new image", latitude = 999, longitude = 999)
+                    new_image = Images(timestamp = date_time, path = path, source=data.station, tag = "new image", latitude ="", longitude = "")
                     db.session.add(new_image)
                     db.session.commit()
             else:
