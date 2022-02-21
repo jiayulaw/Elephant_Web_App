@@ -115,20 +115,36 @@
   }
 
 
+  #progress_bar_offline{
+    /* Just set something so that progress bar can work */
+      background-color: rgb(255, 71, 47);
+  
+  }
+  /* Adjusting color of 'progress' element */
+  /* reference: http://html5doctor.com/the-progress-element/ */
+  /* On Chrome and Safari */
+  #progress_bar_offline::-webkit-progress-bar { background: rgb(248, 0, 0); }
+  #progress_bar_offline::-webkit-progress-value { background: #ff0505; }
+  /* On Firefox */
+  #progress_bar_offline::-moz-progress-bar { background: #df0303; }
 
-
-#progress_bar{
+#progress_bar_online{
   /* Just set something so that progress bar can work */
-    background-color: greenyellow;
+    background-color: rgb(255, 71, 47);
 
 }
 /* Adjusting color of 'progress' element */
 /* reference: http://html5doctor.com/the-progress-element/ */
 /* On Chrome and Safari */
-progress::-webkit-progress-bar { background: rgb(248, 0, 0); }
-progress::-webkit-progress-value { background: #03df15; }
+#progress_bar_online::-webkit-progress-bar { background: rgb(248, 0, 0); }
+#progress_bar_online::-webkit-progress-value { background: #03df15; }
 /* On Firefox */
-progress::-moz-progress-bar { background: #03df15; }
+#progress_bar_online::-moz-progress-bar { background: #03df15; }
+
+
+
+
+
 
 #top_navbar{
   z-index: 99999; 

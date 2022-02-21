@@ -210,6 +210,7 @@ def dashboard():
     devices_name = []
     devices_status = []
     devices_message = []
+    devices_timestamp_diff = []
 
     command = "SELECT * from images;"
     conn = sqlite3.connect(db_path)
@@ -227,16 +228,36 @@ def dashboard():
     command = "SELECT * from end_device;"
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command)
+
+    now = datetime.datetime.now() # current date and time
     
     for device in cursor:
+        
+
+        #dealing with the timestamp formatting for display
+        #try converting to 12 Hr format
+        try:
+            datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
+            datetime_str_formatted = datetime.datetime.strftime(datetime_object, '%I:%M:%S %p, %d/%m/%Y')
+            # getting the difference between 2 timestamps in seconds
+            diff_in_seconds = (now - datetime_object).seconds
+            # Dividing seconds by 60 we get minutes
+            output = divmod(diff_in_seconds,60)
+            diff_in_minutes = output[0]
+        # If the timesstamp received cannot be parsed as datetime obj,
+        # then just display it out
+        # and then make the differrence in minutes a large number
+        except:
+            diff_in_minutes = 999
+            datetime_str_formatted = device[2]
+
+        # append all data to arrays to be displayed on web page
         devices_name.append(device[1])
-        devices_status.append(device[2])
+        devices_timestamp_diff.append(diff_in_minutes)
+        devices_status.append(datetime_str_formatted)
         devices_message.append(device[3])
 
-    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_status = devices_status, devices_message = devices_message)
-
-    
-
+    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_status = devices_status, devices_message = devices_message, devices_timestamp_diff = devices_timestamp_diff)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():

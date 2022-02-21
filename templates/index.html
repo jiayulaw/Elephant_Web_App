@@ -72,8 +72,16 @@ crossorigin=""/>
                   </td>
 
                   <td class="text-center">
-                      <label for="progress_bar">Online</label>
-                      <progress id="progress_bar" value="100" max="100"> 100% </progress>
+
+                      {% if devices_timestamp_diff[counter.value] > 10 %}
+                      <label for="progress_bar_offline">Offline</label>
+                      <progress id="progress_bar_offline" value="100" max="100"> 100% </progress>
+
+                      {% else %}
+                      <label for="progress_bar_online">Online</label>
+                      <progress id="progress_bar_online" value="100" max="100"> 100% </progress>
+                      {% endif %}
+                     
 
                   </td>
                 </tr>

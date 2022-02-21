@@ -67,8 +67,8 @@ a, a:hover, a:focus {
     max-width: 250px;
     height: 100vh;
     /*background:#5125f0;*/
-    background-image: linear-gradient(rgb(51, 14, 202), rgba(51, 1, 231, 0));
-    color: #fff;
+    background-image: linear-gradient(rgb(0, 0, 0), rgba(0, 0, 0, 0));
+    color: rgb(255, 255, 255);
     transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
     transform-origin: bottom left;
     
@@ -88,7 +88,7 @@ a, a:hover, a:focus {
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #5125f0;
+    background: #000000;
 }
 
 #sidebar ul.components {
@@ -171,7 +171,7 @@ a.article, a.article:hover {
     height: 100vh;
     overflow: auto;
     z-index:1;
-    
+    background-color: rgba(0, 0, 0, 0.1);
     transition: all 0.3s;
     /* position: absolute */
 }
