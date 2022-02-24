@@ -5,14 +5,6 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 {{ super() }}
-<style>
-  /* set z-index to prevent the modal box backdrop shadowing the box */
-  .modal-backdrop {
-  z-index: -1;
-}
-
-
-</style>
 
 {% endblock stylesheets %}
 
@@ -20,7 +12,7 @@
 
 {% set counter = namespace(value = 0) %}
   <!-- Modal box for user to confirm file deletion-->
-  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal fade" id="modalbox-confirm-deletion" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -43,6 +35,115 @@
     </div>
   </div>
 
+
+  <!-- Modal box for user to edit file -->
+  <div class="modal fade" id="modalbox-confirm-edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Edit Image</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Modify image information by editting fields.<br><br>
+            <img name="modal-box-edit-img-display" id="modal-box-edit-img-display" src="">
+            <form method="GET" id = "editImgIdform" action="#" enctype="multipart/form-data" autocomplete="off">
+              <div class = "form-group row ml-1 mt-3">
+                <label for="timstamp_input" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
+                <div class="col-sm-9">
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker3" type="text" value="{{input_date_str}}" name="timestamp_input" required>
+                </div> 
+              </div>
+  
+              <div class="form-group row ml-1 mr-1">
+                <label for="inputTag" class="col-sm-2 col-form-label">Tag / Remark</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="inputTag" placeholder="Image description in less than 100 characters" name = "img_tag_input" value = "testing testing">
+                  <input type="hidden" class="form-control" id="inputPath" placeholder="path" name = "img_path_input" value = "testing testing">
+                </div>
+              </div>
+  
+              <div class="form-group row ml-1 mr-1">
+                <label for="inputUploader" class="col-sm-2 col-form-label">Image uploader</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="inputUploader" placeholder="Uploader" value = "{{current_user.username}}"  name = "img_uploader" disabled>
+                </div>
+              </div>
+              <fieldset class="form-group ml-3">
+                <div class="row">
+                  <legend class="col-form-label col-sm-2 pt-0">Image source</legend>
+                  <div class="col-sm-10">
+                    <select class="u-full-width" id="modal-select-station" type="text" value="end device 2" name="modal-img_source">
+                      {% if current_source == "end device 1" %}
+                      <option value = "end device 1" selected>End device 1</option>
+               
+                      {% else %}
+                      <option value = "end device 1">End device 1</option>
+                      {% endif %}
+                      {% if current_source == "end device 2" %}
+                      <option value = "end device 2" selected>End device 2</option>
+                   
+                      {% else %}
+                      <option value = "end device 2">End device 2</option>
+                      {% endif %}
+                      {% if current_source == "end device 3" %}
+                      <option value = "end device 3" selected>End device 3</option>
+                     
+                      {% else %}
+                      <option value = "end device 3">End device 3</option>
+                      {% endif %}
+  
+                      {% if current_source == "uploaded" %}
+                      <option value = "uploaded" selected>uploaded</option>
+                      {% else %}
+                      <option value = "uploaded">uploaded</option>
+                      {% endif %}
+                    </select>
+                   
+                  </div>
+                </div>
+              </fieldset>
+  
+              <div class = "form-group row ml-1">
+  
+                <label for="img_latitude" class="col-sm-2 col-form-label">Latitude:</label>
+                <div class="col-sm-2">
+                  <input type="number" id="img_latitude" name="img_latitude" min="-90" max="90">
+                </div>
+  
+                <label for="img_longitude" class="col-sm-2 col-form-label">Longitude:</label>
+                <div class="col-sm-2">
+                  <input type="number" id="img_longitude" name="img_longitude" min="-180" max="180">
+                </div>
+              </div>
+  
+              <div class = "form-group row ml-3 mr-3">
+                <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
+              </div>
+              <div class="modal-footer">
+                <p>
+                  <input type="submit" value="Save changes" class="btn btn-info ml-3">
+                  <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                </p>
+              </div>
+  
+  
+            </form>
+
+          </div>
+
+
+    
+
+
+
+
+      </div>
+    </div>
+  </div>
+
   <div class="row">
     <!--Filter field-->
       <div class="col-lg-6 col-md-12">
@@ -54,7 +155,6 @@
                 <label for="station" class="col-sm-3 col-form-label">Image source</label>
                 <div class="col-sm-9">
                   <select class="u-full-width" id="station" type="text" value="end device 2" name="station">
-
                     {% if current_source == "end device 1" %}
                     <option value = "end device 1" selected>End device 1</option>
              
@@ -76,14 +176,11 @@
 
                     {% if current_source == "uploaded" %}
                     <option value = "uploaded" selected>uploaded</option>
-                   
                     {% else %}
                     <option value = "uploaded">uploaded</option>
                     {% endif %}
-
                   </select>
                  </div>
-
               </div>
 
               <div class = "form-group row ml-1"> 
@@ -109,12 +206,8 @@
                     {% else %}
                     <option value = "any">Any</option>
                     {% endif %}
-                    
-
                   </select>
-
                  </div>
-
               </div>
 
               <div class = "form-group row ml-1">
@@ -138,11 +231,9 @@
             
             </form>
           </div>
-
         </div>
       </div>
            
-  
   </div>
   
   <div class="row ml-3 mt-2">
@@ -162,30 +253,30 @@
             <div class="card-body">
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
-              
-          
+
               {% if current_user.has_role('admin') %}
               <div class="container">
                 <div class = "row">
             
                   <div class="col-sm-4 mb-2">
                     <!-- Button trigger modal -->
-                    <button style = "width:100%; font-size: 0.8em;"  data-img_id="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button" class="open-AddBookDialog btn btn-fill btn-danger" data-toggle="modal" data-target="#exampleModalCenter" href="#addBookDialog">
+                    <button style = "width:100%; font-size: 0.8em;"  data-delete_img_id_action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}"  data-img_name = "{{image}}" type="button" class="modal-delete-button btn btn-fill btn-danger" data-toggle="modal" data-target="#modalbox-confirm-deletion" href="#none">
                       Delete
                     </button>
+                  </div>
 
-                  </div>
                   <div class="col-sm-3 mb-2">
-                    <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-success">Edit</button>
+                    <button style = "width:100%; font-size: 0.8em;" class="modal-edit-button btn btn-fill btn-success"  data-edit_img_id_action="{{ url_for('edit_img', img_id=image_id[counter.value]) }}" data-img_source = "{{image_source[counter.value]}}"  data-img_timestamp = "{{image_timestamps[counter.value]}}" data-img_uploader = "{{image_uploader[counter.value]}}" data-img_tag = "{{image_tag[counter.value]}}" data-img_path = "{{image_paths[counter.value]}}" data-img_latitude = "{{image_latitude[counter.value]}}" data-img_longitude = "{{image_longitude[counter.value]}}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-edit" href="#none">
+                      Edit
+                    </button>
                   </div>
+
                   <div class="col-sm-5 mb-2">
                     <a href="{{image}}" download>
                       <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
                     </a>
                   </div>
-
                 </div>
-
               </div>
 
               {% elif current_user.has_role('explorer') %}
@@ -195,36 +286,31 @@
               
                     <div class="col-sm-4 mb-2">
                       <!-- Button trigger modal -->
-                      <button style = "width:100%; font-size: 0.8em;"  data-img_id="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button" class="open-AddBookDialog btn btn-fill btn-danger" data-toggle="modal" data-target="#exampleModalCenter" href="#addBookDialog">
+                      <button style = "width:100%; font-size: 0.8em;"  class="modal-delete-button btn btn-fill btn-danger" data-delete_img_id_action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-deletion" href="#none">
                         Delete
                       </button>
   
                     </div>
                     <div class="col-sm-3 mb-2">
-                      <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-success">Edit</button>
+                      <button style = "width:100%; font-size: 0.8em;" class="modal-edit-button btn btn-fill btn-success" data-edit_img_id_action="{{ url_for('edit_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-edit" href="#none">
+                        Edit
+                      </button>
                     </div>
                     <div class="col-sm-5 mb-2">
                       <a href="{{image}}" download>
                         <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
                       </a>
                     </div>
-    
-    
                   </div>
-  
                 </div>
                 {% endif %}
               {% endif %} 
-
-              
             </div>
           </div>
         </div>
       </div>
       {% set counter.value = counter.value + 1 %}
     {% endfor %}
-
-
   </div>
 
 {% endblock content %}
@@ -262,10 +348,15 @@ jQuery('#datetimepicker2').datetimepicker({
   defaultDate:'{{to_date}}'
   });
 
+jQuery('#datetimepicker3').datetimepicker({
+format:'Y-m-d H:i',
+theme: 'light',
+defaultDate:'{{to_date}}'
+});
+
 jQuery("#range_select input[type=radio]").click(function(){
   timezone = jstz.determine();
   jQuery(".timezone").val(timezone.name());
-  // jQuery(".station").val({{station}});
   jQuery("#range_select").submit();
   });
 </script>
@@ -281,23 +372,65 @@ jQuery("#range_select input[type=radio]").click(function(){
 
 
 <script>
-  // This script passes variable to modal box
+  // This script passes variable to image deletion modal box
   // https://stackoverflow.com/questions/10626885/passing-data-to-a-bootstrap-modal
-  $(document).on("click", ".open-AddBookDialog", function () {
-     
+  $(document).on("click", ".modal-delete-button", function () {
+    //  getting variable values from the delete button
      var img_name_delete = $(this).data('img_name');
-     var img_id_delete = $(this).data('img_id');
-    //  $(".modal-footer #deleteImgId").val( img_id_delete );
+     var img_id_delete = $(this).data('delete_img_id_action');
+    //set value for modal box to be displayed
      $(".modal-body #imgName").val( img_name_delete );
+
+    //  append action to modal form delete button where the action is an url
+    // that deletes corresponding image with certain image id in database
      var deleteform = document.getElementById("deleteImgId");
      deleteform.setAttribute("action", img_id_delete)
-     // As pointed out in comments, 
-     // it is unnecessary to have to manually call the modal.
-     // $('#addBookDialog').modal('show');
 
 });
+
+
+  // This script passes variable to image editting modal box
+  $(document).on("click", ".modal-edit-button", function () {
+    //  getting variable values from the delete button
+     var img_name_delete = $(this).data('img_name');
+     var img_id_edit = $(this).data('edit_img_id_action');
+
+     var img_source_original = $(this).data('img_source');
+     var img_timestamp_original = $(this).data('img_timestamp');
+     var img_tag_original = $(this).data('img_tag');
+     var img_path_original = $(this).data('img_path');
+     var img_uploader_original = $(this).data('img_uploader');
+     var img_latitude_original = $(this).data('img_latitude');
+     var img_longitude_original = $(this).data('img_longitude');
+
+    //set value for modal box to be displayed
+     $(".modal-body #imgName").val( img_name_delete );
+     $(".modal-body #datetimepicker3").val( img_timestamp_original );
+     $(".modal-body #inputTag").val( img_tag_original );
+
+     $(".modal-body #inputPath").val( img_path_original );
+     $(".modal-body #inputUploader").val( img_uploader_original );
+     $(".modal-body #img_latitude").val( img_latitude_original );
+     $(".modal-body #img_longitude").val( img_longitude_original );
+
+     var img_src = document.getElementById("modal-box-edit-img-display");
+     img_src.setAttribute("src", img_name_delete)
+
+    //  append action to modal form delete button where the action is an url
+    // that edits corresponding image with certain image id in database
+     var deleteform = document.getElementById("editImgIdform");
+     deleteform.setAttribute("action", img_id_edit)
+
+     selectElement('modal-select-station', img_source_original)
+
+
+
+});
+
+// This function select the option from select input dynamically using code
+function selectElement(id, valueToSelect) {    
+    let element = document.getElementById(id);
+    element.value = valueToSelect;
+}
 </script>
 {% endblock javascripts %}   
-
-
-

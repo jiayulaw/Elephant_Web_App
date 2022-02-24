@@ -193,3 +193,41 @@
   padding: 10px;
   background-color: rgba(152, 219, 125, 0.3);
 }
+
+.modal-backdrop{
+  display: none;
+}
+
+
+.modal-content{
+}
+
+#modal-box-edit-img-display{
+  width: 100%;
+
+}
+
+.modal-dialog {
+  /* position: absolute; */
+  height: 100 px !important;
+  width: 50ww !important;
+  top: 100px;
+  /* right: 100px; */
+  /* bottom: 50px; */
+  padding-bottom: 50px;
+  /* left: 0; */
+  z-index: 10040;
+  overflow: auto;
+  overflow-y: auto;
+}
+
+@media (max-width: 1200px) {
+  .modal-dialog {
+    width: 90vw;
+
+  }
+
+
+
+}
+

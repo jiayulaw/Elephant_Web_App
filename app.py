@@ -18,6 +18,8 @@ from functools import wraps
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import urllib.request
 from werkzeug.utils import secure_filename
+import shutil
+from os.path import exists
 
 #Import database rows declaration, and also Flask app objects
 from DB_class import Images, end_device,User, app, api, db, db_path, BASE_DIR
@@ -341,14 +343,25 @@ def upload_multiple_image():
             filename = secure_filename(file.filename)
             str = img_source + "/" + filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-            file_path2 = os.path.join(BASE_DIR, file_path)
+            absolute_file_path = os.path.join(BASE_DIR, file_path)
+            # if the directory already contain file with same name, then rename before 
+            # saving the file to prevent overwrite
+
+            if exists(absolute_file_path):
+                str = img_source + "/" + "copyof_" + filename
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+                absolute_file_path = os.path.join(BASE_DIR, file_path)
+
+
             # checks whether file path is redundant
             redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
             if redundant_file_bool:
-                flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_multipleimgupload')
-                return redirect('/data_center/update_status')
+                flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
+                return redirect(request.url)
             else:
+            
+          
                 flash('Image successfully uploaded to database.', 'success_msg_multipleimgupload')
                 #=============== Get other user input =============== 
                 # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
@@ -357,7 +370,6 @@ def upload_multiple_image():
                     timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
                 # Create datetime object so that we can convert to UTC from the browser's local time
                 timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-                # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
 
                 img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
 
@@ -366,19 +378,10 @@ def upload_multiple_image():
                 img_latitude = request.form['img_latitude']
                 img_longitude = request.form['img_longitude']
                 
-                print(img_tag_input)
-                print(current_user.username)
-                print(img_source)
-                print(img_latitude)
-                print(img_longitude)
-
                 #save the file to server directory
-                file.save(file_path2)
-                #saving file requires different format, therefore denotes as file_path2
-                #print('upload_image filename: ' + filename)
-                print("filepath: ", file_path)
-                print("filepath2: ", file_path2)
-                
+                file.save(absolute_file_path)
+                #saving file requires different format, therefore denotes as absolute_file_path
+
                 new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
                 db.session.add(new_image)
                 db.session.commit()
@@ -408,14 +411,26 @@ def upload_image():
         filename = secure_filename(file.filename)
         str = img_source + "/" + filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-        file_path2 = os.path.join(BASE_DIR, file_path)
-        # checks whether file path is redundant
+        absolute_file_path = os.path.join(BASE_DIR, file_path)
+        # if the directory already contain file with same name, then rename before 
+        # saving the file to prevent overwrite
+
+        if exists(absolute_file_path):
+            str = img_source + "/" + "copyof_" + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+            absolute_file_path = os.path.join(BASE_DIR, file_path)
+
+
+                    # checks whether file path is redundant
         redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
         if redundant_file_bool:
             flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
             return redirect(request.url)
         else:
+
+
+     
             flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
             #=============== Get other user input =============== 
             # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
@@ -440,11 +455,10 @@ def upload_image():
             print(img_longitude)
 
             #save the file to server directory
-            file.save(file_path2)
+            file.save(absolute_file_path)
             #saving file requires different format, therefore denotes as file_path2
             #print('upload_image filename: ' + filename)
-            print("filepath: ", file_path)
-            print("filepath2: ", file_path2)
+        
             
             new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
             db.session.add(new_image)
@@ -480,6 +494,54 @@ def delete_img(img_id):
     cursor = conn.execute("DELETE FROM Images WHERE id= \'" + str(img_id) +"\';")
     conn.commit()
     conn.close()
+    return redirect(url_for('display_image'))
+
+@app.route('/edit_img/<img_id>')
+def edit_img(img_id):
+    result = Images.query.filter_by(id=img_id).first()
+    if not result:
+        abort(404, message="Image record doesn't exist, cannot update")
+
+    timestamp_str = request.args.get('timestamp_input')
+
+    if not validate_date(timestamp_str):			# Validate date format
+        timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
+    # Create datetime object so that we can convert to UTC from the browser's local time
+    timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+    img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
+    result.timestamp  =  img_time
+
+    # changing file path of the image when user change the image source
+    img_source = request.args.get('modal-img_source')
+    result.source  = img_source
+    path = request.args.get('img_path_input')
+    original_absolute_file_path = os.path.join(BASE_DIR, path)
+    filename = os.path.basename(path)
+    
+    
+    str = img_source + "/" + filename
+    new_relative_file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+    new_absolute_file_path = os.path.join(BASE_DIR, new_relative_file_path)
+
+    # if the directory already contain file with same name, then rename before 
+    # moving the file to prevent overwrite
+    if exists(new_absolute_file_path):
+        str = img_source + "/" + "copyof_" + filename
+        new_relative_file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+        new_absolute_file_path = os.path.join(BASE_DIR, new_relative_file_path)
+
+    result.path  = new_relative_file_path
+    shutil.move(original_absolute_file_path, new_absolute_file_path)
+    
+    result.tag  = request.args.get('img_tag_input')
+    result.latitude  = request.args.get('img_latitude')
+    result.longitude  = request.args.get('img_longitude')
+    db.session.commit()
+    # after editing image, do not request new user input so the previous inputs remain
+    # more user-friendly
+    data.dontRequest = 1
+
     return redirect(url_for('display_image'))
 
 #------------------------------------------------------------
@@ -570,11 +632,16 @@ def display_image():
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command) 
     for image in cursor:
-      date_time = image[1] 
-      date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+      date_time = image[1]
+      try: 
+        date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+      except:
+        date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+
       if start <= date_time_obj <= end:
           image_id.append(image[0])
-          image_timestamps.append(image[1])
+          datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M')
+          image_timestamps.append(datetime_str_formatted)
           image_paths.append(image[2])
           image_source.append(image[3])
           image_uploader.append(image[4])
