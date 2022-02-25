@@ -18,6 +18,8 @@ import os
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView 
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
+from os.path import exists
+import random
 
 def create_DB_Tables():
     app = Flask(__name__)
@@ -84,6 +86,14 @@ def DB_insert_user(DB_name, DB_table, username, password, access):
     conn.close()
 
 
-
+def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
+        # if the directory already contain file with same name, then rename before 
+        # saving the file to prevent overwrite
+        while exists(absolute_file_path):
+            n = random.randint(0,999999)
+            namestr = img_source + "/" + str(n) + "_" + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], namestr)
+            absolute_file_path = os.path.join(BASE_DIR, file_path)
+        return file_path, absolute_file_path
 
 

@@ -6,6 +6,7 @@ from wtforms import StringField, PasswordField, SubmitField, IntegerField, Selec
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 import sys
+import random
 import time
 import datetime
 import arrow
@@ -20,6 +21,7 @@ import urllib.request
 from werkzeug.utils import secure_filename
 import shutil
 from os.path import exists
+from elephant_functions import *
 
 #Import database rows declaration, and also Flask app objects
 from DB_class import Images, end_device,User, app, api, db, db_path, BASE_DIR
@@ -346,11 +348,7 @@ def upload_multiple_image():
             absolute_file_path = os.path.join(BASE_DIR, file_path)
             # if the directory already contain file with same name, then rename before 
             # saving the file to prevent overwrite
-
-            if exists(absolute_file_path):
-                str = img_source + "/" + "copyof_" + filename
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-                absolute_file_path = os.path.join(BASE_DIR, file_path)
+            file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
 
 
             # checks whether file path is redundant
@@ -409,19 +407,14 @@ def upload_image():
     if file and allowed_file(file.filename): 
         img_source = request.form['img_source']
         filename = secure_filename(file.filename)
-        str = img_source + "/" + filename
+        timestamp = datetime.datetime.now().strftime("uploaded-on_%y-%m-%d_%H-%M-%S_")
+        str = img_source + "/" + timestamp + filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
         absolute_file_path = os.path.join(BASE_DIR, file_path)
-        # if the directory already contain file with same name, then rename before 
-        # saving the file to prevent overwrite
 
-        if exists(absolute_file_path):
-            str = img_source + "/" + "copyof_" + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-            absolute_file_path = os.path.join(BASE_DIR, file_path)
+        file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
 
-
-                    # checks whether file path is redundant
+        # checks whether file path is redundant
         redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
         if redundant_file_bool:
@@ -519,17 +512,15 @@ def edit_img(img_id):
     original_absolute_file_path = os.path.join(BASE_DIR, path)
     filename = os.path.basename(path)
     
-    
-    str = img_source + "/" + filename
+    if "edited" in filename:
+        str = img_source + "/" + filename
+    else:
+        str = img_source + "/edited_" + filename
+
     new_relative_file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
     new_absolute_file_path = os.path.join(BASE_DIR, new_relative_file_path)
 
-    # if the directory already contain file with same name, then rename before 
-    # moving the file to prevent overwrite
-    if exists(new_absolute_file_path):
-        str = img_source + "/" + "copyof_" + filename
-        new_relative_file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-        new_absolute_file_path = os.path.join(BASE_DIR, new_relative_file_path)
+    new_relative_file_path, new_absolute_file_path = checkFilePath(new_relative_file_path, new_absolute_file_path, img_source, filename, BASE_DIR, app)
 
     result.path  = new_relative_file_path
     shutil.move(original_absolute_file_path, new_absolute_file_path)
