@@ -209,6 +209,9 @@
 
 
 .modal-content{
+  border-color: #222;
+  border-width: 0.3vw;
+  background-color:#e6fdf0;
 }
 
 #modal-box-edit-img-display{
@@ -228,6 +231,7 @@
   z-index: 10040;
   overflow: auto;
   overflow-y: auto;
+
 }
 
 
