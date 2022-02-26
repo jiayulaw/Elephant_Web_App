@@ -1,3 +1,4 @@
+from operator import contains
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
@@ -50,6 +51,7 @@ class DataStorage():
     station = "end device 1"
     from_date_str = None
     to_date_str = None
+    detection_type = "any"
 
     input_date_str = None
 
@@ -249,7 +251,7 @@ def dashboard():
         image_tag.append(image[5])
         image_latitude.append(image[6])
         image_longitude.append(image[7])
-    
+
     command = "SELECT * from end_device;"
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command)
@@ -689,7 +691,7 @@ def end_devices():
 @require_role(role="admin", role2 = "explorer")
 def display_image():
     if not data.dontRequest == 1:
-        timezone, data.from_date_str, data.to_date_str, data.station = get_records()
+        timezone, data.from_date_str, data.to_date_str, data.station, data.detection_type = get_records()
     else:
         timezone 		= request.args.get('timezone','Etc/UTC')
         data.dontRequest = 0
@@ -698,28 +700,7 @@ def display_image():
     end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
 
 
-    # check directory to update any new images added through SFTP or direct upload to server
-    directory = rf"static/image uploads/{data.station}" 
-    directory2 = os.path.join(BASE_DIR, directory)
-    for filename in os.listdir(directory2):
-        try:
-            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                date_time = filename.split(".")[0]
-                #print(date_time)
-                date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
-                path = os.path.join(directory, filename)
-                path = f"static/image uploads/{data.station}/"+filename
-                result = Images.query.filter_by(path=path).first()
-                if result:
-                    print("the file with same name already saved")
-                else:
-                    new_image = Images(timestamp = date_time, path = path, source=data.station, tag = "new image", latitude ="", longitude = "")
-                    db.session.add(new_image)
-                    db.session.commit()
-            else:
-                continue
-        except:
-            print("Filename is not formatted correctly, but it is ok, just ignore")
+    update_server_directory_images(BASE_DIR, Images, data, db)
 
     # Filter images from database
     image_id = []
@@ -730,29 +711,58 @@ def display_image():
     image_uploader = []
     image_source = []
     image_tag = []
-    command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
+
+    if (data.station == "any"):
+        command = "SELECT * from images;"
+        
+    else:
+        command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
+        
 
     conn = sqlite3.connect(db_path)
-    cursor = conn.execute(command) 
+    cursor = conn.execute(command)
+
+    
     for image in cursor:
-      date_time = image[1]
-      try: 
-        date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
-      except:
-        date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+        image_criteria_pass = 0 #boolean variable to filter image
+        date_time = image[1]
+        try: 
+            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+        except:
+            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
 
-      if start <= date_time_obj <= end:
-          image_id.append(image[0])
-          datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M')
-          image_timestamps.append(datetime_str_formatted)
-          image_paths.append(image[2])
-          image_source.append(image[3])
-          image_uploader.append(image[4])
-          image_tag.append(image[5])
-          image_latitude.append(image[6])
-          image_longitude.append(image[7])
+        if start <= date_time_obj <= end:
+          if data.detection_type == "any":
+              image_criteria_pass = 1
+          else:
+              if data.detection_type in image[5]:
+                  image_criteria_pass = 1
 
-          
+        if image_criteria_pass == 1:
+            image_id.append(image[0])
+            datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M')
+            image_timestamps.append(datetime_str_formatted)
+            image_paths.append(image[2])
+            image_source.append(image[3])
+            image_uploader.append(image[4])
+            image_tag.append(image[5])
+            image_latitude.append(image[6])
+            image_longitude.append(image[7])  
+            
+
+    #reverse the array so that image file with latest timestamp is displayed at top, 
+    # but this method cannnot completely sort all the image, as it depend upon the sequence of being added to database
+    # therefore, sorting should be carried out base on time represented by each image in database, not depending
+    #on the sequence of them being read
+    image_id.reverse()
+    image_timestamps.reverse()
+    image_paths.reverse()
+    image_source.reverse()
+    image_uploader.reverse()
+    image_tag.reverse()
+    image_latitude.reverse()
+    image_longitude.reverse()
+    
     return render_template( "display_image.html", 
                             from_date = data.from_date_str,
                             to_date = data.to_date_str,
@@ -767,7 +777,7 @@ def display_image():
                             image_source = image_source,
                             image_id = image_id,
                             image_tag = image_tag,
-                            current_source = data.station)
+                            current_source = data.station, current_detection_type = data.detection_type)
 
 def get_records():
     """getting records from users at website's form"""
@@ -778,6 +788,8 @@ def get_records():
     range_h_form	= request.args.get('range_h','');  #This will return a string, if field range_h exists in the request
     range_h_int 	= "nan"  # initialise this variable with not a number
     img_source       = request.args.get('station','end device 1')                           #Get img_source, or fall back to end device 1
+    detection_type       = request.args.get('detection_type','any') 
+    
 
     print ("REQUEST:")
     print (request.args)
@@ -786,7 +798,6 @@ def get_records():
         range_h_int	= int(range_h_form)
     except:
         print ("range_h_form not a number")
-
 
     print ("Received from browser: %s, %s, %s, %s" % (from_date_str, to_date_str, timezone, range_h_int))
 
@@ -801,7 +812,7 @@ def get_records():
     from_date_obj       = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
     to_date_obj         = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
 
-    return [timezone, from_date_str, to_date_str, img_source]
+    return [timezone, from_date_str, to_date_str, img_source, detection_type]
 
 
 def validate_date(d):

@@ -104,4 +104,33 @@ def Local2UTC_time(LocalTime):
     utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
     return utcTime
 
+def update_server_directory_images(BASE_DIR, Images, data, db):
+    # check directory to update any new images added through SFTP or direct upload to server
+    for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
+        directory = rf"static/image uploads/{device_name}" 
+        directory2 = os.path.join(BASE_DIR, directory)
+        for filename in os.listdir(directory2):
+            try:
+                if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+                    #strip away file format extension
+                    str1 = filename.split(".")[0]
+                    #strip between datetime and detection type
+                    arr1 = str1.split("-x-")
+                    date_time = arr1[0]
+                    detection_type = arr1[1]
+                    date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+                    path = os.path.join(directory, filename)
+                    path = f"static/image uploads/{device_name}/"+filename
+                    result = Images.query.filter_by(path=path).first()
+                    if result:
+                        print("the file with same name already saved")
+                    else:
+                        new_image = Images(timestamp = date_time, path = path, source=data.station, tag = detection_type, latitude ="", longitude = "")
+                        db.session.add(new_image)
+                        db.session.commit()
+                else:
+                    continue
+            except:
+                print("Filename is not formatted correctly, but it is ok, just ignore")
+
 

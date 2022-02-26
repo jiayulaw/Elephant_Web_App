@@ -174,9 +174,15 @@
                     {% endif %}
 
                     {% if current_source == "uploaded" %}
-                    <option value = "uploaded" selected>uploaded</option>
+                    <option value = "uploaded" selected>Uploaded</option>
                     {% else %}
-                    <option value = "uploaded">uploaded</option>
+                    <option value = "uploaded">Uploaded</option>
+                    {% endif %}
+
+                    {% if current_source == "any" %}
+                    <option value = "any" selected>Any</option>
+                    {% else %}
+                    <option value = "any">Any</option>
                     {% endif %}
                   </select>
                  </div>
@@ -185,21 +191,21 @@
               <div class = "form-group row ml-1"> 
                 <label for="detection" class="col-sm-3 col-form-label">Image type</label>
                 <div class="col-sm-9">
-                  <select class="u-full-width" id="station" type="text" value="station 2" name="station">
+                  <select class="u-full-width" id="detection_type" type="text" value="" name="detection_type">
 
-                    {% if current_source == "elephant" %}
+                    {% if current_detection_type == "elephant" %}
                     <option value = "elephant" selected>Elephant detection</option>
              
                     {% else %}
                     <option value = "elephant">Elephant detection</option>
                     {% endif %}
-                    {% if current_source == "human" %}
+                    {% if current_detection_type == "human" %}
                     <option value = "human" selected>Human detection</option>
                  
                     {% else %}
-                    <option value = "any">Human detection</option>
+                    <option value = "human">Human detection</option>
                     {% endif %}
-                    {% if current_source == "any" %}
+                    {% if current_detection_type == "any" %}
                     <option value = "any" selected>Any</option>
                    
                     {% else %}
