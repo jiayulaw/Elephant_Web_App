@@ -13,7 +13,7 @@ BASE = "http://127.0.0.1:5000/"
 # the name will be what will be displayed on server
 device_id = "3"
 name = "end device 3"
-status = "21/02/2022, 19:52:47"
+status = "26/02/2022, 18:10:47"
 message  = "777 hello"
 
 # this is a function to send 
