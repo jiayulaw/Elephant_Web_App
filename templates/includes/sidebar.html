@@ -10,7 +10,7 @@
     </div>
 
     <ul class="list-unstyled components">
-        <p>by The Quadros</p>
+        <p>by Wildlife Protection Crews</p>
         {% if current_user.is_authenticated == True %}
 
         <li class="{% if 'account' in active_state %} active {% endif %}">
@@ -40,11 +40,11 @@
             <a href="#AdminSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fas fa-users-cog mr-2"></i>Admin Panel</a>
             <ul class="collapse list-unstyled" id="AdminSubmenu">
                 <li>
-                    <a href="/admin">Admin Home</a>
+                    <a href="/admin/home">Admin Home</a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="/admin/user">Manage Users</a>
-                </li>
+                </li> -->
                 <li>
                     <a href="/admin/register">Create Account</a>
                 </li>

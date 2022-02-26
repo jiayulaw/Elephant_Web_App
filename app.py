@@ -308,8 +308,34 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         flash('Registration Success', 'success_msg')
-        return redirect("/admin")
+        return redirect("/admin/register")
     return render_template("register.html", form = form, msg = None, active_state = "admin")
+
+@app.route("/admin/home", methods = ['GET', 'POST'])
+@login_required
+@require_role(role="admin", role2 = "admin")
+def admin_home():
+    usernames = []
+    user_roles = []
+    user_ids = []
+    result = User.query.all()
+    for row in result:
+        user_ids.append(row.id)
+        usernames.append(row.username)
+        
+        user_roles.append(row.access_level)
+        
+    db.session.commit()
+    return render_template("/admin/admin_home.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles)
+
+
+@app.route("/admin/delete_user/<user_id>")
+@login_required
+@require_role(role="admin", role2 = "admin")
+def delete_user(user_id):
+    User.query.filter(User.id == user_id).delete()
+    db.session.commit()
+    return redirect(url_for('admin_home'))
 
 #------------------------------------------------------------
 #-------------------------Image upload-------------------------

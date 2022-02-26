@@ -23,6 +23,13 @@ crossorigin=""/>
 {% block content %}
 <div class = "row">
   <div class="col-lg-12">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h4 class="card-title"> Welcome, {{current_user.username}}</h4>
+
+      </div>
+
+    </div>
     <div class="card">
       <div class="card-header">
         <h4 class="card-title"> End devices</h4>
@@ -30,7 +37,7 @@ crossorigin=""/>
       <div class="card-body">
         
         <div class="table-responsive">
-          <table class="table tablesorter " id="">
+          <table class="table tablesorter fontsize-table " id="">
             <thead class=" text-primary">
               <tr>
                 <th>
@@ -74,12 +81,14 @@ crossorigin=""/>
                   <td class="text-center">
 
                       {% if devices_timestamp_diff[counter.value] > 30 %}
-                      <label for="progress_bar_offline">Offline</label>
-                      <progress id="progress_bar_offline" value="100" max="100"> 100% </progress>
+                      <!-- <label for="progress_bar_offline">Offline</label>
+                      <progress id="progress_bar_offline" value="100" max="100"> 100% </progress> -->
+                      <li class="status_indicator bg-red mr-2"></li>Offline
 
                       {% else %}
-                      <label for="progress_bar_online">Online</label>
-                      <progress id="progress_bar_online" value="100" max="100"> 100% </progress>
+                      <!-- <label for="progress_bar_online">Online</label>
+                      <progress id="progress_bar_online" value="100" max="100"> 100% </progress> -->
+                      <li class="status_indicator bg-green mr-2"></li>Online
                       {% endif %}
                      
 
@@ -141,9 +150,10 @@ crossorigin=""/>
     var marker2 = L.marker([1.788, 103.928]).addTo(mymap);
     var marker3 = L.marker([1.863, 103.89]).addTo(mymap);
     var marker4 = L.marker([1.833, 103.951]).addTo(mymap);
-    {% for i in range(3) %}
 
-{% endfor %}
+    var site1_marker = L.marker([2.1228960, 103.4278710]).addTo(mymap);
+    var site2_marker = L.marker([2.178698, 103.830802]).addTo(mymap);
+    var site3_marker = L.marker([2.0609780, 103.8798060]).addTo(mymap);
 
 
 
@@ -163,6 +173,11 @@ marker.bindPopup("<b>Hello world!</b><br>I am {{current_user.username}}").openPo
 marker2.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
 marker3.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
 marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+
+site1_marker.bindPopup("<b>Feild trip site 1</b>").openPopup();
+site2_marker.bindPopup("<b>Field trip site 2</b>").openPopup();
+site3_marker.bindPopup("<b>Field trip site 3</b>").openPopup();
+
 circle.bindPopup("I am a circle.");
 polygon.bindPopup("I am a polygon.");
   </script>

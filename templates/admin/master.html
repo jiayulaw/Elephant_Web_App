@@ -1,7 +1,7 @@
 {% import 'admin/layout.html' as layout with context -%}
 {% import 'admin/static.html' as admin_static with context %}
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
   <head>
       {% set active_state = "admin"%}
     <title>{% block title %}{% if admin_view.category %}{{ admin_view.category }} - {% endif %}{{ admin_view.name }} - {{ admin_view.admin.name }}{% endblock %}</title>
@@ -26,11 +26,6 @@
             <link href="{{ css_url }}" rel="stylesheet">
           {% endfor %}
         {% endif %}
-        <style>
-            .hide {
-                display: none;
-            }
-        </style>
 
     <!--     CSS for sidebar     -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
@@ -109,10 +104,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
      <!-- jQuery Custom Scroller CDN -->
      <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
-
-
-
-
     <script type="text/javascript">
         $(document).ready(function () {
             $('#sidebarCollapse').on('click', function () {

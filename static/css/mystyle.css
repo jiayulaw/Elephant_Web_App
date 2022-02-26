@@ -157,7 +157,7 @@
 
 
 #mapid{
-  height: 300px;
+  height: 50vh;
   width: 100%;
 }
 
@@ -194,6 +194,15 @@
   background-color: rgba(152, 219, 125, 0.3);
 }
 
+
+.success_msg{
+  color: green;
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: rgba(152, 219, 125, 0.3);
+}
+
 .modal-backdrop{
   display: none;
 }
@@ -221,13 +230,36 @@
   overflow-y: auto;
 }
 
+
+
+
+.status_indicator {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background-color: aqua;
+  border-radius: 7px;
+}
+.bg-red{
+  background-color: red;
+}
+
+.bg-green{
+  background-color: rgb(14, 187, 14);
+}
+
+.fontsize-table{
+  font-size: medium;
+}
+
 @media (max-width: 1200px) {
   .modal-dialog {
     width: 90vw;
 
   }
-
+  .fontsize-table{
+    font-size: small;
+  }
 
 
 }
-
