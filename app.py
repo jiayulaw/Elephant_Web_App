@@ -7,6 +7,7 @@ from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 import sys
 import random
+import pytz
 import time
 import datetime
 import arrow
@@ -253,27 +254,49 @@ def dashboard():
     conn = sqlite3.connect(db_path)
     cursor = conn.execute(command)
 
-    now = datetime.datetime.now() # current date and time
+    UTCnow = datetime.datetime.utcnow() # current date and time in UTC
     
     for device in cursor:
+        datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
+        #hardcode the timezone as Malaysia timezone
+        timezone = pytz.timezone("Asia/Kuala_Lumpur")
+        #add timezone attribute to datetime object
+        datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+        datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+        
+        utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+        # need to convert datetime obj above into a naive object to prevent 
+        # error during subtraction with another datetime
+        #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+        naive = utc_datetime_obj.replace(tzinfo=None)
+        # getting the difference between the received datetime string and current datetime in seconds
+        diff_in_seconds = (UTCnow - naive).seconds
+        # Dividing seconds by 60 we get minutes
+        output = divmod(diff_in_seconds,60)
+        diff_in_minutes = output[0]
         
 
         #dealing with the timestamp formatting for display
         #try converting to 12 Hr format
-        try:
-            datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
-            datetime_str_formatted = datetime.datetime.strftime(datetime_object, '%I:%M:%S %p, %d/%m/%Y')
-            # getting the difference between 2 timestamps in seconds
-            diff_in_seconds = (now - datetime_object).seconds
-            # Dividing seconds by 60 we get minutes
-            output = divmod(diff_in_seconds,60)
-            diff_in_minutes = output[0]
+        # try:
+        #     datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
+        #     #hardcode the timezone as Malaysia timezone
+        #     timezone = pytz.timezone("Asia/Kuala_Lumpur")
+        #     #add timezone attribute to datetime object
+        #     datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+        #     datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+        #     utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+        #     # getting the difference between the received datetime string and current datetime in seconds
+        #     diff_in_seconds = (UTCnow - utc_datetime_obj).seconds
+        #     # Dividing seconds by 60 we get minutes
+        #     output = divmod(diff_in_seconds,60)
+        #     diff_in_minutes = output[0]
         # If the timesstamp received cannot be parsed as datetime obj,
         # then just display it out
         # and then make the differrence in minutes a large number
-        except:
-            diff_in_minutes = 999
-            datetime_str_formatted = device[2]
+        # except:
+        #     diff_in_minutes = 999
+        #     datetime_str_formatted = device[2]
 
         # append all data to arrays to be displayed on web page
         devices_name.append(device[1])

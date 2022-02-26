@@ -47,6 +47,9 @@
               </h4>
           {% endif %}
         {% endwith %}
+        {% if msg %}
+        <span class="text-danger">{{ msg}}</span>
+        {% endif %} 
 
         <h6 class="card-category">
           Login with your credentials

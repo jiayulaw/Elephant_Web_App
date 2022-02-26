@@ -97,3 +97,11 @@ def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR,
         return file_path, absolute_file_path
 
 
+# this function converts a datetime object that contains 
+# a local timezone attribute to UTC time
+def Local2UTC_time(LocalTime):
+    EpochSecond = time.mktime(LocalTime.timetuple())
+    utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
+    return utcTime
+
+
