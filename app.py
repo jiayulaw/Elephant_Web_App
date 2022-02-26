@@ -87,6 +87,26 @@ class RegisterForm(FlaskForm):
             raise ValidationError(
                 "That username already exists. Please choose a different one.")
 
+
+class ChangePasswordForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
+    
+    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
+
+    new_password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "New password"})
+    new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
+   
+    submit = SubmitField("Change password")
+    #Checks whether the username is redundant
+    def validate_username(self, username):
+        existing_user_username = User.query.filter_by(
+            username = username.data).first()
+
+        if not existing_user_username:
+            raise ValidationError("The username does not exist.")
+
+
+
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
     
@@ -274,6 +294,7 @@ def webhook():
 
 @app.route("/login", methods = ['GET', 'POST'])
 def login():
+    navbar_items = []
     msg = None
     form = LoginForm()
     if form.validate_on_submit():
@@ -286,7 +307,7 @@ def login():
                 return redirect(url_for('dashboard'))
         return render_template("login.html", form = form, msg = "Wrong username or password.")
 
-    return render_template("login.html", form = form, msg = msg)
+    return render_template("login.html", form = form, msg = msg, navbar_items = navbar_items)
 
     
 @app.route('/logout', methods = ['GET','POST'])
@@ -311,10 +332,36 @@ def register():
         return redirect("/admin/register")
     return render_template("register.html", form = form, msg = None, active_state = "admin")
 
+
+@app.route("/user/change_password", methods = ['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        result = User.query.filter_by(username = form.username.data).first()
+        if not  bcrypt.check_password_hash(result.password, form.password.data):
+            return render_template("change_password.html", active_state = "account", form = form, msg = "Current password is incorrect.") 
+            
+        if not (form.new_password.data == form.new_password2.data):
+            return render_template("change_password.html", active_state = "account", form = form, msg = "Inconsistent entry of new password.")
+
+        # if the inputs pass all the verification, change password
+        new_hashed_password = bcrypt.generate_password_hash(form.new_password.data)
+        result.password = new_hashed_password
+        db.session.commit() 
+
+        flash('Password changed', 'success_msg')
+        return render_template("change_password.html", active_state = "account", form = form, msg = None) 
+
+    return render_template("change_password.html", active_state = "account", form = form, msg = None)  
+
 @app.route("/admin/home", methods = ['GET', 'POST'])
 @login_required
 @require_role(role="admin", role2 = "admin")
 def admin_home():
+    navbar_items = [["Create account", url_for('register')], ["Manage", "#manage_users"]]
     usernames = []
     user_roles = []
     user_ids = []
@@ -326,8 +373,24 @@ def admin_home():
         user_roles.append(row.access_level)
         
     db.session.commit()
-    return render_template("/admin/admin_home.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles)
+    return render_template("/admin/admin_home.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles, navbar_items = navbar_items)
 
+@app.route("/admin/admin_manage", methods = ['GET', 'POST'])
+@login_required
+@require_role(role="admin", role2 = "admin")
+def admin_manage():
+    navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
+    usernames = []
+    user_roles = []
+    user_ids = []
+    result = User.query.all()
+    for row in result:
+        user_ids.append(row.id)
+        usernames.append(row.username)
+        user_roles.append(row.access_level)
+        
+    db.session.commit()
+    return render_template("/admin/admin_manage.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles, navbar_items = navbar_items)
 
 @app.route("/admin/delete_user/<user_id>")
 @login_required
