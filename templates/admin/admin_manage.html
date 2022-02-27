@@ -33,10 +33,10 @@
                         Username
                       </th>
                       <th>
-                        Date Created
+                        Date Created [UTC+8]
                       </th>
                       <th>
-                        Last Seen
+                        Last Seen [UTC+8]
                       </th>
       
                       <th>
@@ -56,11 +56,12 @@
                           {{name}}
                         </td>
                         <td>
-                          ??
+                          {{user_date_created[counter.value]}}
                         </td>
                   
                         <td>
-                          ??
+                          
+                          {{user_last_seen[counter.value]}}
                         </td>
       
                         <td>

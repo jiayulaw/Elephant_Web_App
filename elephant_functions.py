@@ -20,71 +20,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from os.path import exists
 import random
-
-def create_DB_Tables():
-    app = Flask(__name__)
-    api = Api(app)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + 'database.sqlite'
-    app.config['SECRET_KEY'] = 'thisisasecretkey'
-    db = SQLAlchemy(app)
-
-    class end_device(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        name = db.Column(db.String(100), nullable=False)
-        status = db.Column(db.Integer, nullable=False)
-        message = db.Column(db.Integer, nullable=False)
-
-        def __repr__(self):
-            return f"end_device(name = {name}, views = {status}, likes = {message})"
-
-    class User(db.Model, UserMixin):
-        id = db.Column(db.Integer, primary_key=True)
-        username = db.Column(db.String(20), nullable=False, unique=True)#username must be unique
-        password = db.Column(db.String(80), nullable=False)
-        access_level = db.Column(db.String(20), nullable=False)
-        
-
-    db.create_all()
-
-
-
-def create_DBtable():
-    #Connect to / Open sqlite db
-    conn = sqlite3.connect('users.db')
-    print ("Opened database successfully");
-    #Create table
-    conn.execute('''CREATE TABLE users_table
-            (NAME           TEXT    NOT NULL,
-            PW            TEXT     NOT NULL,
-            ACCESS         INT);''')
-    print ("Table created successfully")
-    #Cursor selection
-    cursor = conn.execute("SELECT NAME, PW, ACCESS from users_table")
-    #print out using cursor
-    for row in cursor:
-        print ("NAME = ", row[0])
-        print ("PW = ", row[1])
-        print ("ACCESS = ", row[2])
-        print ("Operation done successfully")
-    #Close connector
-    conn.close()
-
-
-def DB_insert_user(DB_name, DB_table, username, password, access):
-    conn = sqlite3.connect('users.db')
-    conn.execute("INSERT INTO users_table (NAME, PW, ACCESS) \
-        VALUES ('elephantking', 'pw', 0)")
-    conn.commit()
-    print ("Records created successfully")
-    #Cursor selection
-    cursor = conn.execute("SELECT NAME, PW, ACCESS from users_table")
-    #print out using cursor
-    for row in cursor:
-        print ("NAME = ", row[0])
-        print ("PW = ", row[1])
-        print ("ACCESS = ", row[2])
-    conn.close()
-
+from DB_class import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
         # if the directory already contain file with same name, then rename before 
@@ -103,6 +39,12 @@ def Local2UTC_time(LocalTime):
     EpochSecond = time.mktime(LocalTime.timetuple())
     utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
     return utcTime
+
+def getMalaysiaTime(timestamp):
+    UTC_timestamp = Local2UTC_time(timestamp)
+    Malaysia_timezone_timestamp = UTC_timestamp + datetime.timedelta(hours=8)
+    date_created = Malaysia_timezone_timestamp.strftime("%d/%m/%Y %I:%M:%S %p")
+    return date_created
 
 def update_server_directory_images(BASE_DIR, Images, data, db):
     # check directory to update any new images added through SFTP or direct upload to server
@@ -134,3 +76,7 @@ def update_server_directory_images(BASE_DIR, Images, data, db):
                 print("Filename is not formatted correctly, but it is ok, just ignore")
 
 
+def logServerActivity(timestmp, type, description, db):
+    new_activity = Server_activity(timestamp = timestmp, type = type, description=description )
+    db.session.add(new_activity)
+    db.session.commit()

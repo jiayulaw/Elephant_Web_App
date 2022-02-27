@@ -26,7 +26,7 @@ from os.path import exists
 from elephant_functions import *
 
 #Import database rows declaration, and also Flask app objects
-from DB_class import Images, end_device,User, app, api, db, db_path, BASE_DIR
+from DB_class import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
 
 #------------------------------------------------------------
 #-------------------------User permission Config-------------------------
@@ -151,20 +151,24 @@ admin.add_view(MyModelView(User, db.session))
 device_stat_put_args = reqparse.RequestParser()
 #help parameter is similar to error message we send back to sender when there is no valid input
 #required parameter means the field is not optional
-device_stat_put_args.add_argument("name", type=str, help="Name of the video is required", required=True)
-device_stat_put_args.add_argument("status", type=str, help="Views of the video", required=True)
-device_stat_put_args.add_argument("message", type=str, help="Likes on the video", required=True)
+device_stat_put_args.add_argument("name", type=str, help="Device name is required", required=True)
+device_stat_put_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
+device_stat_put_args.add_argument("message", type=str, help="Device message is required", required=True)
+device_stat_put_args.add_argument("status", type=str, help="Device status is required", required=True)
 
 device_stat_update_args = reqparse.RequestParser()
 device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
-device_stat_update_args.add_argument("status", type=str, help="Views of the video", required=True)
-device_stat_update_args.add_argument("message", type=str, help="Likes on the video", required=True)
+device_stat_update_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
+device_stat_update_args.add_argument("message", type=str, help="Device message is required", required=True)
+device_stat_update_args.add_argument("status", type=str, help="Device status is required", required=True)
+
 
 resource_fields = {
 	'id': fields.Integer,
 	'name': fields.String,
-	'status': fields.String,
-	'message': fields.String
+	'last_seen': fields.String,
+	'message': fields.String,
+    'status': fields.String
 }
 
 #marshal_with to serialize object
@@ -183,7 +187,7 @@ class Device_Stat_pipeline(Resource):
 		if result:
 			abort(409, message="Device id taken...")
 
-		device_record = end_device(id=device_id, name=args['name'], status=args['status'], message=args['message'])
+		device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'])
 		db.session.add(device_record)
 		db.session.commit()
 		return device_record, 201 #this number is just a number in http protocol, can change to other num
@@ -198,11 +202,17 @@ class Device_Stat_pipeline(Resource):
 		if args['name']:
 			result.name = args['name']
 
-		if args['status']:
-			result.status = args['status']
+		if args['last_seen']:
+			result.last_seen = args['last_seen']
 			
 		if args['message']:
 			result.message = args['message']
+        
+		if args['status']:
+			if result.status != args['status']:
+				logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
+
+			result.status = args['status']
 	
 
 		db.session.commit()
@@ -235,9 +245,11 @@ def dashboard():
     image_source = []
     image_tag = []
     devices_name = []
-    devices_status = []
+    devices_last_seen = []
     devices_message = []
-    devices_timestamp_diff = []
+    devices_status = []
+    
+
 
     command = "SELECT * from images;"
     conn = sqlite3.connect(db_path)
@@ -252,14 +264,12 @@ def dashboard():
         image_latitude.append(image[6])
         image_longitude.append(image[7])
 
-    command = "SELECT * from end_device;"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute(command)
 
+    cursor = end_device.query.all()
     UTCnow = datetime.datetime.utcnow() # current date and time in UTC
     
     for device in cursor:
-        datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
+        datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
         #hardcode the timezone as Malaysia timezone
         timezone = pytz.timezone("Asia/Kuala_Lumpur")
         #add timezone attribute to datetime object
@@ -267,6 +277,7 @@ def dashboard():
         datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
         
         utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+
         # need to convert datetime obj above into a naive object to prevent 
         # error during subtraction with another datetime
         #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
@@ -276,37 +287,21 @@ def dashboard():
         # Dividing seconds by 60 we get minutes
         output = divmod(diff_in_seconds,60)
         diff_in_minutes = output[0]
-        
 
-        #dealing with the timestamp formatting for display
-        #try converting to 12 Hr format
-        # try:
-        #     datetime_object = datetime.datetime.strptime(device[2], '%d/%m/%Y, %H:%M:%S')
-        #     #hardcode the timezone as Malaysia timezone
-        #     timezone = pytz.timezone("Asia/Kuala_Lumpur")
-        #     #add timezone attribute to datetime object
-        #     datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-        #     datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-        #     utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-        #     # getting the difference between the received datetime string and current datetime in seconds
-        #     diff_in_seconds = (UTCnow - utc_datetime_obj).seconds
-        #     # Dividing seconds by 60 we get minutes
-        #     output = divmod(diff_in_seconds,60)
-        #     diff_in_minutes = output[0]
-        # If the timesstamp received cannot be parsed as datetime obj,
-        # then just display it out
-        # and then make the differrence in minutes a large number
-        # except:
-        #     diff_in_minutes = 999
-        #     datetime_str_formatted = device[2]
+        if diff_in_minutes > 30:
+            device.status = "Offline"
+            
+
 
         # append all data to arrays to be displayed on web page
-        devices_name.append(device[1])
-        devices_timestamp_diff.append(diff_in_minutes)
-        devices_status.append(datetime_str_formatted)
-        devices_message.append(device[3])
+        devices_name.append(device.name)
+        devices_last_seen.append(datetime_str_formatted)
+        devices_message.append(device.message)
+        devices_status.append(device.status)
 
-    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_status = devices_status, devices_message = devices_message, devices_timestamp_diff = devices_timestamp_diff)
+        db.session.commit()
+
+    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
@@ -329,6 +324,10 @@ def login():
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
                 user.authenticated = True
+                current_time = getMalaysiaTime(datetime.datetime.now())
+                user.last_seen = current_time
+                logServerActivity(current_time, "Login", "User - " + current_user.username + " logged in.", db)
+                db.session.commit() 
                 return redirect(url_for('dashboard'))
         return render_template("login.html", form = form, msg = "Wrong username or password.")
 
@@ -338,6 +337,7 @@ def login():
 @app.route('/logout', methods = ['GET','POST'])
 @login_required
 def logout():
+    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Logout", "User - " + current_user.username + " logged out.", db)
     logout_user()
     current_user.authenticated = False
     return redirect(url_for('login'))
@@ -350,10 +350,14 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
-        new_user = User(username = form.username.data, password=hashed_password, access_level = form.access_level.data)
+        date_created = getMalaysiaTime(datetime.datetime.now())
+
+
+        new_user = User(username = form.username.data, password=hashed_password, access_level = form.access_level.data, date_created = date_created)
         db.session.add(new_user)
         db.session.commit()
         flash('Registration Success', 'success_msg')
+        logServerActivity(date_created, "Account creation", "User - " + current_user.username + " created another user account - " + form.username.data, db)
         return redirect("/admin/register")
     return render_template("register.html", form = form, msg = None, active_state = "admin")
 
@@ -387,18 +391,23 @@ def change_password():
 @require_role(role="admin", role2 = "admin")
 def admin_home():
     navbar_items = [["Create account", url_for('register')], ["Manage", "#manage_users"]]
-    usernames = []
-    user_roles = []
-    user_ids = []
-    result = User.query.all()
+    activity_description = []
+    activity_date = []
+    activity_type = []
+    result = Server_activity.query.all()
     for row in result:
-        user_ids.append(row.id)
-        usernames.append(row.username)
+        activity_description.append(row.description)
+        activity_date.append(row.timestamp)
         
-        user_roles.append(row.access_level)
+        activity_type.append(row.type)
         
+    
     db.session.commit()
-    return render_template("/admin/admin_home.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles, navbar_items = navbar_items)
+    activity_description.reverse()
+    activity_date.reverse()
+    activity_type.reverse()
+
+    return render_template("/admin/admin_home.html", active_state = "admin", activity_description = activity_description, activity_date = activity_date, activity_type = activity_type, navbar_items = navbar_items)
 
 @app.route("/admin/admin_manage", methods = ['GET', 'POST'])
 @login_required
@@ -408,22 +417,31 @@ def admin_manage():
     usernames = []
     user_roles = []
     user_ids = []
+    user_date_created = []
+    user_last_seen = []
     result = User.query.all()
     for row in result:
         user_ids.append(row.id)
         usernames.append(row.username)
         user_roles.append(row.access_level)
+        user_date_created.append(row.date_created)
+        user_last_seen.append(row.last_seen)
         
     db.session.commit()
-    return render_template("/admin/admin_manage.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles, navbar_items = navbar_items)
+    return render_template("/admin/admin_manage.html", active_state = "admin", user_ids = user_ids, usernames = usernames, user_roles = user_roles, user_date_created = user_date_created, user_last_seen = user_last_seen, navbar_items = navbar_items)
+
+
 
 @app.route("/admin/delete_user/<user_id>")
 @login_required
 @require_role(role="admin", role2 = "admin")
 def delete_user(user_id):
+    result = User.query.filter(User.id == user_id).first()
+    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Account deletion", "User - " + current_user.username + " deleted another user account - " + result.username, db)
     User.query.filter(User.id == user_id).delete()
     db.session.commit()
-    return redirect(url_for('admin_home'))
+    
+    return redirect(url_for('admin_manage'))
 
 #------------------------------------------------------------
 #-------------------------Image upload-------------------------
@@ -489,14 +507,18 @@ def upload_multiple_image():
                 
                 img_latitude = request.form['img_latitude']
                 img_longitude = request.form['img_longitude']
-                
+                upload_date = getMalaysiaTime(datetime.datetime.now())
                 #save the file to server directory
                 file.save(absolute_file_path)
                 #saving file requires different format, therefore denotes as absolute_file_path
 
-                new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
+                new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
                 db.session.add(new_image)
                 db.session.commit()
+
+                # server activity
+                logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
+
                 data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
                 return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
 
@@ -554,12 +576,7 @@ def upload_image():
             
             img_latitude = request.form['img_latitude']
             img_longitude = request.form['img_longitude']
-            
-            print(img_tag_input)
-            print(current_user.username)
-            print(img_source)
-            print(img_latitude)
-            print(img_longitude)
+            upload_date = getMalaysiaTime(datetime.datetime.now())
 
             #save the file to server directory
             file.save(absolute_file_path)
@@ -567,9 +584,13 @@ def upload_image():
             #print('upload_image filename: ' + filename)
         
             
-            new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude)
+            new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
             db.session.add(new_image)
             db.session.commit()
+
+            # server activity
+            logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
+
             data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
 
@@ -594,6 +615,8 @@ def delete_img(img_id):
             print("file deleted")
         else:
             print("The file does not exist")
+
+    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image deletion", "User - " + current_user.username + " deleted an image with id " + img_id + ".", db)
 
     # after deleting image, do not request new user input so the previous inputs remain
     # more user-friendly
@@ -643,6 +666,8 @@ def edit_img(img_id):
     result.latitude  = request.args.get('img_latitude')
     result.longitude  = request.args.get('img_longitude')
     db.session.commit()
+
+    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image edition", "User - " + current_user.username + " editted an image with id " + img_id + ".", db)
     # after editing image, do not request new user input so the previous inputs remain
     # more user-friendly
     data.dontRequest = 1
@@ -711,21 +736,25 @@ def display_image():
     image_uploader = []
     image_source = []
     image_tag = []
+    image_upload_date = []
 
     if (data.station == "any"):
-        command = "SELECT * from images;"
+        # command = "SELECT * from images;"
+        cursor = Images.query.all()
         
     else:
-        command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
+        # command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
+        cursor = Images.query.filter_by(source=data.station)
         
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute(command)
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.execute(command)
+    
 
     
     for image in cursor:
         image_criteria_pass = 0 #boolean variable to filter image
-        date_time = image[1]
+        date_time = image.timestamp
         try: 
             date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
         except:
@@ -739,15 +768,16 @@ def display_image():
                   image_criteria_pass = 1
 
         if image_criteria_pass == 1:
-            image_id.append(image[0])
+            image_id.append(image.id)
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M')
             image_timestamps.append(datetime_str_formatted)
-            image_paths.append(image[2])
-            image_source.append(image[3])
-            image_uploader.append(image[4])
-            image_tag.append(image[5])
-            image_latitude.append(image[6])
-            image_longitude.append(image[7])  
+            image_paths.append(image.path)
+            image_source.append(image.source)
+            image_uploader.append(image.uploader)
+            image_tag.append(image.tag)
+            image_latitude.append(image.latitude)
+            image_longitude.append(image.longitude)
+            image_upload_date.append(image.upload_date)  
             
 
     #reverse the array so that image file with latest timestamp is displayed at top, 
@@ -776,7 +806,7 @@ def display_image():
                             image_uploader = image_uploader,
                             image_source = image_source,
                             image_id = image_id,
-                            image_tag = image_tag,
+                            image_tag = image_tag, image_upload_date = image_upload_date,
                             current_source = data.station, current_detection_type = data.detection_type)
 
 def get_records():
