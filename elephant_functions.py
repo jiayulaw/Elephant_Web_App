@@ -121,7 +121,9 @@ class myThread (threading.Thread):
       my_event_handler.on_deleted = on_deleted
       my_event_handler.on_modified = on_modified
       my_event_handler.on_moved = on_moved
-      path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
+     
+      path = os.path.join(BASE_DIR, app.config['UPLOAD_FOLDER'])
+    #   path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
       go_recursively = True
       my_observer = Observer()
       my_observer.schedule(my_event_handler, path, recursive=go_recursively)

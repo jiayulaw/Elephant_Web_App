@@ -11,13 +11,13 @@ USERNAME = "ubuntu"
 # This is the path to the .pem file
 KEYFILE=r'C:\Users\user10\Desktop\lightsailtest\LightsailDefaultKey-ap-southeast-1.pem'
 # This is station number, can also try station 2 and station 3
-station = "station 1"
+station = "end device 1"
 #this is the server path, do not modify
 path = '/var/www/Elephant_Web_App/static/image uploads/' + station
 
 # this is the path to img
 # the file should have the format of '2021-10-17 22-30' at server side
-image = "C:\\Users\\user10\\Desktop\\2021-10-07 22-30.jpg"
+image = r"C:\Users\user10\Desktop\2022-03-01 23-33-x-elephant.jpg"
 
 
 with pysftp.Connection(HOST_NAME, username=USERNAME, private_key=KEYFILE, cnopts=cnopts) as sftp:
