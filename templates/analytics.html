@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %} Home {% endblock title%} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{{ super() }}
+<!-- For Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+{% endblock stylesheets %}
+
+{% block content %}
+<h3>Detection Frequency (Based on number of uploaded images)</h3>
+<div class = "row">
+    <div class="col-lg-6">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">All time </h4>
+            </div>
+            <div class="card-body">
+                <div><canvas id="AllTimeChart" style="width:100%;max-width:600px"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">All time </h4>
+            </div>
+            
+            <div class="card-body">
+                <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px"></canvas></div>
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">Past 7 days </h4>
+            </div>
+            <div class="card-body">
+                <div><canvas id="Past7daysChart" style="width:100%;max-width:600px"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">Past 7 days </h4>
+            </div>
+            
+            <div class="card-body">
+                <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px"></canvas></div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+{{ super() }}
+  
+<script>
+    var all_time_x_array = {{all_time_x_array| tojson}};
+    var all_time_y_array = {{all_time_y_array| tojson}};
+    var all_time_big_Y_array_device1 = {{all_time_big_Y_array_device1| tojson}};
+    var all_time_big_Y_array_device2 = {{all_time_big_Y_array_device2| tojson}};
+    var all_time_big_Y_array_device3 = {{all_time_big_Y_array_device3| tojson}};
+
+    var this_week_x_array = {{this_week_x_array| tojson}};
+    var this_week_y_array = {{this_week_y_array| tojson}};
+    var this_week_big_Y_array_device1 = {{this_week_big_Y_array_device1| tojson}};
+    var this_week_big_Y_array_device2 = {{this_week_big_Y_array_device2| tojson}};
+    var this_week_big_Y_array_device3 = {{this_week_big_Y_array_device3| tojson}};
+    
+
+
+    new Chart("AllTimeChart", {
+      type: "line",
+      data: {
+        labels: all_time_x_array,
+        datasets: [{
+          label: 'End devices and uploaded', 
+          data: all_time_y_array,
+          borderColor: "purple",
+          fill: false
+        
+        }]
+      },
+      options: {
+        legend: {display: true},
+      }
+    });
+
+    new Chart("AllTimeChart2", {
+      type: "line",
+      data: {
+        labels: all_time_x_array,
+        datasets: [{ 
+          data: all_time_big_Y_array_device1,
+          borderColor: "red",
+          fill: false,
+          label: "end device 1"
+        }, { 
+          data: all_time_big_Y_array_device2,
+          borderColor: "green",
+          fill: false,
+          label: "end device 2"
+        }, { 
+          data: all_time_big_Y_array_device3,
+          borderColor: "blue",
+          fill: false,
+          label: "end device 3"
+        }]
+      },
+      options: {
+        legend: {display: true}
+      }
+    });
+
+
+    new Chart("Past7daysChart", {
+      type: "line",
+      data: {
+        labels: this_week_x_array,
+        datasets: [{
+          label: 'End devices and uploaded', 
+          data: this_week_y_array,
+          borderColor: "purple",
+          fill: false
+        
+        }]
+      },
+      options: {
+        legend: {display: true},
+      }
+    });
+
+    new Chart("Past7daysChart2", {
+      type: "line",
+      data: {
+        labels: this_week_x_array,
+        datasets: [{ 
+          data: this_week_big_Y_array_device1,
+          borderColor: "red",
+          fill: false,
+          label: "end device 1"
+        }, { 
+          data: this_week_big_Y_array_device2,
+          borderColor: "green",
+          fill: false,
+          label: "end device 2"
+        }, { 
+          data: this_week_big_Y_array_device3,
+          borderColor: "blue",
+          fill: false,
+          label: "end device 3"
+        }]
+      },
+      options: {
+        legend: {display: true}
+      }
+    });
+
+</script>
+
+{% endblock javascripts %}   

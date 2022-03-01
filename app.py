@@ -49,8 +49,8 @@ def require_role(role, role2):
 class DataStorage():
     dontRequest = None
     station = "end device 1"
-    from_date_str = None
-    to_date_str = None
+    from_date_str = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
+    to_date_str = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
     detection_type = "any"
 
     input_date_str = None
@@ -236,38 +236,49 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 @login_required #we can only access dashboard when logged in
 def dashboard():
     # Filter images from database
-    image_id = []
-    image_paths = []
-    image_timestamps = []
-    image_longitude = []
-    image_latitude = []
-    image_uploader = []
-    image_source = []
-    image_tag = []
+    image1 = []
+    image2 = []
+    image3 = []
     devices_name = []
     devices_last_seen = []
     devices_message = []
     devices_status = []
-    
 
 
-    command = "SELECT * from images;"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute(command) 
-    for image in cursor:
-        image_id.append(image[0])
-        image_timestamps.append(image[1])
-        image_paths.append(image[2])
-        image_source.append(image[3])
-        image_uploader.append(image[4])
-        image_tag.append(image[5])
-        image_latitude.append(image[6])
-        image_longitude.append(image[7])
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 1")
 
+    result = descending.first()
+    if result:
+        image1.append(result.path)
+        image1.append(result.timestamp)
+        image1.append(result.tag)
+        image1.append(result.latitude)
+        image1.append(result.longitude)
+    db.session.commit()
+
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 2")
+
+    result = descending.first()
+    if result:
+        image2.append(result.path)
+        image2.append(result.timestamp)
+        image2.append(result.tag)
+        image2.append(result.latitude)
+        image2.append(result.longitude)
+    db.session.commit()
+
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 3")
+
+    result = descending.first()
+    if result:
+        image3.append(result.path)
+        image3.append(result.timestamp)
+        image3.append(result.tag)
+        image3.append(result.latitude)
+        image3.append(result.longitude)
+    db.session.commit()
 
     cursor = end_device.query.all()
-    UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-    
     for device in cursor:
         datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
         #hardcode the timezone as Malaysia timezone
@@ -275,23 +286,6 @@ def dashboard():
         #add timezone attribute to datetime object
         datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
         datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-        
-        utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-
-        # need to convert datetime obj above into a naive object to prevent 
-        # error during subtraction with another datetime
-        #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-        naive = utc_datetime_obj.replace(tzinfo=None)
-        # getting the difference between the received datetime string and current datetime in seconds
-        diff_in_seconds = (UTCnow - naive).seconds
-        # Dividing seconds by 60 we get minutes
-        output = divmod(diff_in_seconds,60)
-        diff_in_minutes = output[0]
-
-        if diff_in_minutes > 30:
-            device.status = "Offline"
-            
-
 
         # append all data to arrays to be displayed on web page
         devices_name.append(device.name)
@@ -301,7 +295,7 @@ def dashboard():
 
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image_latitude = image_latitude, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status)
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
@@ -347,6 +341,7 @@ def logout():
 @login_required
 @require_role(role="admin", role2 = "admin")
 def register():
+    navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
     form = RegisterForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
@@ -359,7 +354,7 @@ def register():
         flash('Registration Success', 'success_msg')
         logServerActivity(date_created, "Account creation", "User - " + current_user.username + " created another user account - " + form.username.data, db)
         return redirect("/admin/register")
-    return render_template("register.html", form = form, msg = None, active_state = "admin")
+    return render_template("register.html", form = form, msg = None, active_state = "admin", navbar_items = navbar_items)
 
 
 @app.route("/user/change_password", methods = ['GET', 'POST'])
@@ -390,7 +385,7 @@ def change_password():
 @login_required
 @require_role(role="admin", role2 = "admin")
 def admin_home():
-    navbar_items = [["Create account", url_for('register')], ["Manage", "#manage_users"]]
+    navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
     activity_description = []
     activity_date = []
     activity_type = []
@@ -443,6 +438,55 @@ def delete_user(user_id):
     
     return redirect(url_for('admin_manage'))
 
+
+@app.route("/analytics", methods = ['GET', 'POST'])
+@login_required
+@require_role(role="admin", role2 = "explorer")
+def analytics():
+    navbar_items = []
+
+    # Hint: getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime)
+
+    #Filter the number of images for all time
+    all_time_x_array, all_time_y_array = getImageNumOverTime(None, None, None, None)
+    all_time_device1_x_array, all_time_device1_y_array = getImageNumOverTime("end device 1", None, None, None)
+    all_time_device2_x_array, all_time_device2_y_array = getImageNumOverTime("end device 2", None, None, None)
+    all_time_device3_x_array, all_time_device3_y_array = getImageNumOverTime("end device 3", None, None, None)
+
+    all_time_big_Y_array_device1 = map_XYvalues_to_Larger_range(all_time_x_array, all_time_device1_x_array, all_time_device1_y_array)
+    all_time_big_Y_array_device2 = map_XYvalues_to_Larger_range(all_time_x_array, all_time_device2_x_array, all_time_device2_y_array)
+    all_time_big_Y_array_device3 = map_XYvalues_to_Larger_range(all_time_x_array, all_time_device3_x_array, all_time_device3_y_array)
+
+
+    #Filter the number of images for past 7 days
+    end_datetime = datetime.datetime.now()
+    start_datetime = end_datetime - datetime.timedelta(days=7)
+    this_week_x_array, this_week_y_array = getImageNumOverTime(None, None, start_datetime, end_datetime)
+    this_week_device1_x_array, this_week_device1_y_array = getImageNumOverTime("end device 1", None, start_datetime, end_datetime)
+    this_week_device2_x_array, this_week_device2_y_array = getImageNumOverTime("end device 2", None, start_datetime, end_datetime)
+    this_week_device3_x_array, this_week_device3_y_array = getImageNumOverTime("end device 3", None, start_datetime, end_datetime)
+
+
+    # #convert list items to datetime object
+    # big_array_x_datetime_obj = [datetime.datetime.strptime(date, "%Y-%m-%d %H-%M") for date in big_array_x]
+    # #sort the list based on datetime
+    # sorted_big_array_x_datetime_obj = sorted(big_array_x_datetime_obj)
+    # #convert back to string
+    # sorted_big_array_x = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_big_array_x_datetime_obj]
+    # #remove redundant elements in list by converting to dictionary then convert back
+    # sorted_big_array_x = list(dict.fromkeys(sorted_big_array_x))
+
+    this_week_big_Y_array_device1 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device1_x_array, this_week_device1_y_array)
+    this_week_big_Y_array_device2 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device2_x_array, this_week_device2_y_array)
+    this_week_big_Y_array_device3 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device3_x_array, this_week_device3_y_array)
+
+
+    return render_template("analytics.html", msg = None, active_state = "analytics", navbar_items = navbar_items, 
+    all_time_x_array = all_time_x_array, all_time_y_array = all_time_y_array, all_time_big_Y_array_device1 = all_time_big_Y_array_device1,
+    all_time_big_Y_array_device2 = all_time_big_Y_array_device2, all_time_big_Y_array_device3 = all_time_big_Y_array_device3,
+    this_week_x_array = this_week_x_array, this_week_y_array = this_week_y_array, this_week_big_Y_array_device1 = this_week_big_Y_array_device1,
+    this_week_big_Y_array_device2 = this_week_big_Y_array_device2, this_week_big_Y_array_device3 = this_week_big_Y_array_device3 )
+
 #------------------------------------------------------------
 #-------------------------Image upload-------------------------
 #------------------------------------------------------------
@@ -458,12 +502,14 @@ def allowed_file(filename):
 @login_required
 @require_role(role="admin", role2 ="explorer")
 def update_status():
-    return render_template('update_status.html', active_state = "data_center")
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
+    return render_template('update_status.html', active_state = "data_center", navbar_items = navbar_items)
 
 @app.route("/data_center/update_multiple_images", methods = ['POST'])
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def upload_multiple_image():
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if 'files' not in request.files:
         flash('Upload Failed. No file part', 'error_msg_multipleimgupload')
         return redirect('/data_center/update_status')
@@ -520,7 +566,7 @@ def upload_multiple_image():
                 logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
                 data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-                return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
+                return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
 
         else:
             flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_multipleimgupload')
@@ -532,6 +578,7 @@ def upload_multiple_image():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def upload_image():
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if 'file' not in request.files:
         flash('Upload Failed. No file part', 'error_msg_singleimgupload')
         return redirect(request.url)
@@ -592,7 +639,7 @@ def upload_image():
             logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
             data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-            return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str)
+            return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
 
     else:
         flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_singleimgupload')
@@ -715,6 +762,7 @@ def end_devices():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, data.from_date_str, data.to_date_str, data.station, data.detection_type = get_records()
     else:
@@ -723,9 +771,6 @@ def display_image():
 
     start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
     end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
-
-
-    update_server_directory_images(BASE_DIR, Images, data, db)
 
     # Filter images from database
     image_id = []
@@ -739,16 +784,11 @@ def display_image():
     image_upload_date = []
 
     if (data.station == "any"):
-        # command = "SELECT * from images;"
         cursor = Images.query.all()
         
     else:
-        # command = "SELECT * from images WHERE source = \'" + str(data.station) + "\';"
         cursor = Images.query.filter_by(source=data.station)
         
-
-    # conn = sqlite3.connect(db_path)
-    # cursor = conn.execute(command)
     
 
     
@@ -764,7 +804,7 @@ def display_image():
           if data.detection_type == "any":
               image_criteria_pass = 1
           else:
-              if data.detection_type in image[5]:
+              if data.detection_type in image.tag:
                   image_criteria_pass = 1
 
         if image_criteria_pass == 1:
@@ -807,7 +847,7 @@ def display_image():
                             image_source = image_source,
                             image_id = image_id,
                             image_tag = image_tag, image_upload_date = image_upload_date,
-                            current_source = data.station, current_detection_type = data.detection_type)
+                            current_source = data.station, current_detection_type = data.detection_type, navbar_items = navbar_items)
 
 def get_records():
     """getting records from users at website's form"""
@@ -854,8 +894,16 @@ def validate_date(d):
 
     
 if __name__ == "__main__":
+    # Create new thread
+    thread1 = myThread(1, "Thread-1", 2)
+    thread1.start()
+
     app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
+    # Start new Threads
+    
+
+
 
 
 

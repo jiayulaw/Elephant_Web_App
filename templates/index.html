@@ -15,7 +15,7 @@ crossorigin=""/>
 
 <script>
   
-  var myLat = {{image_latitude| tojson}};
+  var myLat = {{image1| tojson}};
   
 </script>
 {% endblock stylesheets %}
@@ -146,10 +146,10 @@ crossorigin=""/>
       accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
     }).addTo(mymap);
 
-    var marker = L.marker([1.818, 103.843]).addTo(mymap);
-    var marker2 = L.marker([1.788, 103.928]).addTo(mymap);
-    var marker3 = L.marker([1.863, 103.89]).addTo(mymap);
-    var marker4 = L.marker([1.833, 103.951]).addTo(mymap);
+    // var marker = L.marker([1.818, 103.843]).addTo(mymap);
+    // var marker2 = L.marker([1.788, 103.928]).addTo(mymap);
+    // var marker3 = L.marker([1.863, 103.89]).addTo(mymap);
+    // var marker4 = L.marker([1.833, 103.951]).addTo(mymap);
 
     var site1_marker = L.marker([2.1228960, 103.4278710]).addTo(mymap);
     var site2_marker = L.marker([2.178698, 103.830802]).addTo(mymap);
@@ -157,29 +157,29 @@ crossorigin=""/>
 
 
 
-    var circle = L.circle([1.833, 103.951], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(mymap);
-var polygon = L.polygon([
-    [1.818, 103.843],
-    [1.788, 103.928],
-    [1.863, 103.89]
-]).addTo(mymap);
+//     var circle = L.circle([1.833, 103.951], {
+//     color: 'red',
+//     fillColor: '#f03',
+//     fillOpacity: 0.5,
+//     radius: 500
+// }).addTo(mymap);
+// var polygon = L.polygon([
+//     [1.818, 103.843],
+//     [1.788, 103.928],
+//     [1.863, 103.89]
+// ]).addTo(mymap);
 
-marker.bindPopup("<b>Hello world!</b><br>I am {{current_user.username}}").openPopup();
-marker2.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-marker3.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+// marker.bindPopup("<b>Hello world!</b><br>I am {{current_user.username}}").openPopup();
+// marker2.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+// marker3.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+// marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
 
-site1_marker.bindPopup("<img src='/static/image uploads/end device 3/2021-10-18 22-30-x-elephant.jpg' style = 'height = auto; width: 100px;'/>  testing").openPopup();
-site2_marker.bindPopup("<b>Field trip site 2</b>").openPopup();
-site3_marker.bindPopup("<b>Field trip site 3</b>").openPopup();
+site1_marker.bindPopup("<strong>Site 1 <br> {{image1[1]}} <br> {{image1[2]}} <br></strong> <img src='{{image1[0]}}' style = 'height = auto; width: 100px;'/> ").openPopup();
+site2_marker.bindPopup("<strong>Site 2 <br> {{image2[1]}} <br> {{image2[2]}} <br></strong> <img src='{{image2[0]}}' style = 'height = auto; width: 100px;'/>").openPopup();
+site3_marker.bindPopup("<strong>Site 3 <br> {{image3[1]}} <br> {{image3[2]}} <br></strong> <img src='{{image3[0]}}' style = 'height = auto; width: 100px;'/>").openPopup();
 
-circle.bindPopup("I am a circle.");
-polygon.bindPopup("I am a polygon.");
+// circle.bindPopup("I am a circle.");
+// polygon.bindPopup("I am a polygon.");
   </script>
   
 

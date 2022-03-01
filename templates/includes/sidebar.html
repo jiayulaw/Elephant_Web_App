@@ -10,7 +10,7 @@
     </div>
 
     <ul class="list-unstyled components">
-        <p>by Wildlife Protection Crews</p>
+        <p>Version 0.5</p>
         {% if current_user.is_authenticated == True %}
 
         <li class="{% if 'account' in active_state %} active {% endif %}">
@@ -54,7 +54,9 @@
         </li>
         {% endif %} 
 
-
+        <li class="{% if 'analytics' in active_state %} active {% endif %}">
+            <a href="{{ url_for('analytics') }}"><i class="fas fa-chart-line mr-2"></i> Analytics</a>
+        </li>
 
 
         <li class="{% if 'data' in active_state %} active {% endif %}">
