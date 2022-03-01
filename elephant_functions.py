@@ -122,7 +122,7 @@ class myThread (threading.Thread):
       my_event_handler.on_modified = on_modified
       my_event_handler.on_moved = on_moved
      
-      path = os.path.join(BASE_DIR, app.config['UPLOAD_FOLDER'])
+      path = os.path.join(BASE_DIR, 'static/image uploads')
     #   path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
       go_recursively = True
       my_observer = Observer()
