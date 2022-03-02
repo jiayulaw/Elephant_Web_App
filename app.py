@@ -895,11 +895,11 @@ def validate_date(d):
 def background_task():
     while True:
         print(datetime.datetime.now())
-        f = open("test-thread22222-running.txt", "w") 
+        f = open("test-thread222228-running.txt", "w") 
         
-        f.write("The thread2222222 is running!!" + str(datetime.datetime.now()))
+        f.write("The thread22222228 is running!!" + str(datetime.datetime.now()))
         f.close() 
-        f = open("test-thread22222-running.txt", "r")
+        f = open("test-thread222228-running.txt", "r")
         print(f.read())
 
         time.sleep(1)
@@ -988,6 +988,12 @@ if __name__ == "__main__":
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
+
+else:
+    thread2 = threading.Thread(target = background_task)
+    thread2.daemon = True
+    thread2.start()
+
     
 
 
