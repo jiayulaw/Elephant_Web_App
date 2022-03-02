@@ -892,17 +892,17 @@ def validate_date(d):
     except ValueError:
         return False
 
-# def background_task():
-#     while True:
-#         print(datetime.datetime.now())
-#         f = open("test-thread2-running.txt", "w") 
+def background_task():
+    while True:
+        print(datetime.datetime.now())
+        f = open("test-thread2-running.txt", "w") 
         
-#         f.write("The thread2222222 is running!!")
-#         f.close() 
-#         f = open("test-thread2-running.txt", "r")
-#         print(f.read())
+        f.write("The thread2222222 is running!!" + datetime.datetime.now())
+        f.close() 
+        f = open("test-thread2-running.txt", "r")
+        print(f.read())
 
-#         time.sleep(1)
+        time.sleep(1)
 
 def update_server_thread():
     def on_created(event):
@@ -979,7 +979,7 @@ if __name__ == "__main__":
     # thread1.daemon = True
     # thread1.start()
 
-    thread2 = threading.Thread(target = update_server_thread)
+    thread2 = threading.Thread(target = background_task)
     thread2.daemon = True
     thread2.start()
 
