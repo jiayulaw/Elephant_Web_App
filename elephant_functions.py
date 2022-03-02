@@ -20,7 +20,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from os.path import exists
 import random
-from DB_class import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
+from DB_class import Images, end_device, User, Detection, Server_activity, api, db, db_path, BASE_DIR
 import threading
 import pytz
 from watchdog.observers import Observer
