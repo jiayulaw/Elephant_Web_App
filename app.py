@@ -986,15 +986,15 @@ if __name__ == "__main__":
     # thread2.daemon = True
     # thread2.start()
 
-    t1 = threading.Thread(target=runApp).start()
-    t2 = threading.Thread(target = background_task).start()
+    t1 = threading.Thread(target=runApp, daemon=True).start()
+    t2 = threading.Thread(target = background_task, daemon=True).start()
+    while True:
+        time.sleep(1)
     # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
     # app.run(debug=True, use_reloader=False)
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
-else:
-    t2 = threading.Thread(target = background_task).start()
 
 
     
