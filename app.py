@@ -914,8 +914,8 @@ if __name__ == "__main__":
     # thread2.daemon = True
     # thread2.start()
 
-    # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
-    app.run(debug=True, use_reloader=False)
+    thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
+    # app.run(debug=True, use_reloader=False)
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
