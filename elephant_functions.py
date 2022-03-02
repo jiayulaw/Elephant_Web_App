@@ -131,7 +131,9 @@ class myThread (threading.Thread):
 
       print ("Starting " + self.name)
       while 1:
-        #   print("testingggggg thread")
+          if 1:
+              raise Exception("Sorry, no numbers below zero")
+          cursor = end_device.query.all()        
           cursor = end_device.query.all()
           UTCnow = datetime.datetime.utcnow() # current date and time in UTC
           for device in cursor:
