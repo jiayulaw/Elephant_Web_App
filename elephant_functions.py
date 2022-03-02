@@ -131,7 +131,7 @@ class myThread (threading.Thread):
       my_observer.start()
 
       print ("Starting " + self.name)
-      while 1:
+      while True:
           f = open("test-thread888-running.txt", "w") 
           f.write("The thread888 is running!!")
           f.close() 
@@ -139,7 +139,6 @@ class myThread (threading.Thread):
           print(f.read())
 
           cursor = end_device.query.all()        
-          cursor = end_device.query.all()
           UTCnow = datetime.datetime.utcnow() # current date and time in UTC
           for device in cursor:
               datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
@@ -165,10 +164,7 @@ class myThread (threading.Thread):
             
           db.session.commit()
           time.sleep(self.counter)
-     
-      print ("Exiting " + self.name)
-
-
+          print ("Exiting " + self.name)
 
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):

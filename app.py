@@ -904,16 +904,84 @@ def validate_date(d):
 
 #         time.sleep(1)
 
+def update_server_thread():
+    def on_created(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
+        update_server_directory_images()
+
+    def on_deleted(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
+        update_server_directory_images()
+    def on_modified(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
+        update_server_directory_images()
+
+    def on_moved(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
+        update_server_directory_images()
+
+    patterns = ["*"]
+    ignore_patterns = None
+    ignore_directories = False
+    case_sensitive = True
+    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+    my_event_handler.on_created = on_created
+    my_event_handler.on_deleted = on_deleted
+    my_event_handler.on_modified = on_modified
+    my_event_handler.on_moved = on_moved
+    
+    path = os.path.join(BASE_DIR, 'static/image uploads')
+#   path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
+    go_recursively = True
+    my_observer = Observer()
+    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+    my_observer.start()
+
+    print ("Starting ")
+    while True:
+        f = open("test-thread888-running.txt", "w") 
+        f.write("The thread888 is running!!")
+        f.close() 
+        f = open("test-thread888-running.txt", "r")
+        print(f.read())
+
+        cursor = end_device.query.all()        
+        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+        for device in cursor:
+            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+            #hardcode the timezone as Malaysia timezone
+            timezone = pytz.timezone("Asia/Kuala_Lumpur")
+            #add timezone attribute to datetime object
+            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+            datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+            # need to convert datetime obj above into a naive object to prevent
+            # # error during subtraction with another datetime
+            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+            naive = utc_datetime_obj.replace(tzinfo=None)
+            # getting the difference between the received datetime string and current datetime in seconds
+            diff_in_seconds = (UTCnow - naive).seconds
+            # Dividing seconds by 60 we get minutes
+            output = divmod(diff_in_seconds,60)
+            diff_in_minutes = output[0]
+            if diff_in_minutes > 30:
+                if device.status != "Offline":
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                    device.status = "Offline"
+        
+        db.session.commit()
+        time.sleep(2)
+        print ("Exiting ")
 
 if __name__ == "__main__":
     # Create new thread
-    thread1 = myThread(1, "Thread-1", 2)
-    thread1.daemon = True
-    thread1.start()
+    # thread1 = myThread(1, "Thread-1", 2)
+    # thread1.daemon = True
+    # thread1.start()
 
-    # thread2 = threading.Thread(target = background_task)
-    # thread2.daemon = True
-    # thread2.start()
+    thread2 = threading.Thread(target = update_server_thread)
+    thread2.daemon = True
+    thread2.start()
 
     thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
     # app.run(debug=True, use_reloader=False)
