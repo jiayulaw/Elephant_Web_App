@@ -132,11 +132,11 @@ class myThread (threading.Thread):
 
       print ("Starting " + self.name)
       while True:
-          f = open("test-thread888-running.txt", "w") 
-          f.write("The thread888 is running!!")
-          f.close() 
-          f = open("test-thread888-running.txt", "r")
-          print(f.read())
+        #   f = open("test-thread888-running.txt", "w") 
+        #   f.write("The thread888 is running!!")
+        #   f.close() 
+        #   f = open("test-thread888-running.txt", "r")
+        #   print(f.read())
 
           cursor = end_device.query.all()        
           UTCnow = datetime.datetime.utcnow() # current date and time in UTC
