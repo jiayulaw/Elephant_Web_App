@@ -25,6 +25,7 @@ import threading
 import pytz
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+import logging
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
         # if the directory already contain file with same name, then rename before 
@@ -132,6 +133,7 @@ class myThread (threading.Thread):
       print ("Starting " + self.name)
       while 1:
           if 1:
+              logging.error('This is an error message!! djsidudidusdshdfsyhgdhkjhh')
               raise Exception("Sorry, no numbers below zero")
           cursor = end_device.query.all()        
           cursor = end_device.query.all()
