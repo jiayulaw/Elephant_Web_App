@@ -738,6 +738,14 @@ def test():
 def about_us():
     return render_template("about_us.html", active_state = "about_us")
 
+@app.route("/start_thread")
+@login_required
+@require_role(role="admin", role2="admin")
+def start_thread():
+    thread1 = myThread(1, "Thread-1", 2)
+    thread1.daemon = True
+    thread1.start()
+
 @app.route("/end_devices")
 @login_required
 @require_role(role="admin", role2="explorer")
@@ -763,7 +771,7 @@ def end_devices():
 @require_role(role="admin", role2 = "explorer")
 def display_image():
     #this function updates server directory for new images
-    update_server_directory_images()
+    # update_server_directory_images()
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, data.from_date_str, data.to_date_str, data.station, data.detection_type = get_records()
@@ -989,7 +997,7 @@ if __name__ == "__main__":
     # thread2.start()
 
     t1 = threading.Thread(target=runApp, daemon=True).start()
-    t2 = threading.Thread(target = background_task, daemon=True).start()
+    # t2 = threading.Thread(target = background_task, daemon=True).start()
     while True:
         time.sleep(1)
     # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
