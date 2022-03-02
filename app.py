@@ -895,11 +895,11 @@ def validate_date(d):
 def background_task():
     while True:
         print(datetime.datetime.now())
-        f = open("test-thread2-running.txt", "w") 
+        f = open("test-thread22222-running.txt", "w") 
         
-        f.write("The thread2222222 is running!!" + datetime.datetime.now())
+        f.write("The thread2222222 is running!!" + str(datetime.datetime.now()))
         f.close() 
-        f = open("test-thread2-running.txt", "r")
+        f = open("test-thread22222-running.txt", "r")
         print(f.read())
 
         time.sleep(1)
