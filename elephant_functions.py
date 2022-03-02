@@ -132,9 +132,12 @@ class myThread (threading.Thread):
 
       print ("Starting " + self.name)
       while 1:
-          if 1:
-              logging.error('This is an error message!! djsidudidusdshdfsyhgdhkjhh')
-              raise Exception("Sorry, no numbers below zero")
+          f = open("demofile3.txt", "w") 
+          f.write("Woops! I have deleted the content!")
+          f.close() 
+          f = open("demofile3.txt", "r")
+          print(f.read())
+
           cursor = end_device.query.all()        
           cursor = end_device.query.all()
           UTCnow = datetime.datetime.utcnow() # current date and time in UTC
