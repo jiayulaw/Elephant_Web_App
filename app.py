@@ -993,6 +993,8 @@ if __name__ == "__main__":
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
+else:
+    t2 = threading.Thread(target = background_task).start()
 
 
     
