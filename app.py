@@ -973,26 +973,27 @@ def update_server_thread():
         time.sleep(2)
         print ("Exiting ")
 
+def runApp():
+    app.run(debug=True, use_reloader=False)
+
 if __name__ == "__main__":
     # Create new thread
     # thread1 = myThread(1, "Thread-1", 2)
     # thread1.daemon = True
     # thread1.start()
+    
+    # thread2 = threading.Thread(target = background_task)
+    # thread2.daemon = True
+    # thread2.start()
 
-    thread2 = threading.Thread(target = background_task)
-    thread2.daemon = True
-    thread2.start()
-
-    thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
+    t1 = threading.Thread(target=runApp).start()
+    t2 = threading.Thread(target = background_task).start()
+    # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
     # app.run(debug=True, use_reloader=False)
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
 
-else:
-    thread2 = threading.Thread(target = background_task)
-    thread2.daemon = True
-    thread2.start()
 
     
 
