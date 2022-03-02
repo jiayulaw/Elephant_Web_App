@@ -762,6 +762,8 @@ def end_devices():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
+    #this function updates server directory for new images
+    update_server_directory_images()
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, data.from_date_str, data.to_date_str, data.station, data.detection_type = get_records()
@@ -995,8 +997,8 @@ if __name__ == "__main__":
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
-else:
-    t2 = threading.Thread(target = background_task, daemon=True).start()
+# else:
+#     t2 = threading.Thread(target = background_task, daemon=True).start()
 
 
     
