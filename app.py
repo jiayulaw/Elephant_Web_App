@@ -908,6 +908,7 @@ def validate_date(d):
 if __name__ == "__main__":
     # Create new thread
     thread1 = myThread(1, "Thread-1", 2)
+    thread1.daemon = True
     thread1.start()
 
     # thread2 = threading.Thread(target = background_task)
