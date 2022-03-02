@@ -892,30 +892,30 @@ def validate_date(d):
     except ValueError:
         return False
 
-def background_task():
-    while True:
-        print(datetime.datetime.now())
-        f = open("test-thread2-running.txt", "w") 
+# def background_task():
+#     while True:
+#         print(datetime.datetime.now())
+#         f = open("test-thread2-running.txt", "w") 
         
-        f.write("The thread2222222 is running!!")
-        f.close() 
-        f = open("test-thread2-running.txt", "r")
-        print(f.read())
+#         f.write("The thread2222222 is running!!")
+#         f.close() 
+#         f = open("test-thread2-running.txt", "r")
+#         print(f.read())
 
-        time.sleep(1)
+#         time.sleep(1)
 
 
 if __name__ == "__main__":
     # Create new thread
-    # thread1 = myThread(1, "Thread-1", 2)
-    # thread1.start()
+    thread1 = myThread(1, "Thread-1", 2)
+    thread1.start()
 
-    thread2 = threading.Thread(target = background_task)
-    thread2.daemon = True
-    thread2.start()
+    # thread2 = threading.Thread(target = background_task)
+    # thread2.daemon = True
+    # thread2.start()
 
-    thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
-    # app.run()
+    # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
+    app.run(debug=True, use_reloader=False)
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads

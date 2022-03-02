@@ -132,10 +132,10 @@ class myThread (threading.Thread):
 
       print ("Starting " + self.name)
       while 1:
-          f = open("test-thread-running.txt", "w") 
-          f.write("The thread is running!!")
+          f = open("test-thread888-running.txt", "w") 
+          f.write("The thread888 is running!!")
           f.close() 
-          f = open("test-thread-running.txt", "r")
+          f = open("test-thread888-running.txt", "r")
           print(f.read())
 
           cursor = end_device.query.all()        
