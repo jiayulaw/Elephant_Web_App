@@ -897,8 +897,8 @@ if __name__ == "__main__":
     # Create new thread
     thread1 = myThread(1, "Thread-1", 2)
     thread1.start()
-
-    app.run(debug=True)
+    app.run()
+    # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
     
