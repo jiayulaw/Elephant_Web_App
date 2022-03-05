@@ -73,9 +73,6 @@
             </ul>
         </li>
 
-        <li>
-            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
-        </li>
 
         {% else %}
         <li>
@@ -85,6 +82,9 @@
     </ul>
 
     <ul class="list-unstyled CTAs">
+        <li>
+            <a href="{{ url_for('logout') }}" class="download"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+        </li>
         <li>
             <a href="{{ url_for('debug') }}" class="download">Debug</a>
         </li>

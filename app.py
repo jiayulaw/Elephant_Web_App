@@ -235,6 +235,7 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 @app.route("/dashboard")
 @login_required #we can only access dashboard when logged in
 def dashboard():
+    navbar_items = [["Device status", "#device_status"], ["Elephant Radar", "#elephant_radar"]]
     # Filter images from database
     image1 = []
     image2 = []
@@ -295,7 +296,7 @@ def dashboard():
 
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status)
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, navbar_items = navbar_items)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
