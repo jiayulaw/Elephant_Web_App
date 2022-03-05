@@ -45,10 +45,10 @@ def Local2UTC_time(LocalTime):
     utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
     return utcTime
 
-def getMalaysiaTime(timestamp):
+def getMalaysiaTime(timestamp, format):
     UTC_timestamp = Local2UTC_time(timestamp)
     Malaysia_timezone_timestamp = UTC_timestamp + datetime.timedelta(hours=8)
-    date_created = Malaysia_timezone_timestamp.strftime("%d/%m/%Y %I:%M:%S %p")
+    date_created = Malaysia_timezone_timestamp.strftime(format)
     return date_created
 
 def update_server_directory_images():
@@ -201,6 +201,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
 
     sorted_img_timestamps = sorted(img_timestamps)
     sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
+    # sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
 
     for timestamp in sorted_img_timestamps_string:
         try:

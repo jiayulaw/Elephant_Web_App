@@ -86,6 +86,18 @@ if __name__ == "__main__":
     new_user = User(username = "elephantking", password=hashed_password, access_level = "admin", date_created = date)
     db.session.add(new_user)
     db.session.commit()
+    new_user = User(username = "jiayu", password=hashed_password, access_level = "admin", date_created = date)
+    db.session.add(new_user)
+    db.session.commit()
+    new_user = User(username = "vinshen", password=hashed_password, access_level = "admin", date_created = date)
+    db.session.add(new_user)
+    db.session.commit()
+    new_user = User(username = "jonathan", password=hashed_password, access_level = "admin", date_created = date)
+    db.session.add(new_user)
+    db.session.commit()
+    new_user = User(username = "hoipang", password=hashed_password, access_level = "admin", date_created = date)
+    db.session.add(new_user)
+    db.session.commit()
     print("Default admin user created successfully")
 
 

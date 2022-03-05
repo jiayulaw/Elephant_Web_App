@@ -241,7 +241,7 @@
            
   </div>
   
-  <div class="row ml-3 mt-2">
+  <div class="row ml-3 mt-2 text-white">
     <br><br>
     <h3>Filtered images</h3>
   </div>
@@ -251,11 +251,10 @@
       <div class="col-lg-4 col-md-12">
         <div class="col">
           <div class="card border-dark mb-3">
-
               <strong class="card-header" style = "color:blue">{{image_source[counter.value]}}</strong>
 
             <img src="{{image}}">
-            <div class="card-body">
+            <div class="card-body fontsize-table">
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Upload date: {{image_upload_date[counter.value]}} <br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
 
@@ -265,20 +264,20 @@
             
                   <div class="col-sm-4 mb-2">
                     <!-- Button trigger modal -->
-                    <button style = "width:100%; font-size: 0.8em;"  data-delete_img_id_action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}"  data-img_name = "{{image}}" type="button" class="modal-delete-button btn btn-fill btn-danger" data-toggle="modal" data-target="#modalbox-confirm-deletion" href="#none">
+                    <button style = "width:100%; font-size: 0.75em;"  data-delete_img_id_action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}"  data-img_name = "{{image}}" type="button" class="modal-delete-button btn btn-fill btn-danger" data-toggle="modal" data-target="#modalbox-confirm-deletion" href="#none">
                       Delete
                     </button>
                   </div>
 
                   <div class="col-sm-3 mb-2">
-                    <button style = "width:100%; font-size: 0.8em;" class="modal-edit-button btn btn-fill btn-success"  data-edit_img_id_action="{{ url_for('edit_img', img_id=image_id[counter.value]) }}" data-img_source = "{{image_source[counter.value]}}"  data-img_timestamp = "{{image_timestamps[counter.value]}}" data-img_uploader = "{{image_uploader[counter.value]}}" data-img_tag = "{{image_tag[counter.value]}}" data-img_path = "{{image_paths[counter.value]}}" data-img_latitude = "{{image_latitude[counter.value]}}" data-img_longitude = "{{image_longitude[counter.value]}}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-edit" href="#none">
+                    <button style = "width:100%; font-size: 0.75em;" class="modal-edit-button btn btn-fill btn-success"  data-edit_img_id_action="{{ url_for('edit_img', img_id=image_id[counter.value]) }}" data-img_source = "{{image_source[counter.value]}}"  data-img_timestamp = "{{image_timestamps[counter.value]}}" data-img_uploader = "{{image_uploader[counter.value]}}" data-img_tag = "{{image_tag[counter.value]}}" data-img_path = "{{image_paths[counter.value]}}" data-img_latitude = "{{image_latitude[counter.value]}}" data-img_longitude = "{{image_longitude[counter.value]}}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-edit" href="#none">
                       Edit
                     </button>
                   </div>
 
                   <div class="col-sm-5 mb-2">
                     <a href="{{image}}" download>
-                      <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
+                      <button style = "width:100%; font-size: 0.75em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
                     </a>
                   </div>
                 </div>

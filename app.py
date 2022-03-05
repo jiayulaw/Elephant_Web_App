@@ -210,7 +210,7 @@ class Device_Stat_pipeline(Resource):
         
 		if args['status']:
 			if result.status != args['status']:
-				logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
+				logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
 
 			result.status = args['status']
 	
@@ -318,7 +318,7 @@ def login():
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
                 user.authenticated = True
-                current_time = getMalaysiaTime(datetime.datetime.now())
+                current_time = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
                 user.last_seen = current_time
                 logServerActivity(current_time, "Login", "User - " + current_user.username + " logged in.", db)
                 db.session.commit() 
@@ -331,7 +331,7 @@ def login():
 @app.route('/logout', methods = ['GET','POST'])
 @login_required
 def logout():
-    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Logout", "User - " + current_user.username + " logged out.", db)
+    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Logout", "User - " + current_user.username + " logged out.", db)
     logout_user()
     current_user.authenticated = False
     return redirect(url_for('login'))
@@ -345,7 +345,7 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
-        date_created = getMalaysiaTime(datetime.datetime.now())
+        date_created = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
 
 
         new_user = User(username = form.username.data, password=hashed_password, access_level = form.access_level.data, date_created = date_created)
@@ -432,7 +432,7 @@ def admin_manage():
 @require_role(role="admin", role2 = "admin")
 def delete_user(user_id):
     result = User.query.filter(User.id == user_id).first()
-    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Account deletion", "User - " + current_user.username + " deleted another user account - " + result.username, db)
+    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Account deletion", "User - " + current_user.username + " deleted another user account - " + result.username, db)
     User.query.filter(User.id == user_id).delete()
     db.session.commit()
     
@@ -553,7 +553,7 @@ def upload_multiple_image():
                 
                 img_latitude = request.form['img_latitude']
                 img_longitude = request.form['img_longitude']
-                upload_date = getMalaysiaTime(datetime.datetime.now())
+                upload_date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
                 #save the file to server directory
                 file.save(absolute_file_path)
                 #saving file requires different format, therefore denotes as absolute_file_path
@@ -563,7 +563,7 @@ def upload_multiple_image():
                 db.session.commit()
 
                 # server activity
-                logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
+                logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
                 data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
                 return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
@@ -623,7 +623,7 @@ def upload_image():
             
             img_latitude = request.form['img_latitude']
             img_longitude = request.form['img_longitude']
-            upload_date = getMalaysiaTime(datetime.datetime.now())
+            upload_date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
 
             #save the file to server directory
             file.save(absolute_file_path)
@@ -636,7 +636,7 @@ def upload_image():
             db.session.commit()
 
             # server activity
-            logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image upload", "User - " + current_user.username + " uploaded an image", db)
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
             data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
@@ -663,7 +663,7 @@ def delete_img(img_id):
         else:
             print("The file does not exist")
 
-    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image deletion", "User - " + current_user.username + " deleted an image with id " + img_id + ".", db)
+    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image deletion", "User - " + current_user.username + " deleted an image with id " + img_id + ".", db)
 
     # after deleting image, do not request new user input so the previous inputs remain
     # more user-friendly
@@ -714,7 +714,7 @@ def edit_img(img_id):
     result.longitude  = request.args.get('img_longitude')
     db.session.commit()
 
-    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Image edition", "User - " + current_user.username + " editted an image with id " + img_id + ".", db)
+    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image edition", "User - " + current_user.username + " editted an image with id " + img_id + ".", db)
     # after editing image, do not request new user input so the previous inputs remain
     # more user-friendly
     data.dontRequest = 1
@@ -774,14 +774,16 @@ def display_image():
     # update_server_directory_images()
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
-        timezone, data.from_date_str, data.to_date_str, data.station, data.detection_type = get_records()
+        timezone, data.from_date_str, end_datetime, data.station, data.detection_type = get_records()
     else:
         timezone 		= request.args.get('timezone','Etc/UTC')
         data.dontRequest = 0
 
     start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
-    end = datetime.datetime.strptime( data.to_date_str, "%Y-%m-%d %H:%M")
-
+    end = datetime.datetime.strptime( end_datetime, "%Y-%m-%d %H:%M")
+    if end > datetime.datetime.now():
+        end = datetime.datetime.now()
+    data.to_date_str = end.strftime("%Y-%m-%d %H:%M")
     # Filter images from database
     image_id = []
     image_paths = []
@@ -976,7 +978,7 @@ def update_server_thread():
             diff_in_minutes = output[0]
             if diff_in_minutes > 30:
                 if device.status != "Offline":
-                    logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
                     device.status = "Offline"
         
         db.session.commit()
@@ -985,6 +987,7 @@ def update_server_thread():
 
 def runApp():
     app.run(debug=True, use_reloader=False)
+    # app.run(debug=True)
 
 if __name__ == "__main__":
     # Create new thread
