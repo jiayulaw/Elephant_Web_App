@@ -200,7 +200,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
             img_timestamps.append(datetime_obj)
 
     sorted_img_timestamps = sorted(img_timestamps)
-    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
+    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d") for date in sorted_img_timestamps]
     # sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
 
     for timestamp in sorted_img_timestamps_string:
