@@ -45,6 +45,7 @@ def Local2UTC_time(LocalTime):
     utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
     return utcTime
 
+# this function converts to Malaysia timezone by adding 8 hours
 def getMalaysiaTime(timestamp, format):
     UTC_timestamp = Local2UTC_time(timestamp)
     Malaysia_timezone_timestamp = UTC_timestamp + datetime.timedelta(hours=8)

@@ -775,16 +775,25 @@ def display_image():
     # update_server_directory_images()
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
-        timezone, data.from_date_str, end_datetime, data.station, data.detection_type = get_records()
+        timezone, start_datetime, end_datetime, data.station, data.detection_type = get_records()
     else:
         timezone 		= request.args.get('timezone','Etc/UTC')
         data.dontRequest = 0
 
-    start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M")
-    end = datetime.datetime.strptime( end_datetime, "%Y-%m-%d %H:%M")
-    if end > datetime.datetime.now():
-        end = datetime.datetime.now()
+    start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M")
+    end = datetime.datetime.strptime(end_datetime, "%Y-%m-%d %H:%M")
+    current_time = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+    if end > current_time:
+        end = current_time
+
+    #if start time is later than end time, then force start time to be = end
+    if start > end:
+        start = end
+
+    # append the start and end time to memory (class variable that is accesible by all)
     data.to_date_str = end.strftime("%Y-%m-%d %H:%M")
+    data.from_date_str = start.strftime("%Y-%m-%d %H:%M")
+
     # Filter images from database
     image_id = []
     image_paths = []
