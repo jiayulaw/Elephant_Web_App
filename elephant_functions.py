@@ -133,12 +133,7 @@ class myThread (threading.Thread):
 
       print ("Starting " + self.name)
       while True:
-        #   f = open("test-thread888-running.txt", "w") 
-        #   f.write("The thread888 is running!!")
-        #   f.close() 
-        #   f = open("test-thread888-running.txt", "r")
-        #   print(f.read())
-
+          print("running thread!")
           cursor = end_device.query.all()        
           UTCnow = datetime.datetime.utcnow() # current date and time in UTC
           for device in cursor:
@@ -160,13 +155,12 @@ class myThread (threading.Thread):
               diff_in_minutes = output[0]
               if diff_in_minutes > 30:
                   if device.status != "Offline":
-                      logServerActivity(getMalaysiaTime(datetime.datetime.now()), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                      logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
                       device.status = "Offline"
             
           db.session.commit()
           time.sleep(self.counter)
           print ("Exiting " + self.name)
-
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):
     x_array = []

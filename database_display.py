@@ -13,6 +13,7 @@ db_path = os.path.join(BASE_DIR, "database.sqlite")
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+# cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+cursor.execute("SELECT * FROM end_device")
 print(cursor.fetchall())
 
