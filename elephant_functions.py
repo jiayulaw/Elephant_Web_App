@@ -228,5 +228,6 @@ def map_XYvalues_to_Larger_range(bigger_x_array, inputX_array, inputY_array):
             bigger_y_array[indexnum] = inputY_array[counter]
         except:
             print("Error! The bigger X array does not contain all elements of smaller x array.")
+        counter = counter + 1
 
     return bigger_y_array
