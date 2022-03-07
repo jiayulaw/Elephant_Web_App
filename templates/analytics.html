@@ -17,45 +17,45 @@
 
 <div class = "row">
     <div class="col-lg-6">
-        <div class="card mt-3">
-            <div class="card-header bg-dark text-white">
+        <div class="card mt-3 bg-dark text-white">
+            <div class="card-header">
                 <h4 class="card-title">All time </h4>
             </div>
             <div class="card-body">
-                <div><canvas id="AllTimeChart" style="width:100%;max-width:600px"></canvas></div>
+                <div><canvas id="AllTimeChart" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
             </div>
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card mt-3">
-            <div class="card-header bg-dark text-white">
+        <div class="card mt-3 bg-dark text-white">
+            <div class="card-header ">
                 <h4 class="card-title">All time </h4>
             </div>
             
             <div class="card-body">
-                <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px"></canvas></div>
+                <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
             </div>
             
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card mt-3">
+        <div class="card mt-3 bg-dark text-white">
             <div class="card-header bg-dark text-white">
                 <h4 class="card-title">Past 7 days </h4>
             </div>
             <div class="card-body">
-                <div><canvas id="Past7daysChart" style="width:100%;max-width:600px"></canvas></div>
+                <div><canvas id="Past7daysChart" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
             </div>
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card mt-3">
+        <div class="card mt-3 bg-dark text-white">
             <div class="card-header bg-dark text-white">
                 <h4 class="card-title">Past 7 days </h4>
             </div>
             
             <div class="card-body">
-                <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px"></canvas></div>
+                <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
             </div>
             
         </div>
@@ -69,6 +69,7 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 {{ super() }}
+<!-- Adjust chart.js colors and scales by  referencing: https://stackoverflow.com/questions/37292423/chart-js-label-color -->
   
 <script>
     var all_time_x_array = {{all_time_x_array| tojson}};
@@ -92,13 +93,36 @@
         datasets: [{
           label: 'End devices and uploaded', 
           data: all_time_y_array,
-          borderColor: "purple",
+          borderColor: "rgba(140, 89, 199, 1)",
           fill: false
         
         }]
       },
       options: {
-        legend: {display: true},
+        legend: {display: true,
+        labels: {
+          fontColor: "white"
+        }
+      },
+
+        scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 14,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+        }
       }
     });
 
@@ -108,23 +132,46 @@
         labels: all_time_x_array,
         datasets: [{ 
           data: all_time_big_Y_array_device1,
-          borderColor: "red",
+          borderColor: "rgba(216, 53, 53, 1)",
           fill: false,
           label: "end device 1"
         }, { 
           data: all_time_big_Y_array_device2,
-          borderColor: "green",
+          borderColor: "rgb(37, 206, 74)",
           fill: false,
           label: "end device 2"
         }, { 
           data: all_time_big_Y_array_device3,
-          borderColor: "blue",
+          borderColor: "rgba(0, 154, 243, 1)",
           fill: false,
           label: "end device 3"
         }]
       },
       options: {
-        legend: {display: true}
+        legend: {display: true,
+        labels: {
+          fontColor: "white"
+        }
+      },
+
+        scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 14,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+        }
       }
     });
 
@@ -136,13 +183,36 @@
         datasets: [{
           label: 'End devices and uploaded', 
           data: this_week_y_array,
-          borderColor: "purple",
+          borderColor: "rgba(140, 89, 199, 1)",
           fill: false
         
         }]
       },
       options: {
-        legend: {display: true},
+        legend: {display: true,
+        labels: {
+          fontColor: "white"
+        }
+      },
+
+        scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 14,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+        }
       }
     });
 
@@ -152,23 +222,46 @@
         labels: this_week_x_array,
         datasets: [{ 
           data: this_week_big_Y_array_device1,
-          borderColor: "red",
+          borderColor: "rgba(216, 53, 53, 1)",
           fill: false,
           label: "end device 1"
         }, { 
           data: this_week_big_Y_array_device2,
-          borderColor: "green",
+          borderColor: "rgb(37, 206, 74)",
           fill: false,
           label: "end device 2"
         }, { 
           data: this_week_big_Y_array_device3,
-          borderColor: "blue",
+          borderColor: "rgba(0, 154, 243, 1)",
           fill: false,
           label: "end device 3"
         }]
       },
       options: {
-        legend: {display: true}
+        legend: {display: true,
+        labels: {
+          fontColor: "white"
+        }
+      },
+
+        scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 14,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+        }
       }
     });
 

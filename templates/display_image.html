@@ -22,8 +22,9 @@
           </button>
         </div>
         <div class="modal-body">
-          Are you sure you want to delete the following image?
-          <input class = "text-primary" style = "border: 0; width: 100%;" type="text" name="imgName" id="imgName" value=""/>
+          Are you sure you want to delete the following image? <br><br>
+          <center><img id="imgName" src = "" style = "height:20vh; width: auto;"></center>
+   
         </div>
         <div class="modal-footer">
           <form id="deleteImgId" action="deleteImgId" method="GET">
@@ -250,8 +251,8 @@
     {% for image in image_paths %}
       <div class="col-lg-4 col-md-12">
         <div class="col">
-          <div class="card border-dark mb-3 bg-dark text-white">
-              <strong class="card-header" style = "color:blue">{{image_source[counter.value]}}</strong>
+          <div class="card border-light mb-3 bg-dark text-white">
+              <center><strong class="card-header" style = "color:rgb(119, 205, 255)">{{image_source[counter.value]}}</strong></center>
 
             <img src="{{image}}">
             <div class="card-body fontsize-table">
@@ -383,7 +384,9 @@ jQuery("#range_select input[type=radio]").click(function(){
      var img_name_delete = $(this).data('img_name');
      var img_id_delete = $(this).data('delete_img_id_action');
     //set value for modal box to be displayed
-     $(".modal-body #imgName").val( img_name_delete );
+    var img_src = document.getElementById("imgName");
+    img_src.setAttribute("src", img_name_delete)
+  
 
     //  append action to modal form delete button where the action is an url
     // that deletes corresponding image with certain image id in database

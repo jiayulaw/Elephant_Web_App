@@ -256,6 +256,26 @@
   font-size: medium;
 }
 
+.analytic_chart{
+
+}
+
+/* change the color of leaflet map api popup */
+/* can open up leaflet css file link to see css class inside */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background-color: rgba(34, 34, 34, 0.99);
+  /* set text color */
+  color: #e6fdf0;
+}
+.map_popup_img{
+  height: auto; 
+  width: 100px;
+  border-style:solid;
+  border-color: rgb(177, 219, 255);
+  border-width: 2px;
+}
+
+
 @media (max-width: 1400px) {
   .modal-dialog {
     width: 90vw;
@@ -263,6 +283,9 @@
   }
   .fontsize-table{
     font-size: small;
+  }
+  .analytic_chart{
+    /* height: 30vh !important; */
   }
 
 

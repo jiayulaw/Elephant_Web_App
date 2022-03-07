@@ -1,5 +1,5 @@
 <!-- <div class = "card" style = "width:auto; padding: 20px;  transition: all 0.3s; z-index:2"> -->
-<nav id = "top_navbar" class="navbar navbar-expand-lg navbar-light bg-light" >
+<nav id = "top_navbar" class="navbar navbar-expand-lg navbar-light bg-secondary text-white" >
     <div class="container-fluid">
     
         <button type="button" id="sidebarCollapse" class="navbar-btn">
@@ -15,8 +15,8 @@
             
             <ul class="nav navbar-nav ml-auto">
                 {% for item in navbar_items %}
-                <li class="nav-item active">
-                    <a class="nav-link" href={{item[1]}}><center>{{item[0]}}</center></a>
+                <li class="nav-item active bg-secondary">
+                    <a class="nav-link text-white" href={{item[1]}}><center>{{item[0]}}</center></a>
                 </li>
                 {% endfor %}
 
