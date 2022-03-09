@@ -904,9 +904,10 @@ if __name__ == "__main__":
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
 else:
-    thread1 = threading.Thread(target = update_server_thread)
-    thread1.daemon = True
-    thread1.start()
+    pass
+    # thread1 = threading.Thread(target = update_server_thread)
+    # thread1.daemon = True
+    # thread1.start()
 
 
 
