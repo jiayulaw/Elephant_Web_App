@@ -728,12 +728,9 @@ def about_us():
 @login_required
 @require_role(role="admin", role2="admin")
 def start_thread():
-    # thread1 = myThread(1, "Thread-1", 2)
-    # thread1.daemon = True
-    # thread1.start()
-    thread2 = threading.Thread(target = update_server_thread)
-    thread2.daemon = True
-    thread2.start()
+    thread1 = threading.Thread(target = update_server_thread)
+    thread1.daemon = True
+    thread1.start()
 
 @app.route("/end_devices")
 @login_required
@@ -863,21 +860,17 @@ def get_records():
     to_date_str     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
 
     # use try except to convert datetime string to datetime object
-    try:
-        from_date_str = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
-        to_date_str = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
-    except:
-        from_date_str = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M:%S')
-        to_date_str = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M:%S')
+    from_date_obj = getDatetimeObject(from_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])
+    to_date_obj = getDatetimeObject(to_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])
+
 
     # get the desired format from datetime object
-    from_date_str = datetime.datetime.strftime(from_date_str, "%Y-%m-%d %H:%M:%S")
-    to_date_str = datetime.datetime.strftime(to_date_str, "%Y-%m-%d %H:%M:%S")
+    from_date_str = datetime.datetime.strftime(from_date_obj, "%Y-%m-%d %H:%M:%S")
+    to_date_str = datetime.datetime.strftime(to_date_obj, "%Y-%m-%d %H:%M:%S")
 
     timezone 		= request.args.get('timezone','Etc/UTC')
     img_source       = request.args.get('station','end device 1')                           #Get img_source, or fall back to end device 1
     detection_type       = request.args.get('detection_type','any') 
-
 
     print ("Received from browser: %s, %s, %s" % (from_date_str, to_date_str, timezone))
 
@@ -902,17 +895,7 @@ def runApp():
     # app.run(debug=True)
 
 if __name__ == "__main__":
-    # Create new thread
-    # thread1 = myThread(1, "Thread-1", 2)
-    # thread1.daemon = True
-    # thread1.start()
-    
-    # thread2 = threading.Thread(target = background_task)
-    # thread2.daemon = True
-    # thread2.start()
-
     t1 = threading.Thread(target=runApp, daemon=True).start()
-    # t2 = threading.Thread(target = background_task, daemon=True).start()
     while True:
         time.sleep(1)
     # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
@@ -920,8 +903,10 @@ if __name__ == "__main__":
     # app.run(debug=True)
     # app.run(debug=True, host='0.0.0.0', port=8080) #using thisline causing error to static path
     # Start new Threads
-# else:
-#     t2 = threading.Thread(target = background_task, daemon=True).start()
+else:
+    thread1 = threading.Thread(target = update_server_thread)
+    thread1.daemon = True
+    thread1.start()
 
 
 

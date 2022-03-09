@@ -77,7 +77,6 @@ def update_server_directory_images():
                     arr1 = str1.split("-x-")
                     date_time = arr1[0]
                     detection_type = arr1[1]
-                    date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M-%S")
                     path = os.path.join(directory, filename)
                     path = f"static/image uploads/{device_name}/"+filename
                     result = Images.query.filter_by(path=path).first()
@@ -91,52 +90,53 @@ def update_server_directory_images():
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
                         db.session.add(new_image)
                         db.session.commit()
+                        print("New image detected and recorded to database")
                         ######################################################
                         # Check and send .json file associated with the image (if any)
                         ######################################################
-                        JsonFileName = str1 + ".json"
-                        JsonFilePath = os.path.join(directory, JsonFileName)
-                        if os.path.exists(JsonFilePath):
-                            # After all detections, Convert image
-                            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                            pilImage = Image.fromarray(img)
-                            # Convert to JPEG Buffer
-                            buffered = io.BytesIO()
-                            pilImage.save(buffered, quality=90, format="JPEG")
-                            # Base 64 Encode
-                            img_str = base64.b64encode(buffered.getvalue())
-                            img_str = img_str.decode("ascii")
-                            print("decoded and ready to send!")
-                            # Construct the URL
-                            image_upload_url = "".join([
-                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
-                                "?api_key=", ROBOFLOW_API_KEY,
-                                "&name=captured.jpg",
-                                "&split=train"
-                            ])
+                        # JsonFileName = str1 + ".json"
+                        # JsonFilePath = os.path.join(directory, JsonFileName)
+                        # if os.path.exists(JsonFilePath):
+                        #     # After all detections, Convert image
+                        #     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                        #     pilImage = Image.fromarray(img)
+                        #     # Convert to JPEG Buffer
+                        #     buffered = io.BytesIO()
+                        #     pilImage.save(buffered, quality=90, format="JPEG")
+                        #     # Base 64 Encode
+                        #     img_str = base64.b64encode(buffered.getvalue())
+                        #     img_str = img_str.decode("ascii")
+                        #     print("decoded and ready to send!")
+                        #     # Construct the URL
+                        #     image_upload_url = "".join([
+                        #         "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
+                        #         "?api_key=", ROBOFLOW_API_KEY,
+                        #         "&name=captured.jpg",
+                        #         "&split=train"
+                        #     ])
                             
-                            r = requests.post(image_upload_url, data=img_str, headers={
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            })
+                        #     r = requests.post(image_upload_url, data=img_str, headers={
+                        #         "Content-Type": "application/x-www-form-urlencoded"
+                        #     })
                             
-                            imageId = r.json()['id']
-                            print(imageId)
-                            # Read Annotation as String
-                            annotationStr = open(JsonFilePath, "r").read()
-                            print(annotationStr)
-                            # Construct the URL
-                            annotation_upload_url = "".join([
-                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
-                                "?api_key=", ROBOFLOW_API_KEY,
-                                "&name=", annotationFilename
-                            ])
+                        #     imageId = r.json()['id']
+                        #     print(imageId)
+                        #     # Read Annotation as String
+                        #     annotationStr = open(JsonFilePath, "r").read()
+                        #     print(annotationStr)
+                        #     # Construct the URL
+                        #     annotation_upload_url = "".join([
+                        #         "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+                        #         "?api_key=", ROBOFLOW_API_KEY,
+                        #         "&name=", annotationFilename
+                        #     ])
 
-                            # POST to the API
-                            r = requests.post(annotation_upload_url, data=annotationStr, headers={
-                                "Content-Type": "text/plain"
-                            })
+                        #     # POST to the API
+                        #     r = requests.post(annotation_upload_url, data=annotationStr, headers={
+                        #         "Content-Type": "text/plain"
+                        #     })
                             
-                            print("Done Bossku")
+                        #     print("Done Bossku")
 
                 else:
                     continue
@@ -283,3 +283,14 @@ def map_XYvalues_to_Larger_range(bigger_x_array, inputX_array, inputY_array):
         counter = counter + 1
 
     return bigger_y_array
+
+
+def getDatetimeObject(datetime_str, formats):
+    """This function returns a datetime object when the format of a datetime string is specified.
+    When multiple formats are supplied, the function will try all format until no error."""
+    for format in formats:
+        try:
+            datetime_object = datetime.datetime.strptime(datetime_str,format)
+        except:
+            pass
+    return datetime_object
