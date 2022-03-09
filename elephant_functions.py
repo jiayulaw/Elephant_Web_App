@@ -76,7 +76,7 @@ def update_server_directory_images():
                     #strip between datetime and detection type
                     arr1 = str1.split("-x-")
                     date_time = arr1[0]
-                    date_time_obj = getDatetimeObject(date_time, '%Y-%m-%d %H-%M-%S')
+                    date_time_obj = datetime.datetime.strptime(date_time,'%Y-%m-%d %H-%M-%S')
                     date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
 
                     detection_type = arr1[1]
@@ -289,8 +289,7 @@ def map_XYvalues_to_Larger_range(bigger_x_array, inputX_array, inputY_array):
 
 
 def getDatetimeObject(datetime_str, formats):
-    """This function returns a datetime object when the format of a datetime string is specified.
-    When multiple formats are supplied, the function will try all format until no error."""
+    """This function returns a datetime object by trying out multiple formats given."""
     for format in formats:
         try:
             datetime_object = datetime.datetime.strptime(datetime_str,format)
