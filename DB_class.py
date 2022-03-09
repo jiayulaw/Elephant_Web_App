@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # Create default admin user
     bcrypt = Bcrypt(app)
     hashed_password = bcrypt.generate_password_hash("pwpw")
-    date = getMalaysiaTime(datetime.datetime.now())
+    date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
     new_user = User(username = "elephantking", password=hashed_password, access_level = "admin", date_created = date)
     db.session.add(new_user)
     db.session.commit()

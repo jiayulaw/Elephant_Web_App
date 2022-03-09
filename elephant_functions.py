@@ -26,6 +26,12 @@ import pytz
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import logging
+import requests
+import base64
+# For roboflow api
+import cv2
+from config import *
+from PIL import Image
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
         # if the directory already contain file with same name, then rename before 
@@ -54,6 +60,7 @@ def getMalaysiaTime(timestamp, format):
 
 def update_server_directory_images():
     """ check directory to update any new images added through SFTP or direct upload to server"""
+    print("Updating server directory images and detection information...")
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
@@ -70,101 +77,148 @@ def update_server_directory_images():
                     arr1 = str1.split("-x-")
                     date_time = arr1[0]
                     detection_type = arr1[1]
-                    date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+                    date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M-%S")
                     path = os.path.join(directory, filename)
                     path = f"static/image uploads/{device_name}/"+filename
                     result = Images.query.filter_by(path=path).first()
                     if result:
-                        print("the file with same name already saved")
+                        # print("the file with same name already saved")
+                        pass
                     else:
+                        ######################################################
+                        # Record new image to database 
+                        ######################################################
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
                         db.session.add(new_image)
                         db.session.commit()
+                        ######################################################
+                        # Check and send .json file associated with the image (if any)
+                        ######################################################
+                        JsonFileName = str1 + ".json"
+                        JsonFilePath = os.path.join(directory, JsonFileName)
+                        if os.path.exists(JsonFilePath):
+                            # After all detections, Convert image
+                            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                            pilImage = Image.fromarray(img)
+                            # Convert to JPEG Buffer
+                            buffered = io.BytesIO()
+                            pilImage.save(buffered, quality=90, format="JPEG")
+                            # Base 64 Encode
+                            img_str = base64.b64encode(buffered.getvalue())
+                            img_str = img_str.decode("ascii")
+                            print("decoded and ready to send!")
+                            # Construct the URL
+                            image_upload_url = "".join([
+                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
+                                "?api_key=", ROBOFLOW_API_KEY,
+                                "&name=captured.jpg",
+                                "&split=train"
+                            ])
+                            
+                            r = requests.post(image_upload_url, data=img_str, headers={
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            })
+                            
+                            imageId = r.json()['id']
+                            print(imageId)
+                            # Read Annotation as String
+                            annotationStr = open(JsonFilePath, "r").read()
+                            print(annotationStr)
+                            # Construct the URL
+                            annotation_upload_url = "".join([
+                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+                                "?api_key=", ROBOFLOW_API_KEY,
+                                "&name=", annotationFilename
+                            ])
+
+                            # POST to the API
+                            r = requests.post(annotation_upload_url, data=annotationStr, headers={
+                                "Content-Type": "text/plain"
+                            })
+                            
+                            print("Done Bossku")
+
                 else:
                     continue
             except:
-                print("Filename is not formatted correctly, but it is ok, just ignore")
+                pass
+                # print("Filename is not formatted correctly, but it is ok, just ignore")
+
 
 
 def logServerActivity(timestmp, type, description, db):
-    new_activity = Server_activity(timestamp = timestmp, type = type, description=description )
-    db.session.add(new_activity)
-    db.session.commit()
+   new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
+   db.session.add(new_activity)
+   db.session.commit()
+    
 
+def update_server_thread():
+    ###########################################################################
+    # Check for change in directory
+    ###########################################################################
+    def on_created(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
+        update_server_directory_images()
 
-class myThread (threading.Thread):
-   def __init__(self, threadID, name, delay):
-      threading.Thread.__init__(self)
-      self.threadID = threadID
-      self.name = name
-      self.counter = delay
+    def on_deleted(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
+        update_server_directory_images()
+    def on_modified(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
+        update_server_directory_images()
 
-   def run(self):
-       #watchdog tutorial
-       #https://thepythoncorner.com/posts/2019-01-13-how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/#
-       #https://michaelcho.me/article/using-pythons-watchdog-to-monitor-changes-to-a-directory
-      def on_created(event):
-          print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
-          update_server_directory_images()
+    def on_moved(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
+        update_server_directory_images()
 
-      def on_deleted(event):
-          print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-          update_server_directory_images()
-      def on_modified(event):
-          print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-          update_server_directory_images()
+    patterns = ["*"]
+    ignore_patterns = None
+    ignore_directories = False
+    case_sensitive = True
+    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+    my_event_handler.on_created = on_created
+    my_event_handler.on_deleted = on_deleted
+    my_event_handler.on_modified = on_modified
+    my_event_handler.on_moved = on_moved
+    #relative path that needs to be checked for changes
+    path = os.path.join(BASE_DIR, 'static/image uploads')
+    go_recursively = True
+    my_observer = Observer()
+    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+    my_observer.start()
 
-      def on_moved(event):
-          print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-          update_server_directory_images()
-
-      patterns = ["*"]
-      ignore_patterns = None
-      ignore_directories = False
-      case_sensitive = True
-      my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
-      my_event_handler.on_created = on_created
-      my_event_handler.on_deleted = on_deleted
-      my_event_handler.on_modified = on_modified
-      my_event_handler.on_moved = on_moved
-     
-      path = os.path.join(BASE_DIR, 'static/image uploads')
-    #   path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
-      go_recursively = True
-      my_observer = Observer()
-      my_observer.schedule(my_event_handler, path, recursive=go_recursively)
-      my_observer.start()
-
-      print ("Starting " + self.name)
-      while True:
-          print("running thread!")
-          cursor = end_device.query.all()        
-          UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-          for device in cursor:
-              datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
-              #hardcode the timezone as Malaysia timezone
-              timezone = pytz.timezone("Asia/Kuala_Lumpur")
-              #add timezone attribute to datetime object
-              datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-              datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-              utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-              # need to convert datetime obj above into a naive object to prevent
-              # # error during subtraction with another datetime
-              #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-              naive = utc_datetime_obj.replace(tzinfo=None)
-              # getting the difference between the received datetime string and current datetime in seconds
-              diff_in_seconds = (UTCnow - naive).seconds
-              # Dividing seconds by 60 we get minutes
-              output = divmod(diff_in_seconds,60)
-              diff_in_minutes = output[0]
-              if diff_in_minutes > 30:
-                  if device.status != "Offline":
-                      logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
-                      device.status = "Offline"
-            
-          db.session.commit()
-          time.sleep(self.counter)
-          print ("Exiting " + self.name)
+    print ("Starting ")
+    ###########################################################################
+    # Check for change in end device status
+    ###########################################################################
+    while True:
+        print("Updating end devices status...")
+        cursor = end_device.query.all()        
+        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+        for device in cursor:
+            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+            #hardcode the timezone as Malaysia timezone
+            timezone = pytz.timezone("Asia/Kuala_Lumpur")
+            #add timezone attribute to datetime object
+            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+            # need to convert datetime obj above into a naive object to prevent
+            # # error during subtraction with another datetime
+            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+            naive = utc_datetime_obj.replace(tzinfo=None)
+            # getting the difference between the received datetime string and current datetime in seconds
+            diff_in_seconds = (UTCnow - naive).seconds
+            # Dividing seconds by 60 we get minutes
+            output = divmod(diff_in_seconds,60)
+            diff_in_minutes = output[0]
+            if diff_in_minutes > 30:
+                if device.status != "Offline":
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                    device.status = "Offline"
+        
+        db.session.commit()
+        time.sleep(2)
+        print ("Exiting ")
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):
     x_array = []
@@ -181,7 +235,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
         bool1 = 0
         bool2 = 0
         #convert to datetime object
-        datetime_obj = datetime.datetime.strptime(image.timestamp,"%Y-%m-%d %H-%M")
+        datetime_obj = datetime.datetime.strptime(image.timestamp,"%Y-%m-%d %H-%M-%S")
         #if the time range is given, filter the time
         if start_datetime and end_datetime:
             if start_datetime <= datetime_obj <= end_datetime:
@@ -199,7 +253,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
             img_timestamps.append(datetime_obj)
 
     sorted_img_timestamps = sorted(img_timestamps)
-    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d") for date in sorted_img_timestamps]
+    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d-%S") for date in sorted_img_timestamps]
     # sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
 
     for timestamp in sorted_img_timestamps_string:

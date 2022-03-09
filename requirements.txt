@@ -23,4 +23,5 @@ SQLAlchemy==1.3.23
 Werkzeug==2.0.2
 WTForms==3.0.0
 watchdog
-
+opencv-python
+Pillow

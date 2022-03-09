@@ -468,15 +468,6 @@ def analytics():
     this_week_device3_x_array, this_week_device3_y_array = getImageNumOverTime("end device 3", None, start_datetime, end_datetime)
 
 
-    # #convert list items to datetime object
-    # big_array_x_datetime_obj = [datetime.datetime.strptime(date, "%Y-%m-%d %H-%M") for date in big_array_x]
-    # #sort the list based on datetime
-    # sorted_big_array_x_datetime_obj = sorted(big_array_x_datetime_obj)
-    # #convert back to string
-    # sorted_big_array_x = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_big_array_x_datetime_obj]
-    # #remove redundant elements in list by converting to dictionary then convert back
-    # sorted_big_array_x = list(dict.fromkeys(sorted_big_array_x))
-
     this_week_big_Y_array_device1 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device1_x_array, this_week_device1_y_array)
     this_week_big_Y_array_device2 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device2_x_array, this_week_device2_y_array)
     this_week_big_Y_array_device3 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device3_x_array, this_week_device3_y_array)
@@ -529,7 +520,6 @@ def upload_multiple_image():
             # saving the file to prevent overwrite
             file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
 
-
             # checks whether file path is redundant
             redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
@@ -537,18 +527,15 @@ def upload_multiple_image():
                 flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
                 return redirect(request.url)
             else:
-            
-          
                 flash('Image successfully uploaded to database.', 'success_msg_multipleimgupload')
                 #=============== Get other user input =============== 
                 # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
                 timestamp_str   = request.form['timestamp_input']
-                if not validate_date(timestamp_str):			# Validate date format
-                    timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
-                # Create datetime object so that we can convert to UTC from the browser's local time
-                timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
 
-                img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+                # Create datetime object so that we can convert to UTC from the browser's local time
+                timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
+
+                img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
 
                 img_tag_input = request.form['img_tag_input']
                 
@@ -610,15 +597,10 @@ def upload_image():
      
             flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
             #=============== Get other user input =============== 
-            # timestamp_str   = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
             timestamp_str   = request.form['timestamp_input']
-            if not validate_date(timestamp_str):			# Validate date format
-                timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
             # Create datetime object so that we can convert to UTC from the browser's local time
-            timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-            # img_tim = datetime.datetime.strptime(from_date_str, "%Y-%m-%d %H:%M")
-
-            img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+            timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
+            img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
 
             img_tag_input = request.form['img_tag_input']
             
@@ -628,9 +610,6 @@ def upload_image():
 
             #save the file to server directory
             file.save(absolute_file_path)
-            #saving file requires different format, therefore denotes as file_path2
-            #print('upload_image filename: ' + filename)
-        
             
             new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
             db.session.add(new_image)
@@ -639,7 +618,10 @@ def upload_image():
             # server activity
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
-            data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+            timestamp_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+            data.input_date_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+            data.input_date_str = data.input_date_str.strftime("%Y-%m-%d %H:%M:%S")
+            
             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
 
     else:
@@ -682,11 +664,14 @@ def edit_img(img_id):
 
     timestamp_str = request.args.get('timestamp_input')
 
-    if not validate_date(timestamp_str):			# Validate date format
-        timestamp_str 	= time.strftime("%Y-%m-%d %H:%M")
     # Create datetime object so that we can convert to UTC from the browser's local time
-    timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-    img_time = timestamp_str.strftime("%Y-%m-%d %H-%M")
+
+    try:
+        timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+    except:
+        timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
+
+    img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
 
     result.timestamp  =  img_time
 
@@ -743,9 +728,12 @@ def about_us():
 @login_required
 @require_role(role="admin", role2="admin")
 def start_thread():
-    thread1 = myThread(1, "Thread-1", 2)
-    thread1.daemon = True
-    thread1.start()
+    # thread1 = myThread(1, "Thread-1", 2)
+    # thread1.daemon = True
+    # thread1.start()
+    thread2 = threading.Thread(target = update_server_thread)
+    thread2.daemon = True
+    thread2.start()
 
 @app.route("/end_devices")
 @login_required
@@ -771,18 +759,19 @@ def end_devices():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
-    #this function updates server directory for new images
-    # update_server_directory_images()
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type = get_records()
+        start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
+        end = datetime.datetime.strptime(end_datetime, "%Y-%m-%d %H:%M:%S")
     else:
         timezone 		= request.args.get('timezone','Etc/UTC')
         data.dontRequest = 0
+        start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M:%S")
+        end = datetime.datetime.strptime(data.to_date_str, "%Y-%m-%d %H:%M:%S")
 
-    start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M")
-    end = datetime.datetime.strptime(end_datetime, "%Y-%m-%d %H:%M")
-    current_time = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+
+    current_time = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
     if end > current_time:
         end = current_time
 
@@ -791,8 +780,8 @@ def display_image():
         start = end
 
     # append the start and end time to memory (class variable that is accesible by all)
-    data.to_date_str = end.strftime("%Y-%m-%d %H:%M")
-    data.from_date_str = start.strftime("%Y-%m-%d %H:%M")
+    data.to_date_str = end.strftime("%Y-%m-%d %H:%M:%S")
+    data.from_date_str = start.strftime("%Y-%m-%d %H:%M:%S")
 
     # Filter images from database
     image_id = []
@@ -810,17 +799,14 @@ def display_image():
         
     else:
         cursor = Images.query.filter_by(source=data.station)
-        
-    
-
     
     for image in cursor:
         image_criteria_pass = 0 #boolean variable to filter image
         date_time = image.timestamp
         try: 
-            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M")
+            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H-%M-%S")
         except:
-            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+            date_time_obj = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M:%S")
 
         if start <= date_time_obj <= end:
           if data.detection_type == "any":
@@ -831,7 +817,7 @@ def display_image():
 
         if image_criteria_pass == 1:
             image_id.append(image.id)
-            datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M')
+            datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
             image_paths.append(image.path)
             image_source.append(image.source)
@@ -876,124 +862,40 @@ def get_records():
     from_date_str   = request.args.get('from',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
     to_date_str     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
 
+    # use try except to convert datetime string to datetime object
+    try:
+        from_date_str = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
+        to_date_str = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
+    except:
+        from_date_str = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M:%S')
+        to_date_str = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M:%S')
+
+    # get the desired format from datetime object
+    from_date_str = datetime.datetime.strftime(from_date_str, "%Y-%m-%d %H:%M:%S")
+    to_date_str = datetime.datetime.strftime(to_date_str, "%Y-%m-%d %H:%M:%S")
+
     timezone 		= request.args.get('timezone','Etc/UTC')
-    range_h_form	= request.args.get('range_h','');  #This will return a string, if field range_h exists in the request
-    range_h_int 	= "nan"  # initialise this variable with not a number
     img_source       = request.args.get('station','end device 1')                           #Get img_source, or fall back to end device 1
     detection_type       = request.args.get('detection_type','any') 
-    
 
-    print ("REQUEST:")
-    print (request.args)
 
-    try:
-        range_h_int	= int(range_h_form)
-    except:
-        print ("range_h_form not a number")
+    print ("Received from browser: %s, %s, %s" % (from_date_str, to_date_str, timezone))
 
-    print ("Received from browser: %s, %s, %s, %s" % (from_date_str, to_date_str, timezone, range_h_int))
 
-    if not validate_date(from_date_str):			# Validate date format
-        from_date_str 	= time.strftime("%Y-%m-%d %H:%M")
-    if not validate_date(to_date_str):
-        to_date_str 	= time.strftime("%Y-%m-%d %H:%M")		# Validate date format
 
     print ('2. From: %s, to: %s, timezone: %s' % (from_date_str,to_date_str,timezone))
-
-    # Create datetime object so that we can convert to UTC from the browser's local time
-    from_date_obj       = datetime.datetime.strptime(from_date_str,'%Y-%m-%d %H:%M')
-    to_date_obj         = datetime.datetime.strptime(to_date_str,'%Y-%m-%d %H:%M')
 
     return [timezone, from_date_str, to_date_str, img_source, detection_type]
 
 
 def validate_date(d):
     try:
-        datetime.datetime.strptime(d, '%Y-%m-%d %H:%M')
+        datetime.datetime.strptime(d, '%Y-%m-%d %H:%M:%S')
         return True
     except ValueError:
         return False
 
-def background_task():
-    while True:
-        print(datetime.datetime.now())
-        f = open("test-thread222228-running.txt", "w") 
-        
-        f.write("The thread22222228 is running!!" + str(datetime.datetime.now()))
-        f.close() 
-        f = open("test-thread222228-running.txt", "r")
-        print(f.read())
 
-        time.sleep(1)
-
-def update_server_thread():
-    def on_created(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
-        update_server_directory_images()
-
-    def on_deleted(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-        update_server_directory_images()
-    def on_modified(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-        update_server_directory_images()
-
-    def on_moved(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-        update_server_directory_images()
-
-    patterns = ["*"]
-    ignore_patterns = None
-    ignore_directories = False
-    case_sensitive = True
-    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
-    my_event_handler.on_created = on_created
-    my_event_handler.on_deleted = on_deleted
-    my_event_handler.on_modified = on_modified
-    my_event_handler.on_moved = on_moved
-    
-    path = os.path.join(BASE_DIR, 'static/image uploads')
-#   path = r"C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads"
-    go_recursively = True
-    my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
-    my_observer.start()
-
-    print ("Starting ")
-    while True:
-        f = open("test-thread888-running.txt", "w") 
-        f.write("The thread888 is running!!")
-        f.close() 
-        f = open("test-thread888-running.txt", "r")
-        print(f.read())
-
-        cursor = end_device.query.all()        
-        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-        for device in cursor:
-            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
-            #hardcode the timezone as Malaysia timezone
-            timezone = pytz.timezone("Asia/Kuala_Lumpur")
-            #add timezone attribute to datetime object
-            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-            datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-            # need to convert datetime obj above into a naive object to prevent
-            # # error during subtraction with another datetime
-            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-            naive = utc_datetime_obj.replace(tzinfo=None)
-            # getting the difference between the received datetime string and current datetime in seconds
-            diff_in_seconds = (UTCnow - naive).seconds
-            # Dividing seconds by 60 we get minutes
-            output = divmod(diff_in_seconds,60)
-            diff_in_minutes = output[0]
-            if diff_in_minutes > 30:
-                if device.status != "Offline":
-                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
-                    device.status = "Offline"
-        
-        db.session.commit()
-        time.sleep(2)
-        print ("Exiting ")
 
 def runApp():
     app.run(debug=True, use_reloader=False)

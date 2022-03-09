@@ -14,6 +14,6 @@ conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
 # cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-cursor.execute("SELECT * FROM end_device")
+cursor.execute("SELECT * FROM Images")
 print(cursor.fetchall())
 
