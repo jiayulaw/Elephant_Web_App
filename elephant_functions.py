@@ -76,6 +76,9 @@ def update_server_directory_images():
                     #strip between datetime and detection type
                     arr1 = str1.split("-x-")
                     date_time = arr1[0]
+                    date_time_obj = getDatetimeObject(date_time, '%Y-%m-%d %H-%M-%S')
+                    date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
+
                     detection_type = arr1[1]
                     path = os.path.join(directory, filename)
                     path = f"static/image uploads/{device_name}/"+filename

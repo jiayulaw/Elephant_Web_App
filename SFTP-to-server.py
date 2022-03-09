@@ -11,7 +11,7 @@ USERNAME = "ubuntu"
 # This is the path to the .pem file
 KEYFILE=r'C:\Users\user10\Desktop\lightsailtest\LightsailDefaultKey-ap-southeast-1.pem'
 # This is station number, can also try station 2 and station 3
-station = "end device 2"
+station = "end device 3"
 #this is the server path, do not modify
 path = '/var/www/Elephant_Web_App/static/image uploads/' + station
 
