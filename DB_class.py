@@ -76,7 +76,6 @@ class User(db.Model, UserMixin):
         else:
             return False
             
-
 if __name__ == "__main__":
     db.create_all()
     # Create default admin user

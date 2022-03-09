@@ -53,12 +53,16 @@ def getMalaysiaTime(timestamp, format):
     return date_created
 
 def update_server_directory_images():
-    # check directory to update any new images added through SFTP or direct upload to server
+    """ check directory to update any new images added through SFTP or direct upload to server"""
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
             try:
+                # if filename.endswith(".json"):
+                # if db contains file with same name as .json, send the file together with this .json to roboflow
+                # for filename in os.listdir(directory2):                
+
                 if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
                     #strip away file format extension
                     str1 = filename.split(".")[0]

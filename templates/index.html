@@ -107,7 +107,15 @@
     <div class="card bg-dark text-white" id = "elephant_radar">
       <div class="card-header">
         <h5 class="card-category">Aerial map</h5>
-        <h3 class="card-title"><i class="tim-icons icon-bell-55 text-primary"></i> Elephant Radar</h3>
+        <h3 class="card-title" style = "display:inline-block;"><i class="tim-icons icon-bell-55 text-primary"></i> Elephant Radar</h3>
+        <div class="btn-group float-right" role="group" aria-label="">
+          <button type="button" onclick = "normal_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
+          <button type="button" onclick = "satelite_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
+        </div>
+        
+        
+      </div>
+      <div class = "card-body">
         <div id="mapid"></div>
       </div>
       
@@ -136,6 +144,7 @@
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       maxZoom: 18,
       id: 'mapbox/streets-v11', //mapbox/satellite-v9
+      // id: 'mapbox/satellite-v9',
       tileSize: 512,
       zoomOffset: -1,
       accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
@@ -175,7 +184,31 @@ site3_marker.bindPopup("<strong>Site 3 <br> {{image3[1]}} <br> {{image3[2]}} <br
 
 // circle.bindPopup("I am a circle.");
 // polygon.bindPopup("I am a polygon.");
-  </script>
+
+
+
+function normal_view() {
+  L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: 'mapbox/streets-v11',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
+    }).addTo(mymap);
+}
+
+function satelite_view() {
+  L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: 'mapbox/satellite-v9',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
+    }).addTo(mymap);
+}
+</script>
   
 
 
