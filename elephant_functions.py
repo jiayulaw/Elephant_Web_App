@@ -29,9 +29,9 @@ import logging
 import requests
 import base64
 # For roboflow api
-import cv2
-from config import *
-from PIL import Image
+# import cv2
+# from config import *
+# from PIL import Image
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
         # if the directory already contain file with same name, then rename before 
