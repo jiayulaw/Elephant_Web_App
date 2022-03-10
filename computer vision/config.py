@@ -1,8 +1,8 @@
 import json
 
-with open(r'personal_config.json') as f:
+with open(r'C:\Users\vinshen\Desktop\vinshen_workspace\Year_3_Project\Mobile_Connectivity\Codes\new_packet_structure\draw_box_roboflow\personal_config.json') as f:
     config = json.load(f)
-    # print(f)
+
     ROBOFLOW_API_KEY = config["ROBOFLOW_API_KEY"]
     ROBOFLOW_MODEL = config["ROBOFLOW_MODEL"]
     ROBOFLOW_SIZE = config["ROBOFLOW_SIZE"]
