@@ -42,6 +42,8 @@ class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.String(100), nullable=False)
     path = db.Column(db.String(100), nullable=False, unique=True)
+    path2 = db.Column(db.String(100), nullable=True, unique=True)
+    json_path = db.Column(db.String(100), nullable=True, unique=True)
     source = db.Column(db.String(100), nullable=False)
     uploader = db.Column(db.String(100), nullable=True)
     tag = db.Column(db.String(100), nullable=True)

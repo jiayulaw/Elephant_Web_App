@@ -105,6 +105,7 @@ def update_server_directory_images():
                     date_time = arr1[0]
                     date_time_obj = datetime.datetime.strptime(date_time,'%Y-%m-%d %H-%M-%S')
                     date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
+                    
 
                     detection_type = arr1[1]
                     path = os.path.join(directory, filename)
@@ -125,7 +126,11 @@ def update_server_directory_images():
                         ######################################################
                         JsonFileName = str1 + ".json"
                         JsonFilePath = os.path.join(directory, JsonFileName)
-                        
+                        # Record to database the new image    
+                        new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
+                        db.session.add(new_image)
+                        db.session.commit()
+                        print("New image detected and recorded to database")
                         if os.path.exists(JsonFilePath):
                         #    Read Annotation as String
                             annotationStr = open(JsonFilePath, "r").read()
@@ -136,17 +141,15 @@ def update_server_directory_images():
                             annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
                             annotated_filepath = f"static/image uploads/{device_name}/" + annotated_filename
                             cv2.imwrite(annotated_filepath, annotated_img)
-
-                            new_image = Images(timestamp = date_time, path = annotated_filepath, source=device_name, tag = detection_type, latitude ="", longitude = "")
-                            db.session.add(new_image)
+                            result = Images.query.filter_by(path=path).first()
+                            result.path2 = annotated_filepath
+                            result.json_path = JsonFilePath
                             db.session.commit()
-                            print("New image detected and recorded to database")
 
                             # remember to remove confidence from the annotations before sending to roboflow api
                             for box in annotationList[0]['annotations']:
                                 del box['confidence']
 
-                            
                             # PROCEED TO ROBOFLOW API
                             # After all detections, Convert image
                             roboflow_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
@@ -202,6 +205,8 @@ def update_server_directory_images():
 
                             print(r.json()['success'])
                             print("Done Bossku")
+
+
                 else:
                     continue
             except:
@@ -296,7 +301,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
         bool1 = 0
         bool2 = 0
         #convert to datetime object
-        datetime_obj = datetime.datetime.strptime(image.timestamp,"%Y-%m-%d %H-%M-%S")
+        datetime_obj = datetime.datetime.strptime(image.timestamp,"%Y-%m-%d %H:%M:%S")
         #if the time range is given, filter the time
         if start_datetime and end_datetime:
             if start_datetime <= datetime_obj <= end_datetime:

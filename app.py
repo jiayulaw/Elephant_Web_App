@@ -912,6 +912,7 @@ def display_image():
     # Filter images from database
     image_id = []
     image_paths = []
+    image_paths2 = []
     image_timestamps = []
     image_longitude = []
     image_latitude = []
@@ -946,6 +947,7 @@ def display_image():
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
             image_paths.append(image.path)
+            image_paths2.append(image.path2)
             image_source.append(image.source)
             image_uploader.append(image.uploader)
             image_tag.append(image.tag)
@@ -961,6 +963,7 @@ def display_image():
     image_id.reverse()
     image_timestamps.reverse()
     image_paths.reverse()
+    image_paths2.reverse()
     image_source.reverse()
     image_uploader.reverse()
     image_tag.reverse()
@@ -973,7 +976,7 @@ def display_image():
                             query_string = request.query_string,
                             timezone = timezone,
                             active_state = "data_center",
-                            image_paths = image_paths,
+                            image_paths = image_paths, image_paths2 = image_paths2,
                             image_timestamps = image_timestamps,
                             image_longitude = image_longitude,
                             image_latitude = image_latitude,

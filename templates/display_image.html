@@ -6,6 +6,7 @@
 {% block stylesheets %}
 {{ super() }}
 
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -244,7 +245,16 @@
           <div class="card border-light mb-3 bg-dark text-white">
               <center><strong class="card-header" style = "color:rgb(119, 205, 255)">{{image_source[counter.value]}}</strong></center>
 
-            <img src="{{image}}">
+            <img id = "testimg" src="{{image}}">
+            {% if image_paths2[counter.value]: %}
+            <script>
+              var counterval = {{counter.value| tojson}};
+            </script>
+            <button id="clickme" onclick="changeImage(counterval);">Switch view</button>
+            {% endif %}
+
+
+
             <div class="card-body fontsize-table">
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Upload date: {{image_upload_date[counter.value]}} <br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
@@ -428,6 +438,13 @@ jQuery("#range_select input[type=radio]").click(function(){
 function selectElement(id, valueToSelect) {    
     let element = document.getElementById(id);
     element.value = valueToSelect;
+}
+
+function changeImage(counterval)
+{
+var img = document.getElementById("testimg");
+img.src="images/test2";
+return false;
 }
 </script>
 {% endblock javascripts %}   
