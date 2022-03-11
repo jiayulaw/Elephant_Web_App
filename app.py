@@ -1,6 +1,6 @@
 import ast
 from operator import contains
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -66,6 +66,17 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+# login_manager.refresh_view = 'relogin'
+# login_manager.needs_refresh_message = (u"Session timedout, please re-login")
+# login_manager.needs_refresh_message_category = "info"
+
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(minutes=20)
+    session.modified = True
+
 @login_manager.user_loader
 
 def load_user(user_id):
@@ -445,7 +456,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first() 
         if user: #if user in database
             if bcrypt.check_password_hash(user.password, form.password.data):
-                login_user(user)
+                login_user(user, remember=False)
                 user.authenticated = True
                 current_time = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
                 user.last_seen = current_time
