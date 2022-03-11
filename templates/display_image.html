@@ -247,10 +247,10 @@
 
             <img id = "testimg" src="{{image}}">
             {% if image_paths2[counter.value]: %}
-            <script>
+            <!-- <script>
               var counterval = {{counter.value| tojson}};
-            </script>
-            <button id="clickme" onclick="changeImage(counterval);">Switch view</button>
+            </script> -->
+            <button class = "bg-warning" id="clickme" onclick="toggleImage('{{image}}', '{{image_paths2[counter.value]}}');"><strong>Toggle detection view</strong></button>
             {% endif %}
 
 
@@ -440,10 +440,19 @@ function selectElement(id, valueToSelect) {
     element.value = valueToSelect;
 }
 
-function changeImage(counterval)
+function toggleImage(path1, path2)
 {
 var img = document.getElementById("testimg");
-img.src="images/test2";
+// img.src="images/test2";
+// return false;
+
+if (img.getAttribute('src') == path1) {
+  document.getElementById("testimg").src  = path2;
+        
+}
+else {
+  document.getElementById("testimg").src = path1;
+}
 return false;
 }
 </script>
