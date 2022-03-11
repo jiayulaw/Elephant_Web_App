@@ -61,8 +61,7 @@ data = DataStorage()
 #------------------------------------------------------------
 #-------------------------User Auth-------------------------
 #------------------------------------------------------------
-basedir = os.path.abspath(os.path.dirname(__file__))
-print(basedir)
+
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)

@@ -1,6 +1,9 @@
 import json
-
-with open('/personal_config.json', 'r') as f:
+import os
+from DB_class import BASE_DIR
+directory = rf"personal_config.json" 
+directory2 = os.path.join(BASE_DIR, directory)
+with open(directory2, 'r') as f:
     config = json.load(f)
     # print(f)
     ROBOFLOW_API_KEY = config["ROBOFLOW_API_KEY"]
