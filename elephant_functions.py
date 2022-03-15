@@ -125,7 +125,7 @@ def update_server_directory_images():
                         JsonFileName = str1 + ".json"
                         # JsonFilePath = os.path.join(directory, JsonFileName)
                         # JsonFilePath = rf"static/image uploads/{device_name}/"+JsonFileName
-                        JsonFilePath = os.path.join(rf"static/image uploads/{device_name}/", JsonFileName)
+                        JsonFilePath = os.path.join(rf"static/image uploads/{device_name}", JsonFileName)
                         JsonFilePath = os.path.join(BASE_DIR, JsonFilePath)
                         # Record to database the new image    
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
