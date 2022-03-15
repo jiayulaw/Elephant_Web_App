@@ -93,7 +93,7 @@ def update_server_directory_images():
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
             # try:
-            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg") and '-x-' in filename:
                 #strip away file format extension
                 str1 = filename.split(".")[0]
                 str2 = filename.split(".")[1]
