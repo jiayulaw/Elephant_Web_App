@@ -108,6 +108,7 @@ def update_server_directory_images():
                     detection_type = arr1[1]
                     # path = os.path.join(directory, filename)
                     path = rf"static/image uploads/{device_name}/"+filename
+
                     result = Images.query.filter_by(path=path).first()
                     if result:
                         # print("the file with same name already saved")
@@ -124,6 +125,7 @@ def update_server_directory_images():
                         JsonFileName = str1 + ".json"
                         # JsonFilePath = os.path.join(directory, JsonFileName)
                         JsonFilePath = rf"static/image uploads/{device_name}/"+JsonFileName
+                        JsonFilePath = os.path.join(BASE_DIR, JsonFilePath)
                         # Record to database the new image    
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
                         db.session.add(new_image)
