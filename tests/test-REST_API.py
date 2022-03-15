@@ -14,7 +14,7 @@ BASE = "http://127.0.0.1:5000/"
 # set status as online
 device_id = "1"
 name = "end device 1"
-last_seen = "06/03/2022, 19:46:27"
+last_seen = "06/03/2022, 19-46-27"
 message  = "Human detected!"
 status = "Online"
 battery_voltage = "14"

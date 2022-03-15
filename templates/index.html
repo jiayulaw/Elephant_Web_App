@@ -123,6 +123,10 @@
                 <th>
                   Battery current
                 </th>
+
+                <th>
+                  Power level
+                </th>
                 <th>
                   Battery level
                 </th>
@@ -145,8 +149,9 @@
                   <td>
                     {{devices_battery_current[counter.value]}} mA
                   </td>
-    
-
+                  <td>
+                    {{devices_power_level[counter.value]}} W
+                  </td>
                   <td class="text-center">
 
                       <label for="progress_bar_online">{{devices_battery_level[counter.value]}} %</label>

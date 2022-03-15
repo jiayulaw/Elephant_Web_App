@@ -354,6 +354,7 @@ def dashboard():
     devices_battery_voltage = []
     devices_battery_current = []
     devices_battery_level = []
+    devices_power_level = []
     devices_battery_status = []
 
 
@@ -417,7 +418,9 @@ def dashboard():
         devices_battery_level.append(battery_level)
 
 
-        devices_power_level = current_battery_voltage*current_battery_current
+        current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
+        current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
+        devices_power_level.append(current_power_level)
         
 
         if current_battery_voltage > 13:
