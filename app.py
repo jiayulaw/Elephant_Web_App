@@ -255,8 +255,9 @@ def roboflow():
                     # Check and send .json file associated with the image (if any)
                     ######################################################
                     JsonFileName = str1 + ".json"
-                    JsonFilePath = os.path.join(directory, JsonFileName)
-                    
+                    # JsonFilePath = os.path.join(directory, JsonFileName)
+                    directory = rf"static/image uploads/{device_name}" + JsonFileName
+                    JsonFilePath = os.path.join(BASE_DIR, directory)
                     if os.path.exists(JsonFilePath):
                     #    Read Annotation as String
                         annotationStr = open(JsonFilePath, "r").read()
