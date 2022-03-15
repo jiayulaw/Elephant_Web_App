@@ -358,13 +358,14 @@ def getDatetimeObject(datetime_str, formats):
     return datetime_object
 
 
-def check_and_create_img_thumbnail(dir, filename, max_size_in_kb):
+def check_and_create_img_thumbnail(path, max_size_in_kb):
     """ check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
     If image size is greater than max_size_in_kb, then the algorithm will continue compressing the image until it is smaller than maximum size.
     The function returns the boolean indicating whether input file is greater than specified size and the path of the compressed image.
     In the event where input file is already smaller than speciied size, the function returns the same path as input."""
     #read the img
-    path = dir + filename
+    # path = dir + filename
+    filename = os.path.basename(path)
     im = Image.open(path)
     # check filesize
     file_size = os.stat(path)

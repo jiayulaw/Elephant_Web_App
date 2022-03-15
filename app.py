@@ -393,7 +393,7 @@ def dashboard():
 
     cursor = end_device.query.all()
     for device in cursor:
-        datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H-%M-%S')
+        datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
         #hardcode the timezone as Malaysia timezone
         timezone = pytz.timezone("Asia/Kuala_Lumpur")
         #add timezone attribute to datetime object
@@ -862,7 +862,9 @@ def debug():
 @app.route("/about_us")
 @login_required
 def about_us():
-    return render_template("about_us.html", active_state = "about_us")
+    images = []
+    images.append(check_and_create_img_thumbnail('static/img/bigpicture.png', 1000)[1])
+    return render_template("about_us.html", active_state = "about_us", images = images)
 
 @app.route("/start_thread")
 @login_required
