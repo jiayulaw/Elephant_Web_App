@@ -93,115 +93,116 @@ def update_server_directory_images():
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
             # try:
-            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg") and '-x-' in filename:
-                #strip away file format extension
-                str1 = filename.split(".")[0]
-                str2 = filename.split(".")[1]
-                #strip between datetime and detection type
-                arr1 = str1.split("-x-")
-                date_time = arr1[0]
-                date_time_obj = datetime.datetime.strptime(date_time,'%Y-%m-%d %H-%M-%S')
-                date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
-                
+            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+                if '-x-' in filename:
+                    #strip away file format extension
+                    str1 = filename.split(".")[0]
+                    str2 = filename.split(".")[1]
+                    #strip between datetime and detection type
+                    arr1 = str1.split("-x-")
+                    date_time = arr1[0]
+                    date_time_obj = datetime.datetime.strptime(date_time,'%Y-%m-%d %H-%M-%S')
+                    date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
+                    
 
-                detection_type = arr1[1]
-                path = os.path.join(directory, filename)
-                path = rf"static/image uploads/{device_name}/"+filename
-                result = Images.query.filter_by(path=path).first()
-                if result:
-                    # print("the file with same name already saved")
-                    pass
-                else:
-                    ######################################################
-                    # Record new image to database 
-                    ######################################################
-                    print("hellloooo7")
-                    original_img = cv2.imread(path)
+                    detection_type = arr1[1]
+                    path = os.path.join(directory, filename)
+                    path = rf"static/image uploads/{device_name}/"+filename
+                    result = Images.query.filter_by(path=path).first()
+                    if result:
+                        # print("the file with same name already saved")
+                        pass
+                    else:
+                        ######################################################
+                        # Record new image to database 
+                        ######################################################
+                        print("hellloooo7")
+                        original_img = cv2.imread(path)
 
-                    ######################################################
-                    # Check and send .json file associated with the image (if any)
-                    ######################################################
-                    JsonFileName = str1 + ".json"
-                    JsonFilePath = os.path.join(directory, JsonFileName)
-                    # Record to database the new image    
-                    new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
-                    db.session.add(new_image)
-                    db.session.commit()
-                    print("New image detected and recorded to database")
-                    if os.path.exists(JsonFilePath):
-                    #    Read Annotation as String
-                        annotationStr = open(JsonFilePath, "r").read()
-                        annotationList = ast.literal_eval(annotationStr)
-                        print(annotationList)
-                        print(type(annotationList))
-                        annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
-                        annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
-                        annotated_filepath = f"static/image uploads/{device_name}/" + annotated_filename
-                        cv2.imwrite(annotated_filepath, annotated_img)
-                        result = Images.query.filter_by(path=path).first()
-                        result.path2 = annotated_filepath
-                        result.json_path = JsonFilePath
+                        ######################################################
+                        # Check and send .json file associated with the image (if any)
+                        ######################################################
+                        JsonFileName = str1 + ".json"
+                        JsonFilePath = os.path.join(directory, JsonFileName)
+                        # Record to database the new image    
+                        new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
+                        db.session.add(new_image)
                         db.session.commit()
+                        print("New image detected and recorded to database")
+                        if os.path.exists(JsonFilePath):
+                        #    Read Annotation as String
+                            annotationStr = open(JsonFilePath, "r").read()
+                            annotationList = ast.literal_eval(annotationStr)
+                            print(annotationList)
+                            print(type(annotationList))
+                            annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
+                            annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
+                            annotated_filepath = f"static/image uploads/{device_name}/" + annotated_filename
+                            cv2.imwrite(annotated_filepath, annotated_img)
+                            result = Images.query.filter_by(path=path).first()
+                            result.path2 = annotated_filepath
+                            result.json_path = JsonFilePath
+                            db.session.commit()
 
-                        # remember to remove confidence from the annotations before sending to roboflow api
-                        for box in annotationList[0]['annotations']:
-                            del box['confidence']
+                            # remember to remove confidence from the annotations before sending to roboflow api
+                            for box in annotationList[0]['annotations']:
+                                del box['confidence']
 
-                        # PROCEED TO ROBOFLOW API
-                        # After all detections, Convert image
-                        roboflow_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
-                        pilImage = Image.fromarray(roboflow_img)
+                            # PROCEED TO ROBOFLOW API
+                            # After all detections, Convert image
+                            roboflow_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
+                            pilImage = Image.fromarray(roboflow_img)
 
-                        # Convert to JPEG Buffer
-                        buffered = io.BytesIO()
-                        pilImage.save(buffered, quality=90, format="JPEG")
+                            # Convert to JPEG Buffer
+                            buffered = io.BytesIO()
+                            pilImage.save(buffered, quality=90, format="JPEG")
 
-                        # Base 64 Encode
-                        img_str = base64.b64encode(buffered.getvalue())
-                        img_str = img_str.decode("ascii")
-                        print("decoded and ready to send!")
-                        # Construct the URL
-                        image_upload_url = "".join([
-                            "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
-                            "?api_key=", ROBOFLOW_API_KEY,
-                            "&name=", filename,
-                            "&split=train"
-                        ])
+                            # Base 64 Encode
+                            img_str = base64.b64encode(buffered.getvalue())
+                            img_str = img_str.decode("ascii")
+                            print("decoded and ready to send!")
+                            # Construct the URL
+                            image_upload_url = "".join([
+                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
+                                "?api_key=", ROBOFLOW_API_KEY,
+                                "&name=", filename,
+                                "&split=train"
+                            ])
 
-                        r = requests.post(image_upload_url, data=img_str, headers={
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        })
+                            r = requests.post(image_upload_url, data=img_str, headers={
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            })
 
-                        imageId = r.json()['id']
-                        print(imageId)
-                        # After all detections,
-                        # Save to Json File
-                        with open("activeLearning.json", 'w') as outfile:
-                            json.dump(annotationList, outfile)
-                        # Read Annotation as String
-                        annotationStr2 = open("activeLearning.json", "r").read()
-                        print("below is string read from json:")
-                        print(annotationStr2)
+                            imageId = r.json()['id']
+                            print(imageId)
+                            # After all detections,
+                            # Save to Json File
+                            with open("activeLearning.json", 'w') as outfile:
+                                json.dump(annotationList, outfile)
+                            # Read Annotation as String
+                            annotationStr2 = open("activeLearning.json", "r").read()
+                            print("below is string read from json:")
+                            print(annotationStr2)
 
-                        # Construct the URL
-                        annotation_upload_url = "".join([
-                            "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
-                            "?api_key=", ROBOFLOW_API_KEY,
-                            "&name=activeLearning.json"
-                        ])
-                        print(annotation_upload_url)
-                        # POST to the API
-                        print("below is string converted from list using str method:")
-                        annotationStr = str(annotationList)
-                        r = requests.post(annotation_upload_url, data=annotationStr2, headers={
-                            "Content-Type": "text/plain"
-                        })
-                        print("annotate sent!")
-                        print(annotationStr2)
-                        print(type(annotationStr2))
+                            # Construct the URL
+                            annotation_upload_url = "".join([
+                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+                                "?api_key=", ROBOFLOW_API_KEY,
+                                "&name=activeLearning.json"
+                            ])
+                            print(annotation_upload_url)
+                            # POST to the API
+                            print("below is string converted from list using str method:")
+                            annotationStr = str(annotationList)
+                            r = requests.post(annotation_upload_url, data=annotationStr2, headers={
+                                "Content-Type": "text/plain"
+                            })
+                            print("annotate sent!")
+                            print(annotationStr2)
+                            print(type(annotationStr2))
 
-                        print(r.json()['success'])
-                        print("Done Bossku")
+                            print(r.json()['success'])
+                            print("Done Bossku")
 
 
             else:
