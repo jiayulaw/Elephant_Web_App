@@ -243,7 +243,7 @@ def roboflow():
                 result = Images.query.filter_by(path=path).first()
                 if result:
                     # print("the file with same name already saved")
-                    print("hellloooo6")
+                    pass
                 else:
                     ######################################################
                     # Record new image to database 
