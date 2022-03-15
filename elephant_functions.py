@@ -107,7 +107,7 @@ def update_server_directory_images():
 
                     detection_type = arr1[1]
                     path = os.path.join(directory2, filename)
-                    path = rf"static/image uploads/{device_name}/"+filename
+                    # path = rf"static/image uploads/{device_name}/"+ filename
                     result = Images.query.filter_by(path=path).first()
                     if result:
                         # print("the file with same name already saved")
