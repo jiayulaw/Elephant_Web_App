@@ -139,8 +139,12 @@
     <!--Filter field-->
       <div class="col-lg-6 col-md-12">
         <div class="card card-chart ml-1 bg-dark text-white">
+          <div class="card-header">
+            <h2 class = "card-title">Data Center - View Image(s)</h2>
+
+          </div>
           <div class="card-body">
-            <h3 class="card-title">Image Filter</h3>
+            <h4>Image Filter</h4>
             <form style = "width:100%;" id="datetime_range" action="{{ url_for('display_image') }}" method="GET" autocomplete="off">
               <div class = "form-group row ml-1"> 
                 <label for="station" class="col-sm-3 col-form-label">Image source</label>
@@ -244,13 +248,13 @@
         <div class="col">
           <div class="card border-light mb-3 bg-dark text-white">
               <center><strong class="card-header" style = "color:rgb(119, 205, 255)">{{image_source[counter.value]}}</strong></center>
-
-            <img id = "testimg" src="{{image}}">
+              {% set my_string = "dispImg" ~ counter.value %}
+            <img id = {{my_string}} src="{{image}}">
             {% if image_paths2[counter.value]: %}
             <!-- <script>
               var counterval = {{counter.value| tojson}};
             </script> -->
-            <button class = "bg-warning" id="clickme" onclick="toggleImage('{{image}}', '{{image_paths2[counter.value]}}');"><strong>Toggle detection view</strong></button>
+            <button class = "bg-warning" id="clickme" onclick="toggleImage('{{image}}', '{{image_paths2[counter.value]}}', '{{my_string}}');"><strong>Toggle detection view</strong></button>
             {% endif %}
 
 
@@ -440,18 +444,18 @@ function selectElement(id, valueToSelect) {
     element.value = valueToSelect;
 }
 
-function toggleImage(path1, path2)
+function toggleImage(path1, path2, imgId)
 {
-var img = document.getElementById("testimg");
+var img = document.getElementById(imgId);
 // img.src="images/test2";
 // return false;
 
 if (img.getAttribute('src') == path1) {
-  document.getElementById("testimg").src  = path2;
+  img.src  = path2;
         
 }
 else {
-  document.getElementById("testimg").src = path1;
+  img.src = path1;
 }
 return false;
 }

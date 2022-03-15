@@ -26,7 +26,7 @@ from os.path import exists
 from elephant_functions import *
 
 #Import database rows declaration, and also Flask app objects
-from DB_class import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
+from app_config import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
 
 x_array = []
 y_array = []

@@ -5,20 +5,20 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy 
 import os
-import sqlite3
 from flask_bcrypt import Bcrypt
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import datetime
 from elephant_functions import *
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
 
 app = Flask(__name__, static_folder='static')
 api = Api(app)
 #need to set base dir to prevent path issue in pythonanywhere
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "database.sqlite")
-#------------------------------------------------------------
-#-------------------------Database Config-------------------------
-#------------------------------------------------------------
+#=============================================================================================
+# Database tables initialization
+#=============================================================================================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SECRET_KEY'] = 'thisisasecretkey'
 db = SQLAlchemy(app)
@@ -58,6 +58,8 @@ class end_device(db.Model):
     last_seen = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(100), nullable=False)
     message = db.Column(db.String(100), nullable=True)
+    battery_voltage = db.Column(db.String(100), nullable=True)
+    battery_current = db.Column(db.String(100), nullable=True)
     timezone = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
@@ -77,6 +79,52 @@ class User(db.Model, UserMixin):
             return True
         else:
             return False
+
+#=============================================================================================
+# Forms initialization
+#=============================================================================================
+class RegisterForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
+    
+    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
+   
+    # access_level = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
+
+    access_level = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
+    submit = SubmitField("Register")
+    #Checks whether the username is redundant
+    def validate_username(self, username):
+        existing_user_username = User.query.filter_by(
+            username = username.data).first()
+
+        if existing_user_username:
+            raise ValidationError(
+                "That username already exists. Please choose a different one.")
+
+
+class ChangePasswordForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
+    
+    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
+
+    new_password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "New password"})
+    new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
+   
+    submit = SubmitField("Change password")
+    #Checks whether the username is redundant
+    def validate_username(self, username):
+        existing_user_username = User.query.filter_by(
+            username = username.data).first()
+
+        if not existing_user_username:
+            raise ValidationError("The username does not exist.")
+
+class LoginForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
+    
+    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
+    
+    submit = SubmitField("Login")
             
 if __name__ == "__main__":
     db.create_all()

@@ -1,7 +1,7 @@
 import json
 import os
-from DB_class import BASE_DIR
-directory = rf"personal_config.json" 
+from app_config import BASE_DIR
+directory = rf"roboflow_config.json" 
 directory2 = os.path.join(BASE_DIR, directory)
 with open(directory2, 'r') as f:
     config = json.load(f)

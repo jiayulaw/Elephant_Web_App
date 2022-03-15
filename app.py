@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
+
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 import sys
@@ -25,9 +25,10 @@ from werkzeug.utils import secure_filename
 import shutil
 from os.path import exists
 from elephant_functions import *
+import threading
 
 #Import database rows declaration, and also Flask app objects
-from DB_class import Images, end_device, User, Detection, Server_activity, app, api, db, db_path, BASE_DIR
+from app_config import *
 
 #------------------------------------------------------------
 #-------------------------User permission Config-------------------------
@@ -83,50 +84,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-class RegisterForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-   
-    # access_level = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
 
-    access_level = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
-    submit = SubmitField("Register")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if existing_user_username:
-            raise ValidationError(
-                "That username already exists. Please choose a different one.")
-
-
-class ChangePasswordForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
-
-    new_password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "New password"})
-    new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
-   
-    submit = SubmitField("Change password")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if not existing_user_username:
-            raise ValidationError("The username does not exist.")
-
-
-
-class LoginForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-    
-    submit = SubmitField("Login")
 
 #------------------------------------------------------------
 #-------------------------User Admin-------------------------
@@ -166,12 +124,16 @@ device_stat_put_args.add_argument("name", type=str, help="Device name is require
 device_stat_put_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
 device_stat_put_args.add_argument("message", type=str, help="Device message is required", required=True)
 device_stat_put_args.add_argument("status", type=str, help="Device status is required", required=True)
+device_stat_put_args.add_argument("battery_voltage", type=str, help="Device battery voltage?")
+device_stat_put_args.add_argument("battery_current", type=str, help="Device battery current?")
 
 device_stat_update_args = reqparse.RequestParser()
 device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
 device_stat_update_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
 device_stat_update_args.add_argument("message", type=str, help="Device message is required", required=True)
 device_stat_update_args.add_argument("status", type=str, help="Device status is required", required=True)
+device_stat_update_args.add_argument("battery_voltage", type=str, help="Device battery voltage?")
+device_stat_update_args.add_argument("battery_current", type=str, help="Device battery current?")
 
 
 resource_fields = {
@@ -179,7 +141,9 @@ resource_fields = {
 	'name': fields.String,
 	'last_seen': fields.String,
 	'message': fields.String,
-    'status': fields.String
+    'status': fields.String,
+    'battery_voltage': fields.String,
+    'battery_current': fields.String
 }
 
 #marshal_with to serialize object
@@ -218,6 +182,12 @@ class Device_Stat_pipeline(Resource):
 			
 		if args['message']:
 			result.message = args['message']
+
+		if args['battery_voltage']:
+			result.battery_voltage = args['battery_voltage']
+
+		if args['battery_current']:
+			result.battery_current = args['battery_current']
         
 		if args['status']:
 			if result.status != args['status']:
@@ -244,7 +214,6 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 @app.route("/roboflow")
 @login_required #we can only access dashboard when logged in
 def roboflow():
-    print("hellloooo")
     """ check directory to update any new images added through SFTP or direct upload to server"""
     print("Updating server directory images and detection information...")
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
@@ -252,7 +221,6 @@ def roboflow():
         directory2 = os.path.join(BASE_DIR, directory)
         print("hellloooo2")
         for filename in os.listdir(directory2):
-            print("hellloooo3")
             
             # if filename.endswith(".json"):
             # if db contains file with same name as .json, send the file together with this .json to roboflow
@@ -383,6 +351,10 @@ def dashboard():
     devices_last_seen = []
     devices_message = []
     devices_status = []
+    devices_battery_voltage = []
+    devices_battery_current = []
+    devices_battery_level = []
+    devices_battery_status = []
 
 
     descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 1")
@@ -432,10 +404,33 @@ def dashboard():
         devices_last_seen.append(datetime_str_formatted)
         devices_message.append(device.message)
         devices_status.append(device.status)
+        devices_battery_current.append(device.battery_current)
+        # Battery stats
+        current_battery_voltage = float(device.battery_voltage)
+        devices_battery_voltage.append(current_battery_voltage)
+        full_battery_voltage = 13
+        min_battery_voltage  = 11
+        battery_operating_range = full_battery_voltage - min_battery_voltage
+        battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
+        battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
+        devices_battery_level.append(battery_level)
+        
+
+        if current_battery_voltage > 13:
+            stat = "Charging"
+        elif current_battery_voltage == 13:
+            stat = "Fully charged"
+        elif current_battery_voltage > 10 and current_battery_voltage < 13:
+            stat = "Operating"
+        elif current_battery_voltage < 10:
+            stat = "Running out"
+            
+        devices_battery_status.append(stat)
+
 
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, navbar_items = navbar_items)
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, navbar_items = navbar_items)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
@@ -502,8 +497,6 @@ def register():
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
-
-        hashed_password = bcrypt.generate_password_hash(form.password.data)
         result = User.query.filter_by(username = form.username.data).first()
         if not  bcrypt.check_password_hash(result.password, form.password.data):
             return render_template("change_password.html", active_state = "account", form = form, msg = "Current password is incorrect.") 
@@ -586,7 +579,6 @@ def analytics():
     navbar_items = []
 
     # Hint: getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime)
-
     #Filter the number of images for all time
     all_time_x_array, all_time_y_array = getImageNumOverTime(None, None, None, None)
     all_time_device1_x_array, all_time_device1_y_array = getImageNumOverTime("end device 1", None, None, None)
@@ -672,9 +664,9 @@ def upload_multiple_image():
                 timestamp_str   = request.form['timestamp_input']
 
                 # Create datetime object so that we can convert to UTC from the browser's local time
-                timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
+                timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
 
-                img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
+                img_time = timestamp_str.strftime("%Y-%m-%d %H:%M:%S")
 
                 img_tag_input = request.form['img_tag_input']
                 
@@ -692,80 +684,81 @@ def upload_multiple_image():
                 # server activity
                 logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
-                data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-                return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
+
 
         else:
             flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_multipleimgupload')
             return redirect('/data_center/update_status')
+    data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+    return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
         
    
 
-@app.route("/data_center/update_status", methods = ['POST'])
-@login_required
-@require_role(role="admin", role2 = "explorer")
-def upload_image():
-    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
-    if 'file' not in request.files:
-        flash('Upload Failed. No file part', 'error_msg_singleimgupload')
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        flash('Upload Failed. No image selected for uploading', 'error_msg_singleimgupload')
-        return redirect(request.url)
+# @app.route("/data_center/update_status", methods = ['POST'])
+# @login_required
+# @require_role(role="admin", role2 = "explorer")
+# def upload_image():
+#     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
+#     if 'file' not in request.files:
+#         flash('Upload Failed. No file part', 'error_msg_singleimgupload')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('Upload Failed. No image selected for uploading', 'error_msg_singleimgupload')
+#         return redirect(request.url)
 
-    if file and allowed_file(file.filename): 
-        img_source = request.form['img_source']
-        filename = secure_filename(file.filename)
-        timestamp = datetime.datetime.now().strftime("uploaded-on_%y-%m-%d_%H-%M-%S_")
-        str = img_source + "/" + timestamp + filename
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-        absolute_file_path = os.path.join(BASE_DIR, file_path)
+#     if file and allowed_file(file.filename): 
+#         img_source = request.form['img_source']
+#         filename = secure_filename(file.filename)
+#         timestamp = datetime.datetime.now().strftime("uploaded-on_%y-%m-%d_%H-%M-%S_")
+#         str = img_source + "/" + timestamp + filename
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
+#         absolute_file_path = os.path.join(BASE_DIR, file_path)
 
-        file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
+#         file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
 
-        # checks whether file path is redundant
-        redundant_file_bool = Images.query.filter_by(path=file_path).first()
+#         # checks whether file path is redundant
+#         redundant_file_bool = Images.query.filter_by(path=file_path).first()
 
-        if redundant_file_bool:
-            flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
-            return redirect(request.url)
-        else:
+#         if redundant_file_bool:
+#             flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
+#             return redirect(request.url)
+#         else:
 
 
      
-            flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
-            #=============== Get other user input =============== 
-            timestamp_str   = request.form['timestamp_input']
-            # Create datetime object so that we can convert to UTC from the browser's local time
-            timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
-            img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
+#             flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
+#             #=============== Get other user input =============== 
+#             timestamp_str   = request.form['timestamp_input']
+#             # Create datetime object so that we can convert to UTC from the browser's local time
+#             timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+#             img_time = timestamp_str.strftime("%Y-%m-%d %H:%M:%S")
 
-            img_tag_input = request.form['img_tag_input']
+#             img_tag_input = request.form['img_tag_input']
             
-            img_latitude = request.form['img_latitude']
-            img_longitude = request.form['img_longitude']
-            upload_date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
+#             img_latitude = request.form['img_latitude']
+#             img_longitude = request.form['img_longitude']
+#             upload_date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
 
-            #save the file to server directory
-            file.save(absolute_file_path)
+#             #save the file to server directory
+#             file.save(absolute_file_path)
             
-            new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
-            db.session.add(new_image)
-            db.session.commit()
+#             new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
+#             db.session.add(new_image)
+#             db.session.commit()
 
-            # server activity
-            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
+#             # server activity
+#             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
-            timestamp_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-            data.input_date_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-            data.input_date_str = data.input_date_str.strftime("%Y-%m-%d %H:%M:%S")
+#             timestamp_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
+#             data.input_date_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
+#             data.input_date_str = data.input_date_str.strftime("%Y-%m-%d %H:%M:%S")
             
-            return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
+#             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
 
-    else:
-        flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_singleimgupload')
-        return redirect(request.url)
+#     else:
+#         flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_singleimgupload')
+#         return redirect(request.url)
         
 # @app.route('/display/<file_path>')
 # def display_img(filename):
@@ -854,12 +847,13 @@ def edit_img(img_id):
 def debug():
     return render_template("debug.html", active_state = "debug")
 
-@app.route("/test")
-def test():
-    return render_template("test.html")
+# @app.route("/test")
+# def test():
+#     return render_template("test.html")
 
 
 @app.route("/about_us")
+@login_required
 def about_us():
     return render_template("about_us.html", active_state = "about_us")
 

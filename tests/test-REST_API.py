@@ -17,19 +17,21 @@ name = "end device 1"
 last_seen = "06/03/2022, 19:46:27"
 message  = "Human detected!"
 status = "Online"
+battery_voltage = "14"
+battery_current = "0.4"
 
 # this is a function to send 
-def update_device_stat(device_id, name, last_seen, message, status):
+def update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current):
     print("Trying to create new row in DB")
-    response = requests.put(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status})
+    response = requests.put(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status, "battery_voltage": battery_voltage, "battery_current": battery_current})
     print(response.json())
 
     print("Update existing row in DB")
-    response = requests.patch(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status})
+    response = requests.patch(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status, "battery_voltage": battery_voltage, "battery_current": battery_current})
     print(response.json())
 
     print("Displaying updated row in DB")
     response = requests.get(BASE + "device_stat/" + device_id)
     print(response.json())
 
-update_device_stat(device_id, name, last_seen, message, status)
+update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current)

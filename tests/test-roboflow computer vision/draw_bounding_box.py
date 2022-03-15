@@ -1,7 +1,7 @@
 
 import cv2
 import numpy as np
-from config import*
+from roboflow_config import*
 import requests
 import base64
 import io

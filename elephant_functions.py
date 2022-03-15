@@ -20,8 +20,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from os.path import exists
 import random
-from DB_class import Images, end_device, User, Detection, Server_activity, api, db, db_path, BASE_DIR
-import threading
+from app_config import *
 import pytz
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -30,7 +29,7 @@ import requests
 import base64
 # For roboflow API
 import cv2
-from config import *
+from roboflow_config import *
 from PIL import Image
 import io
 import ast
@@ -113,7 +112,7 @@ def update_server_directory_images():
                     result = Images.query.filter_by(path=path).first()
                     if result:
                         # print("the file with same name already saved")
-                        print("hellloooo6")
+                        pass
                     else:
                         ######################################################
                         # Record new image to database 
@@ -319,7 +318,7 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
             img_timestamps.append(datetime_obj)
 
     sorted_img_timestamps = sorted(img_timestamps)
-    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d-%S") for date in sorted_img_timestamps]
+    sorted_img_timestamps_string = [date.strftime("%Y-%m-%d") for date in sorted_img_timestamps]
     # sorted_img_timestamps_string = [date.strftime("%Y-%m-%d %H-%M") for date in sorted_img_timestamps]
 
     for timestamp in sorted_img_timestamps_string:
@@ -359,3 +358,31 @@ def getDatetimeObject(datetime_str, formats):
         except:
             pass
     return datetime_object
+
+
+def check_and_create_img_thumbnail(dir, filename, max_size_in_kb):
+    """ check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
+    If image size is greater than max_size_in_kb, then the algorithm will continue compressing the image until it is smaller than maximum size.
+    The function returns the boolean indicating whether input file is greater than specified size and the path of the compressed image.
+    In the event where input file is already smaller than speciied size, the function returns the same path as input."""
+    #read the img
+    path = dir + filename
+    im = Image.open(path)
+    # check filesize
+    file_size = os.stat(path)
+    print("Size of file :", file_size.st_size, "bytes")
+    size_bool = 0
+    while (int(file_size.st_size)/1024) > max_size_in_kb:
+        size_bool = 1
+        #create thumbnail
+        MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
+        im.thumbnail(MAX_SIZE)
+        # creating thumbnail
+        path = dir + "compressed_" + filename
+        im.save(path)
+        # im.show()
+        file_size = os.stat(path)
+        print("Compressed image to size:", file_size.st_size)
+
+    return size_bool, path
+

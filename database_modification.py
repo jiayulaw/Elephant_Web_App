@@ -28,7 +28,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SECRET_KEY'] = 'thisisasecretkey'
 db = SQLAlchemy(app)
 
-from DB_class import Images, end_device, User
+from app_config import Images, end_device, User
 
 command = "DELETE FROM Images WHERE timestamp='2022-01-28 00:00:00';"
 command = "DELETE FROM Images;"
