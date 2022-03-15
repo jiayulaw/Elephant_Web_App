@@ -124,8 +124,8 @@ device_stat_put_args.add_argument("name", type=str, help="Device name is require
 device_stat_put_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
 device_stat_put_args.add_argument("message", type=str, help="Device message is required", required=True)
 device_stat_put_args.add_argument("status", type=str, help="Device status is required", required=True)
-device_stat_put_args.add_argument("battery_voltage", type=str, help="Device battery voltage?")
-device_stat_put_args.add_argument("battery_current", type=str, help="Device battery current?")
+device_stat_put_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
+device_stat_put_args.add_argument("battery_current", type=str, help="Device battery current?", required=True)
 
 device_stat_update_args = reqparse.RequestParser()
 device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
