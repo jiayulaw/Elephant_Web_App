@@ -132,8 +132,8 @@ device_stat_update_args.add_argument("name", type=str, help="Device name is requ
 device_stat_update_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
 device_stat_update_args.add_argument("message", type=str, help="Device message is required", required=True)
 device_stat_update_args.add_argument("status", type=str, help="Device status is required", required=True)
-device_stat_update_args.add_argument("battery_voltage", type=str, help="Device battery voltage?")
-device_stat_update_args.add_argument("battery_current", type=str, help="Device battery current?")
+device_stat_update_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
+device_stat_update_args.add_argument("battery_current", type=str, help="Device battery current?",required=True)
 
 
 resource_fields = {
@@ -392,7 +392,7 @@ def dashboard():
 
     cursor = end_device.query.all()
     for device in cursor:
-        datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+        datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H-%M-%S')
         #hardcode the timezone as Malaysia timezone
         timezone = pytz.timezone("Asia/Kuala_Lumpur")
         #add timezone attribute to datetime object
@@ -404,7 +404,8 @@ def dashboard():
         devices_last_seen.append(datetime_str_formatted)
         devices_message.append(device.message)
         devices_status.append(device.status)
-        devices_battery_current.append(device.battery_current)
+        current_battery_current = float(device.battery_current)
+        devices_battery_current.append(current_battery_current)
         # Battery stats
         current_battery_voltage = float(device.battery_voltage)
         devices_battery_voltage.append(current_battery_voltage)
@@ -414,6 +415,9 @@ def dashboard():
         battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
         battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
         devices_battery_level.append(battery_level)
+
+
+        devices_power_level = current_battery_voltage*current_battery_current
         
 
         if current_battery_voltage > 13:
@@ -430,7 +434,7 @@ def dashboard():
 
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, navbar_items = navbar_items)
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level navbar_items = navbar_items)
 
 @app.route('/update_server', methods=['POST'])
 def webhook():

@@ -27,7 +27,7 @@ import os
 
 
 
-def check_and_create_img_thumbnail(dir, filename, max_size_in_kb):
+def check_and_create_img_thumbnail(path, max_size_in_kb):
     """ check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
     If image size is greater than max_size_in_kb, then the algorithm will continue compressing the image until it is smaller than maximum size.
     The function returns the boolean indicating whether input file is greater than specified size and the path of the compressed image.
@@ -45,7 +45,7 @@ def check_and_create_img_thumbnail(dir, filename, max_size_in_kb):
         MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
         im.thumbnail(MAX_SIZE)
         # creating thumbnail
-        path = dir + "compressed_" + filename
+        path = dir + "thumbnail" + filename
         im.save(path)
         # im.show()
         file_size = os.stat(path)

@@ -91,11 +91,9 @@ def update_server_directory_images():
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
-        print("hellloooo2")
         for filename in os.listdir(directory2):
             try:
                 if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                    print("hellloooo5")
                     #strip away file format extension
                     str1 = filename.split(".")[0]
                     str2 = filename.split(".")[1]
@@ -378,7 +376,7 @@ def check_and_create_img_thumbnail(dir, filename, max_size_in_kb):
         MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
         im.thumbnail(MAX_SIZE)
         # creating thumbnail
-        path = dir + "compressed_" + filename
+        path = dir + "thumbnail_" + filename
         im.save(path)
         # im.show()
         file_size = os.stat(path)
