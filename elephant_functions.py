@@ -140,7 +140,10 @@ def update_server_directory_images():
                             print(type(annotationList))
                             annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
                             annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
-                            annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
+                            # annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
+                            annotated_filepath = "static/image uploads/" + device_name + "/" + annotated_filename
+                            print('annotated_filepath: ')
+                            print(annotated_filepath)
                             
                             cv2.imwrite(annotated_filepath, annotated_img)
                             result = Images.query.filter_by(path=path).first()
