@@ -86,6 +86,99 @@ def bounding_box_and_text(annotations, img):
         cv2.putText(img, text_box, (x+10, y-7), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 0), 2)
     return img
 
+def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat):
+    absolute_path = os.path.join(BASE_DIR, path)
+    original_img = cv2.imread(absolute_path)
+    JsonFileName = common_name + ".json"
+    # JsonFilePath = os.path.join(directory, JsonFileName)
+
+    JsonFilePath = os.path.dirname(path)+"/" + JsonFileName
+    # JsonFilePath = os.path.join(rf"static/image uploads/{device_name}", JsonFileName)
+    JsonFilePath_absolute = os.path.join(BASE_DIR, JsonFilePath)
+    annotated_filename = detection_datetime + "xxx" + detection_type + "_annotated." + fileformat
+    annotated_filepath = os.path.dirname(path)+"/" + annotated_filename
+    annotated_filepath_absolute = os.path.join(BASE_DIR, annotated_filepath)
+
+    #if the image is not yet annotated and there exist an annotation file for it
+    if not os.path.exists(annotated_filepath_absolute) and os.path.exists(JsonFilePath_absolute):
+    #    Read Annotation as String
+        annotationStr = open(JsonFilePath_absolute, "r").read()
+        annotationList = ast.literal_eval(annotationStr)
+        print(annotationList)
+        print(type(annotationList))
+        annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
+
+        cv2.imwrite(annotated_filepath_absolute, annotated_img)
+        result = Images.query.filter_by(path=path).first()
+        result.path2 = annotated_filepath
+        result.json_path = JsonFilePath
+        db.session.commit()
+
+        # remember to remove confidence from the annotations before sending to roboflow api
+        for box in annotationList[0]['annotations']:
+            del box['confidence']
+
+        # PROCEED TO ROBOFLOW API
+        # After all detections, Convert image
+        roboflow_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
+        pilImage = Image.fromarray(roboflow_img)
+
+        # Convert to JPEG Buffer
+        buffered = io.BytesIO()
+        pilImage.save(buffered, quality=90, format="JPEG")
+
+        # Base 64 Encode
+        img_str = base64.b64encode(buffered.getvalue())
+        img_str = img_str.decode("ascii")
+        print("decoded and ready to send!")
+        # Construct the URL
+        image_upload_url = "".join([
+            "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
+            "?api_key=", ROBOFLOW_API_KEY,
+            "&name=", os.path.basename(path),
+            "&split=train"
+        ])
+
+        r = requests.post(image_upload_url, data=img_str, headers={
+            "Content-Type": "application/x-www-form-urlencoded"
+        })
+
+        imageId = r.json()['id']
+        print(imageId)
+        # After all detections,
+        # Save to Json File
+        with open("activeLearning.json", 'w') as outfile:
+            json.dump(annotationList, outfile)
+        # Read Annotation as String
+        annotationStr2 = open("activeLearning.json", "r").read()
+        print("below is string read from json:")
+        print(annotationStr2)
+
+        # Construct the URL
+        annotation_upload_url = "".join([
+            "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+            "?api_key=", ROBOFLOW_API_KEY,
+            "&name=activeLearning.json"
+        ])
+        print(annotation_upload_url)
+        # POST to the API
+        print("below is string converted from list using str method:")
+        annotationStr = str(annotationList)
+        r = requests.post(annotation_upload_url, data=annotationStr2, headers={
+            "Content-Type": "text/plain"
+        })
+        print("annotate sent!")
+        print(annotationStr2)
+        print(type(annotationStr2))
+
+        try:
+            print(r.json()['success'])
+        except:
+            pass
+
+        
+        print("Done Bossku")
+
 def update_server_directory_images():
     """ check directory to update any new images added through SFTP or direct upload to server"""
     print("Updating server directory images and detection information...")
@@ -97,12 +190,12 @@ def update_server_directory_images():
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
                 if '-x-' in filename and 'thumbnail' not in filename:
                     #strip away file format extension
-                    str1 = filename.split(".")[0]
-                    str2 = filename.split(".")[1]
+                    common_name = filename.split(".")[0]
+                    fileformat = filename.split(".")[1]
                     #strip between datetime and detection type
-                    arr1 = str1.split("-x-")
-                    date_time = arr1[0]
-                    date_time_obj = datetime.datetime.strptime(date_time,'%Y-%m-%d %H-%M-%S')
+                    arr1 = common_name.split("-x-")
+                    detection_date_time = arr1[0]
+                    date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
                     date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
                     
 
@@ -113,116 +206,19 @@ def update_server_directory_images():
                     result = Images.query.filter_by(path=path).first()
                     if result:
                         # print("the file with same name already saved")
-                        pass
+                        annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat)
                     else:
                         ######################################################
                         # Record new image to database 
                         ######################################################
-                        absolute_path = os.path.join(BASE_DIR, path)
-                        original_img = cv2.imread(absolute_path)
-                        ######################################################
-                        # Check and send .json file associated with the image (if any)
-                        ######################################################
-                        JsonFileName = str1 + ".json"
-                        # JsonFilePath = os.path.join(directory, JsonFileName)
-                        JsonFilePath = rf"static/image uploads/{device_name}/"+JsonFileName
-                        # JsonFilePath = os.path.join(rf"static/image uploads/{device_name}", JsonFileName)
-                        JsonFilePath_absolute = os.path.join(BASE_DIR, JsonFilePath)
-                        # Record to database the new image    
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
                         db.session.add(new_image)
                         db.session.commit()
                         print("New image detected and recorded to database")
-                        if os.path.exists(JsonFilePath_absolute):
-                        #    Read Annotation as String
-                            annotationStr = open(JsonFilePath_absolute, "r").read()
-                            annotationList = ast.literal_eval(annotationStr)
-                            print(annotationList)
-                            print(type(annotationList))
-                            annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
-                            annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
-                            # annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
-                            # annotated_filepath = "static/image uploads/" + device_name + "/" + annotated_filename
-                            # annotated_filepath = os.path.join(os.path.expanduser('~'),'Desktop','tropical_image_sig5.bmp')
-                            annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
-                            # annotated_filepath = os.path.join(rf"static/image uploads/{device_name}", annotated_filename)
-                            annotated_filepath_absolute = os.path.join(BASE_DIR, annotated_filepath)
-                            print('annotated_filepath: ')
-                            print(annotated_filepath)
-                            
-                            
-                            cv2.imwrite(annotated_filepath_absolute, annotated_img)
-                            result = Images.query.filter_by(path=path).first()
-                            result.path2 = annotated_filepath
-                            result.json_path = JsonFilePath
-                            db.session.commit()
-
-                            # remember to remove confidence from the annotations before sending to roboflow api
-                            for box in annotationList[0]['annotations']:
-                                del box['confidence']
-
-                            # PROCEED TO ROBOFLOW API
-                            # After all detections, Convert image
-                            roboflow_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
-                            pilImage = Image.fromarray(roboflow_img)
-
-                            # Convert to JPEG Buffer
-                            buffered = io.BytesIO()
-                            pilImage.save(buffered, quality=90, format="JPEG")
-
-                            # Base 64 Encode
-                            img_str = base64.b64encode(buffered.getvalue())
-                            img_str = img_str.decode("ascii")
-                            print("decoded and ready to send!")
-                            # Construct the URL
-                            image_upload_url = "".join([
-                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/upload",
-                                "?api_key=", ROBOFLOW_API_KEY,
-                                "&name=", filename,
-                                "&split=train"
-                            ])
-
-                            r = requests.post(image_upload_url, data=img_str, headers={
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            })
-
-                            imageId = r.json()['id']
-                            print(imageId)
-                            # After all detections,
-                            # Save to Json File
-                            with open("activeLearning.json", 'w') as outfile:
-                                json.dump(annotationList, outfile)
-                            # Read Annotation as String
-                            annotationStr2 = open("activeLearning.json", "r").read()
-                            print("below is string read from json:")
-                            print(annotationStr2)
-
-                            # Construct the URL
-                            annotation_upload_url = "".join([
-                                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
-                                "?api_key=", ROBOFLOW_API_KEY,
-                                "&name=activeLearning.json"
-                            ])
-                            print(annotation_upload_url)
-                            # POST to the API
-                            print("below is string converted from list using str method:")
-                            annotationStr = str(annotationList)
-                            r = requests.post(annotation_upload_url, data=annotationStr2, headers={
-                                "Content-Type": "text/plain"
-                            })
-                            print("annotate sent!")
-                            print(annotationStr2)
-                            print(type(annotationStr2))
-
-                            try:
-                                print(r.json()['success'])
-                            except:
-                                pass
-
-                            
-                            print("Done Bossku")
-
-
+                        ######################################################
+                        # Check and send .json file associated with the image (if any)
+                        ######################################################
+                        annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat)
             else:
                 continue
             # except:
@@ -275,16 +271,16 @@ def update_server_thread():
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
         update_server_directory_images()
 
-    def on_deleted(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-        update_server_directory_images()
-    def on_modified(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-        update_server_directory_images()
+    # def on_deleted(event):
+    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
+    #     update_server_directory_images()
+    # def on_modified(event):
+    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
+    #     update_server_directory_images()
 
-    def on_moved(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-        update_server_directory_images()
+    # def on_moved(event):
+    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
+    #     update_server_directory_images()
 
     patterns = ["*"]
     ignore_patterns = None
@@ -292,9 +288,9 @@ def update_server_thread():
     case_sensitive = True
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
     my_event_handler.on_created = on_created
-    my_event_handler.on_deleted = on_deleted
-    my_event_handler.on_modified = on_modified
-    my_event_handler.on_moved = on_moved
+    # my_event_handler.on_deleted = on_deleted
+    # my_event_handler.on_modified = on_modified
+    # my_event_handler.on_moved = on_moved
     #relative path that needs to be checked for changes
     path = os.path.join(BASE_DIR, 'static/image uploads')
     go_recursively = True
@@ -311,7 +307,7 @@ def update_server_thread():
         cursor = end_device.query.all()        
         UTCnow = datetime.datetime.utcnow() # current date and time in UTC
         for device in cursor:
-            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+            datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
             #hardcode the timezone as Malaysia timezone
             timezone = pytz.timezone("Asia/Kuala_Lumpur")
             #add timezone attribute to datetime object

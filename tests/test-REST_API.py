@@ -14,7 +14,7 @@ BASE = "https://d3m318b1ejw1x6.cloudfront.net/"
 # set status as online
 device_id = "1"
 name = "end device 1"
-last_seen = "2022-03-16 14-08-27"
+last_seen = "2022-03-16 18-53-27"
 message  = "Human detected!"
 status = "Online"
 battery_voltage = "14"
