@@ -118,16 +118,16 @@ def update_server_directory_images():
                         ######################################################
                         # Record new image to database 
                         ######################################################
-                        absolute_path = os.path.join(BASE_DIR, path)
-                        original_img = cv2.imread(absolute_path)
+                        # absolute_path = os.path.join(BASE_DIR, path)
+                        original_img = cv2.imread(path)
                         ######################################################
                         # Check and send .json file associated with the image (if any)
                         ######################################################
                         JsonFileName = str1 + ".json"
                         # JsonFilePath = os.path.join(directory, JsonFileName)
-                        # JsonFilePath = rf"static/image uploads/{device_name}/"+JsonFileName
-                        JsonFilePath = os.path.join(rf"static/image uploads/{device_name}", JsonFileName)
-                        JsonFilePath = os.path.join(BASE_DIR, JsonFilePath)
+                        JsonFilePath = rf"static/image uploads/{device_name}/"+JsonFileName
+                        # JsonFilePath = os.path.join(rf"static/image uploads/{device_name}", JsonFileName)
+                        JsonFilePath_absolute = os.path.join(BASE_DIR, JsonFilePath)
                         # Record to database the new image    
                         new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
                         db.session.add(new_image)
@@ -135,7 +135,7 @@ def update_server_directory_images():
                         print("New image detected and recorded to database")
                         if os.path.exists(JsonFilePath):
                         #    Read Annotation as String
-                            annotationStr = open(JsonFilePath, "r").read()
+                            annotationStr = open(JsonFilePath_absolute, "r").read()
                             annotationList = ast.literal_eval(annotationStr)
                             print(annotationList)
                             print(type(annotationList))
@@ -144,11 +144,12 @@ def update_server_directory_images():
                             # annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
                             # annotated_filepath = "static/image uploads/" + device_name + "/" + annotated_filename
                             # annotated_filepath = os.path.join(os.path.expanduser('~'),'Desktop','tropical_image_sig5.bmp')
-
-                            annotated_filepath = os.path.join(rf"static/image uploads/{device_name}", annotated_filename)
-                            annotated_filepath = os.path.join(BASE_DIR, annotated_filepath)
+                            annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
+                            # annotated_filepath = os.path.join(rf"static/image uploads/{device_name}", annotated_filename)
+                            # annotated_filepath = os.path.join(BASE_DIR, annotated_filepath)
                             print('annotated_filepath: ')
                             print(annotated_filepath)
+                            
                             
                             cv2.imwrite(annotated_filepath, annotated_img)
                             result = Images.query.filter_by(path=path).first()
@@ -417,12 +418,12 @@ def check_and_create_img_thumbnail(path, max_size_in_kb, data):
     #read the img
     # path = dir + filename
     filename = os.path.basename(path)
-    path = Path(path)
     data.debug_arr.append(path)
     dir = os.path.dirname(path)
-    path2 = Path(dir + "/thumbnail_" + filename)
+    path2 = dir + "/thumbnail_" + filename
+
     if os.path.exists(path2):
-        print("found")
+        print("existing thumbnail found")
         path = path2
 
     im = Image.open(path)
