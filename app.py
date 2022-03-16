@@ -56,6 +56,7 @@ class DataStorage():
     detection_type = "any"
 
     input_date_str = None
+    debug_arr = []
 
 data = DataStorage()
 
@@ -734,7 +735,7 @@ def edit_img(img_id):
 
 @app.route("/debug")
 def debug():
-    return render_template("debug.html", active_state = "debug")
+    return render_template("debug.html", active_state = "debug", debug_arr = data.debug_arr)
 
 # @app.route("/test")
 # def test():
@@ -745,7 +746,7 @@ def debug():
 @login_required
 def about_us():
     images = []
-    images.append(check_and_create_img_thumbnail('static/img/bigpicture.png', 1000)[1])
+    images.append(check_and_create_img_thumbnail('static/img/bigpicture.png', 1000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
 
 @app.route("/start_thread")
@@ -848,12 +849,12 @@ def display_image():
             image_id.append(image.id)
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
-            image_paths.append(check_and_create_img_thumbnail(image.path, 300)[1])
+            image_paths.append(check_and_create_img_thumbnail(image.path, 300, data)[1])
             image_paths_high_res.append(image.path)
 
             if image.path2:
             #this if loop is to prevent when file path is none type
-                image_paths2.append(check_and_create_img_thumbnail(image.path2, 300)[1])
+                image_paths2.append(check_and_create_img_thumbnail(image.path2, 300, data)[1])
             else:
                 image_paths2.append(image.path2)
 

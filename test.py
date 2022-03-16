@@ -1,6 +1,6 @@
 import os
 
-
+from pathlib import Path
 
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # print(BASE_DIR)
@@ -30,3 +30,11 @@ username = 'kk'
 
 import pathlib
 print(pathlib.Path(f"~/{username}.txt"))
+
+p1 = os.path.dirname('static/img/img.txt')
+print(p1)
+print(Path(p1))
+
+print(p1[1:])
+
+print(os.path.basename('static/img/img.txt'))
