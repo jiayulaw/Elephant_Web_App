@@ -118,8 +118,8 @@ def update_server_directory_images():
                         ######################################################
                         # Record new image to database 
                         ######################################################
-                        # absolute_path = os.path.join(BASE_DIR, path)
-                        original_img = cv2.imread(path)
+                        absolute_path = os.path.join(BASE_DIR, path)
+                        original_img = cv2.imread(absolute_path)
                         ######################################################
                         # Check and send .json file associated with the image (if any)
                         ######################################################
@@ -133,7 +133,7 @@ def update_server_directory_images():
                         db.session.add(new_image)
                         db.session.commit()
                         print("New image detected and recorded to database")
-                        if os.path.exists(JsonFilePath):
+                        if os.path.exists(JsonFilePath_absolute):
                         #    Read Annotation as String
                             annotationStr = open(JsonFilePath_absolute, "r").read()
                             annotationList = ast.literal_eval(annotationStr)
