@@ -311,8 +311,10 @@ def dashboard():
             stat = "Fully charged"
         elif current_battery_voltage > 10 and current_battery_voltage < 13:
             stat = "Operating"
-        elif current_battery_voltage < 10:
+        elif current_battery_voltage <= 10:
             stat = "Running out"
+        else:
+            stat = "Unknown"
             
         devices_battery_status.append(stat)
 
