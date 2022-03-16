@@ -146,12 +146,12 @@ def update_server_directory_images():
                             # annotated_filepath = os.path.join(os.path.expanduser('~'),'Desktop','tropical_image_sig5.bmp')
                             annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
                             # annotated_filepath = os.path.join(rf"static/image uploads/{device_name}", annotated_filename)
-                            # annotated_filepath = os.path.join(BASE_DIR, annotated_filepath)
+                            annotated_filepath_absolute = os.path.join(BASE_DIR, annotated_filepath)
                             print('annotated_filepath: ')
                             print(annotated_filepath)
                             
                             
-                            cv2.imwrite(annotated_filepath, annotated_img)
+                            cv2.imwrite(annotated_filepath_absolute, annotated_img)
                             result = Images.query.filter_by(path=path).first()
                             result.path2 = annotated_filepath
                             result.json_path = JsonFilePath
