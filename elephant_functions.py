@@ -94,7 +94,7 @@ def update_server_directory_images():
         for filename in os.listdir(directory2):
             # try:
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                if '-x-' in filename:
+                if '-x-' in filename and 'thumbnail' not in filename:
                     #strip away file format extension
                     str1 = filename.split(".")[0]
                     str2 = filename.split(".")[1]
@@ -141,7 +141,11 @@ def update_server_directory_images():
                             annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
                             annotated_filename = arr1[0] + "xxx" + arr1[1] + "_annotated." + str2
                             # annotated_filepath = rf"static/image uploads/{device_name}/" + annotated_filename
-                            annotated_filepath = "/static/image uploads/" + device_name + "/" + annotated_filename
+                            # annotated_filepath = "static/image uploads/" + device_name + "/" + annotated_filename
+                            # annotated_filepath = os.path.join(os.path.expanduser('~'),'Desktop','tropical_image_sig5.bmp')
+
+                            annotated_filepath = os.path.join(rf"static/image uploads/{device_name}", annotated_filename)
+                            annotated_filepath = os.path.join(BASE_DIR, annotated_filepath)
                             print('annotated_filepath: ')
                             print(annotated_filepath)
                             
@@ -226,6 +230,39 @@ def logServerActivity(timestmp, type, description, db):
    new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
    db.session.add(new_activity)
    db.session.commit()
+
+def update_end_device_database_thread():
+        ###########################################################################
+    # Update end device online/offline status
+    ###########################################################################
+    while True:
+        print("Updating end devices status...")
+        cursor = end_device.query.all()        
+        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+        for device in cursor:
+            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+            #hardcode the timezone as Malaysia timezone
+            timezone = pytz.timezone("Asia/Kuala_Lumpur")
+            #add timezone attribute to datetime object
+            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+            # need to convert datetime obj above into a naive object to prevent
+            # # error during subtraction with another datetime
+            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+            naive = utc_datetime_obj.replace(tzinfo=None)
+            # getting the difference between the received datetime string and current datetime in seconds
+            diff_in_seconds = (UTCnow - naive).seconds
+            # Dividing seconds by 60 we get minutes
+            output = divmod(diff_in_seconds,60)
+            diff_in_minutes = output[0]
+            if diff_in_minutes > 30:
+                if device.status != "Offline":
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                    device.status = "Offline"
+        
+        db.session.commit()
+        time.sleep(2)
+        print ("Exiting ")
     
 
 def update_server_thread():
@@ -264,37 +301,37 @@ def update_server_thread():
     my_observer.start()
 
     print ("Starting ")
-    ###########################################################################
-    # Check for change in end device status
-    ###########################################################################
-    while True:
-        print("Updating end devices status...")
-        cursor = end_device.query.all()        
-        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-        for device in cursor:
-            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
-            #hardcode the timezone as Malaysia timezone
-            timezone = pytz.timezone("Asia/Kuala_Lumpur")
-            #add timezone attribute to datetime object
-            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-            # need to convert datetime obj above into a naive object to prevent
-            # # error during subtraction with another datetime
-            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-            naive = utc_datetime_obj.replace(tzinfo=None)
-            # getting the difference between the received datetime string and current datetime in seconds
-            diff_in_seconds = (UTCnow - naive).seconds
-            # Dividing seconds by 60 we get minutes
-            output = divmod(diff_in_seconds,60)
-            diff_in_minutes = output[0]
-            if diff_in_minutes > 30:
-                if device.status != "Offline":
-                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
-                    device.status = "Offline"
+    # ###########################################################################
+    # # Check for change in end device status
+    # ###########################################################################
+    # while True:
+    #     print("Updating end devices status...")
+    #     cursor = end_device.query.all()        
+    #     UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+    #     for device in cursor:
+    #         datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+    #         #hardcode the timezone as Malaysia timezone
+    #         timezone = pytz.timezone("Asia/Kuala_Lumpur")
+    #         #add timezone attribute to datetime object
+    #         datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+    #         utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+    #         # need to convert datetime obj above into a naive object to prevent
+    #         # # error during subtraction with another datetime
+    #         #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+    #         naive = utc_datetime_obj.replace(tzinfo=None)
+    #         # getting the difference between the received datetime string and current datetime in seconds
+    #         diff_in_seconds = (UTCnow - naive).seconds
+    #         # Dividing seconds by 60 we get minutes
+    #         output = divmod(diff_in_seconds,60)
+    #         diff_in_minutes = output[0]
+    #         if diff_in_minutes > 30:
+    #             if device.status != "Offline":
+    #                 logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+    #                 device.status = "Offline"
         
-        db.session.commit()
-        time.sleep(2)
-        print ("Exiting ")
+    #     db.session.commit()
+    #     time.sleep(2)
+    #     print ("Exiting ")
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):
     x_array = []
@@ -379,6 +416,12 @@ def check_and_create_img_thumbnail(path, max_size_in_kb):
     #read the img
     # path = dir + filename
     filename = os.path.basename(path)
+    dir = dirname = os.path.dirname(path)
+    path2 = dir + "/thumbnail_" + filename
+    if os.path.exists(path2):
+        print("found")
+        path = path2
+
     im = Image.open(path)
     # check filesize
     file_size = os.stat(path)
@@ -390,7 +433,7 @@ def check_and_create_img_thumbnail(path, max_size_in_kb):
         MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
         im.thumbnail(MAX_SIZE)
         # creating thumbnail
-        path = dir + "thumbnail_" + filename
+        path = dir + "/thumbnail_" + filename
         im.save(path)
         # im.show()
         file_size = os.stat(path)

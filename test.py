@@ -20,4 +20,7 @@ import os
 #     print("yes")
 # else:
 #     print("no")
-print(os.environ.get('USER'))
+
+filepath = "static/img/xxx.png"
+dirname = os.path.dirname(filepath)
+print(dirname)

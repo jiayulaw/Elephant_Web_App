@@ -655,11 +655,9 @@ def upload_multiple_image():
 
 @app.route('/delete_img/<img_id>')
 def delete_img(img_id):
-   
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute("SELECT path from images WHERE id=\'" + str(img_id) + "\';")
-    for row in cursor:
-        filepath = row[0]
+    result = Images.query.filter_by(id=img_id).first()
+
+    for filepath in [result.path, result.path2, result.json_path]:
         if os.path.exists(filepath):
             os.remove(filepath)
             print("file deleted")
@@ -671,6 +669,7 @@ def delete_img(img_id):
     # after deleting image, do not request new user input so the previous inputs remain
     # more user-friendly
     data.dontRequest = 1
+    conn = sqlite3.connect(db_path)
     cursor = conn.execute("DELETE FROM Images WHERE id= \'" + str(img_id) +"\';")
     conn.commit()
     conn.close()
@@ -754,6 +753,12 @@ def start_thread():
     thread1 = threading.Thread(target = update_server_thread)
     thread1.daemon = True
     thread1.start()
+    
+    thread2 = threading.Thread(target = update_end_device_database_thread)
+    thread2.daemon = True
+    thread2.start()
+
+    return render_template('thread.html')
 
 @app.route("/end_devices")
 @login_required
@@ -806,6 +811,7 @@ def display_image():
     # Filter images from database
     image_id = []
     image_paths = []
+    image_paths_high_res = []
     image_paths2 = []
     image_timestamps = []
     image_longitude = []
@@ -840,8 +846,15 @@ def display_image():
             image_id.append(image.id)
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
-            image_paths.append(image.path)
-            image_paths2.append(image.path2)
+            image_paths.append(check_and_create_img_thumbnail(image.path, 300)[1])
+            image_paths_high_res.append(image.path)
+
+            if image.path2:
+            #this if loop is to prevent when file path is none type
+                image_paths2.append(check_and_create_img_thumbnail(image.path2, 300)[1])
+            else:
+                image_paths2.append(image.path2)
+
             image_source.append(image.source)
             image_uploader.append(image.uploader)
             image_tag.append(image.tag)
@@ -857,6 +870,7 @@ def display_image():
     image_id.reverse()
     image_timestamps.reverse()
     image_paths.reverse()
+    image_paths_high_res.reverse()
     image_paths2.reverse()
     image_source.reverse()
     image_uploader.reverse()
@@ -870,7 +884,7 @@ def display_image():
                             query_string = request.query_string,
                             timezone = timezone,
                             active_state = "data_center",
-                            image_paths = image_paths, image_paths2 = image_paths2,
+                            image_paths = image_paths, image_paths2 = image_paths2, image_paths_high_res = image_paths_high_res,
                             image_timestamps = image_timestamps,
                             image_longitude = image_longitude,
                             image_latitude = image_latitude,
