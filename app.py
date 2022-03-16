@@ -849,14 +849,17 @@ def display_image():
             image_id.append(image.id)
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
-            image_paths.append(check_and_create_img_thumbnail(image.path, 300, data)[1])
+            # image_paths.append(check_and_create_img_thumbnail(image.path, 300, data)[1])
+            image_paths.append(image.path)
             image_paths_high_res.append(image.path)
 
-            if image.path2:
-            #this if loop is to prevent when file path is none type
-                image_paths2.append(check_and_create_img_thumbnail(image.path2, 300, data)[1])
-            else:
-                image_paths2.append(image.path2)
+            # if image.path2:
+            # #this if loop is to prevent when file path is none type
+            #     image_paths2.append(check_and_create_img_thumbnail(image.path2, 300, data)[1])
+            # else:
+            #     image_paths2.append(image.path2)
+
+            image_paths2.append(image.path2)
 
             image_source.append(image.source)
             image_uploader.append(image.uploader)
