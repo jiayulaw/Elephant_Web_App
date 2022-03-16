@@ -142,42 +142,44 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         r = requests.post(image_upload_url, data=img_str, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
-
-        imageId = r.json()['id']
-        print(imageId)
-        # After all detections,
-        # Save to Json File
-        with open("activeLearning.json", 'w') as outfile:
-            json.dump(annotationList, outfile)
-        # Read Annotation as String
-        annotationStr2 = open("activeLearning.json", "r").read()
-        print("below is string read from json:")
-        print(annotationStr2)
-
-        # Construct the URL
-        annotation_upload_url = "".join([
-            "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
-            "?api_key=", ROBOFLOW_API_KEY,
-            "&name=activeLearning.json"
-        ])
-        print(annotation_upload_url)
-        # POST to the API
-        print("below is string converted from list using str method:")
-        annotationStr = str(annotationList)
-        r = requests.post(annotation_upload_url, data=annotationStr2, headers={
-            "Content-Type": "text/plain"
-        })
-        print("annotate sent!")
-        print(annotationStr2)
-        print(type(annotationStr2))
-
         try:
-            print(r.json()['success'])
-        except:
-            pass
+            imageId = r.json()['id']
+            print(imageId)
+            # After all detections,
+            # Save to Json File
+            with open("activeLearning.json", 'w') as outfile:
+                json.dump(annotationList, outfile)
+            # Read Annotation as String
+            annotationStr2 = open("activeLearning.json", "r").read()
+            print("below is string read from json:")
+            print(annotationStr2)
+
+            # Construct the URL
+            annotation_upload_url = "".join([
+                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+                "?api_key=", ROBOFLOW_API_KEY,
+                "&name=activeLearning.json"
+            ])
+            print(annotation_upload_url)
+            # POST to the API
+            print("below is string converted from list using str method:")
+            annotationStr = str(annotationList)
+            r = requests.post(annotation_upload_url, data=annotationStr2, headers={
+                "Content-Type": "text/plain"
+            })
+            print("annotate sent!")
+            print(annotationStr2)
+            print(type(annotationStr2))
+
+            try:
+                print(r.json()['success'])
+            except:
+                pass
 
         
-        print("Done Bossku")
+            print("Done Bossku")
+        except:
+            print("Failed to send annotation to roboflow.")
 
 def update_server_directory_images():
     """ check directory to update any new images added through SFTP or direct upload to server"""
@@ -198,7 +200,6 @@ def update_server_directory_images():
                     date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
                     date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
                     
-
                     detection_type = arr1[1]
                     # path = os.path.join(directory, filename)
                     path = rf"static/image uploads/{device_name}/"+filename
