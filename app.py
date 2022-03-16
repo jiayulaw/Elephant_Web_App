@@ -658,9 +658,11 @@ def delete_img(img_id):
     result = Images.query.filter_by(id=img_id).first()
 
     for filepath in [result.path, result.path2, result.json_path]:
-        if os.path.exists(filepath):
-            os.remove(filepath)
-            print("file deleted")
+        print(filepath)
+        if filepath:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                print("file deleted")
         else:
             print("The file does not exist")
 
@@ -754,9 +756,9 @@ def start_thread():
     thread1.daemon = True
     thread1.start()
     
-    thread2 = threading.Thread(target = update_end_device_database_thread)
-    thread2.daemon = True
-    thread2.start()
+    # thread2 = threading.Thread(target = update_end_device_database_thread)
+    # thread2.daemon = True
+    # thread2.start()
 
     return render_template('thread.html')
 

@@ -19,7 +19,7 @@ path = '/var/www/Elephant_Web_App/static/image uploads/' + station
 # the file should have the format of '2021-10-17 22-30' at server side
 # image = r"C:\Users\user10\Desktop\2022-02-21 21-21-21-x-maggimee.jpg"
 
-image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-12 18-18-18-x-crazyalrdysystem - Copy.jpg'
+image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-20 18-18-18-x-ggggg.jpg'
 jsonn = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-12 18-18-18-x-crazyalrdysystem - Copy.json'
 
 
@@ -27,7 +27,7 @@ jsonn = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elepha
 with pysftp.Connection(HOST_NAME, username=USERNAME, private_key=KEYFILE, cnopts=cnopts) as sftp:
     print("CONNECTED!!")
     with sftp.cd(f"{path}"):
-        sftp.put(jsonn)
+        # sftp.put(jsonn)
         sftp.put(image)
         
 

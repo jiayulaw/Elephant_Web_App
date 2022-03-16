@@ -231,38 +231,38 @@ def logServerActivity(timestmp, type, description, db):
    db.session.add(new_activity)
    db.session.commit()
 
-def update_end_device_database_thread():
-        ###########################################################################
-    # Update end device online/offline status
-    ###########################################################################
-    while True:
-        print("Updating end devices status...")
-        cursor = end_device.query.all()        
-        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-        for device in cursor:
-            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
-            #hardcode the timezone as Malaysia timezone
-            timezone = pytz.timezone("Asia/Kuala_Lumpur")
-            #add timezone attribute to datetime object
-            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-            # need to convert datetime obj above into a naive object to prevent
-            # # error during subtraction with another datetime
-            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-            naive = utc_datetime_obj.replace(tzinfo=None)
-            # getting the difference between the received datetime string and current datetime in seconds
-            diff_in_seconds = (UTCnow - naive).seconds
-            # Dividing seconds by 60 we get minutes
-            output = divmod(diff_in_seconds,60)
-            diff_in_minutes = output[0]
-            if diff_in_minutes > 30:
-                if device.status != "Offline":
-                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
-                    device.status = "Offline"
+# def update_end_device_database_thread():
+#         ###########################################################################
+#     # Update end device online/offline status
+#     ###########################################################################
+#     while True:
+#         print("Updating end devices status...")
+#         cursor = end_device.query.all()        
+#         UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+#         for device in cursor:
+#             datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+#             #hardcode the timezone as Malaysia timezone
+#             timezone = pytz.timezone("Asia/Kuala_Lumpur")
+#             #add timezone attribute to datetime object
+#             datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+#             utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+#             # need to convert datetime obj above into a naive object to prevent
+#             # # error during subtraction with another datetime
+#             #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+#             naive = utc_datetime_obj.replace(tzinfo=None)
+#             # getting the difference between the received datetime string and current datetime in seconds
+#             diff_in_seconds = (UTCnow - naive).seconds
+#             # Dividing seconds by 60 we get minutes
+#             output = divmod(diff_in_seconds,60)
+#             diff_in_minutes = output[0]
+#             if diff_in_minutes > 30:
+#                 if device.status != "Offline":
+#                     logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+#                     device.status = "Offline"
         
-        db.session.commit()
-        time.sleep(2)
-        print ("Exiting ")
+#         db.session.commit()
+#         time.sleep(2)
+#         print ("Exiting ")
     
 
 def update_server_thread():
@@ -301,37 +301,37 @@ def update_server_thread():
     my_observer.start()
 
     print ("Starting ")
-    # ###########################################################################
-    # # Check for change in end device status
-    # ###########################################################################
-    # while True:
-    #     print("Updating end devices status...")
-    #     cursor = end_device.query.all()        
-    #     UTCnow = datetime.datetime.utcnow() # current date and time in UTC
-    #     for device in cursor:
-    #         datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
-    #         #hardcode the timezone as Malaysia timezone
-    #         timezone = pytz.timezone("Asia/Kuala_Lumpur")
-    #         #add timezone attribute to datetime object
-    #         datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-    #         utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
-    #         # need to convert datetime obj above into a naive object to prevent
-    #         # # error during subtraction with another datetime
-    #         #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
-    #         naive = utc_datetime_obj.replace(tzinfo=None)
-    #         # getting the difference between the received datetime string and current datetime in seconds
-    #         diff_in_seconds = (UTCnow - naive).seconds
-    #         # Dividing seconds by 60 we get minutes
-    #         output = divmod(diff_in_seconds,60)
-    #         diff_in_minutes = output[0]
-    #         if diff_in_minutes > 30:
-    #             if device.status != "Offline":
-    #                 logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
-    #                 device.status = "Offline"
+    ###########################################################################
+    # Check for change in end device status
+    ###########################################################################
+    while True:
+        print("Updating end devices status...")
+        cursor = end_device.query.all()        
+        UTCnow = datetime.datetime.utcnow() # current date and time in UTC
+        for device in cursor:
+            datetime_object = datetime.datetime.strptime(device.last_seen, '%d/%m/%Y, %H:%M:%S')
+            #hardcode the timezone as Malaysia timezone
+            timezone = pytz.timezone("Asia/Kuala_Lumpur")
+            #add timezone attribute to datetime object
+            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+            utc_datetime_obj = datetime_object_timezone.astimezone(pytz.utc)
+            # need to convert datetime obj above into a naive object to prevent
+            # # error during subtraction with another datetime
+            #Refrence: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes 
+            naive = utc_datetime_obj.replace(tzinfo=None)
+            # getting the difference between the received datetime string and current datetime in seconds
+            diff_in_seconds = (UTCnow - naive).seconds
+            # Dividing seconds by 60 we get minutes
+            output = divmod(diff_in_seconds,60)
+            diff_in_minutes = output[0]
+            if diff_in_minutes > 30:
+                if device.status != "Offline":
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
+                    device.status = "Offline"
         
-    #     db.session.commit()
-    #     time.sleep(2)
-    #     print ("Exiting ")
+        db.session.commit()
+        time.sleep(2)
+        print ("Exiting ")
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):
     x_array = []
