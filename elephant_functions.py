@@ -271,16 +271,16 @@ def update_server_thread():
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
         update_server_directory_images()
 
-    # def on_deleted(event):
-    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-    #     update_server_directory_images()
-    # def on_modified(event):
-    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-    #     update_server_directory_images()
+    def on_deleted(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
+        update_server_directory_images()
+    def on_modified(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
+        update_server_directory_images()
 
-    # def on_moved(event):
-    #     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-    #     update_server_directory_images()
+    def on_moved(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
+        update_server_directory_images()
 
     patterns = ["*"]
     ignore_patterns = None
@@ -288,9 +288,9 @@ def update_server_thread():
     case_sensitive = True
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
     my_event_handler.on_created = on_created
-    # my_event_handler.on_deleted = on_deleted
-    # my_event_handler.on_modified = on_modified
-    # my_event_handler.on_moved = on_moved
+    my_event_handler.on_deleted = on_deleted
+    my_event_handler.on_modified = on_modified
+    my_event_handler.on_moved = on_moved
     #relative path that needs to be checked for changes
     path = os.path.join(BASE_DIR, 'static/image uploads')
     go_recursively = True
