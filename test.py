@@ -21,6 +21,12 @@ import os
 # else:
 #     print("no")
 
-filepath = "static/img/xxx.png"
-dirname = os.path.dirname(filepath)
-print(dirname)
+# filepath = "static/img/xxx.png"
+# dirname = os.path.dirname(filepath)
+# print(dirname)
+
+print(os.path.abspath('.'))
+username = 'kk'
+
+import pathlib
+print(pathlib.Path(f"~/{username}.txt"))

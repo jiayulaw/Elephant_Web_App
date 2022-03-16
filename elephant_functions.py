@@ -33,6 +33,7 @@ from roboflow_config import *
 from PIL import Image
 import io
 import ast
+from pathlib import Path
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
         # if the directory already contain file with same name, then rename before 
@@ -416,8 +417,8 @@ def check_and_create_img_thumbnail(path, max_size_in_kb):
     #read the img
     # path = dir + filename
     filename = os.path.basename(path)
-    dir = dirname = os.path.dirname(path)
-    path2 = dir + "/thumbnail_" + filename
+    dir = os.path.dirname(path)
+    path2 = Path(dir + "/thumbnail_" + filename)
     if os.path.exists(path2):
         print("found")
         path = path2
@@ -433,7 +434,7 @@ def check_and_create_img_thumbnail(path, max_size_in_kb):
         MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
         im.thumbnail(MAX_SIZE)
         # creating thumbnail
-        path = dir + "/thumbnail_" + filename
+        path = Path(dir + "/thumbnail_" + filename)
         im.save(path)
         # im.show()
         file_size = os.stat(path)
