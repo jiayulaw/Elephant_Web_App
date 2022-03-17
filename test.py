@@ -48,7 +48,12 @@ print(rf"static/image uploads/{device_name}/" +"haha.txt")
 device_name = 'end device 2'
 original_img = cv2.imread(f'static/image uploads/{device_name}/2021-07-15 16-18-18xxxelephant_annotated.jpg')
 
-Jsonpath = rf'static/image uploads/{device_name}/2021-08-15 16-18-18-x-babyy - Copy - Copy - Copy.json'
-print(os.path.exists(Jsonpath))
+# Jsonpath = rf'static/image uploads/{device_name}/2021-08-15 16-18-18-x-babyy - Copy - Copy - Copy.json'
+# print(os.path.exists(Jsonpath))
 
-annotationStr = open(Jsonpath, "r").read()
+# annotationStr = open(Jsonpath, "r").read()
+
+
+
+str11 = "['eee','rrr']"
+print(str11.replace("\'", "\""))

@@ -12,13 +12,13 @@ BASE = "https://d3m318b1ejw1x6.cloudfront.net/"
 # set message to attach a message
 # the name will be what will be displayed on server
 # set status as online
-device_id = "1"
+device_id = "3"
 name = "end device 3"
 last_seen = "2022-03-16 18-53-27"
-message  = "Monster detected!"
+message  = "Elephant detected!"
 status = "Online"
-battery_voltage = "10"
-battery_current = "0.3"
+battery_voltage = "13"
+battery_current = "0.66"
 
 # this is a function to send 
 def update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current):

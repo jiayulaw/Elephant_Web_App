@@ -142,44 +142,54 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         r = requests.post(image_upload_url, data=img_str, headers={
             "Content-Type": "application/x-www-form-urlencoded"
         })
-        try:
-            imageId = r.json()['id']
-            print(imageId)
-            # After all detections,
-            # Save to Json File
-            with open("activeLearning.json", 'w') as outfile:
-                json.dump(annotationList, outfile)
-            # Read Annotation as String
-            annotationStr2 = open("activeLearning.json", "r").read()
-            print("below is string read from json:")
-            print(annotationStr2)
+        # try:
+        imageId = r.json()['id']
+        print(imageId)
 
-            # Construct the URL
-            annotation_upload_url = "".join([
-                "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
-                "?api_key=", ROBOFLOW_API_KEY,
-                "&name=activeLearning.json"
-            ])
-            print(annotation_upload_url)
-            # POST to the API
-            print("below is string converted from list using str method:")
-            annotationStr = str(annotationList)
-            r = requests.post(annotation_upload_url, data=annotationStr2, headers={
-                "Content-Type": "text/plain"
-            })
-            print("annotate sent!")
-            print(annotationStr2)
-            print(type(annotationStr2))
+        #Writing  out .json will have permission error on Linux server
+        # # After all detections,
+        # # Save to Json File
+        # with open("activeLearning.json", 'w') as outfile:
+        #     json.dump(annotationList, outfile)
+        # # Read Annotation as String
+        # annotationStr2 = open("activeLearning.json", "r").read()
 
-            try:
-                print(r.json()['success'])
-            except:
-                pass
+        # print("below is string read from json:")
+        # print(annotationStr2)
 
         
-            print("Done Bossku")
+        annotationStr2 = str(annotationList)
+        annotationStr2 = annotationStr2.replace("\'", "\"")
+        print("below is string read converted from list:")
+        print(annotationStr2)
+
+        # Construct the URL
+        annotation_upload_url = "".join([
+            "https://api.roboflow.com/dataset/", DATASET_NAME, "/annotate/", imageId,
+            "?api_key=", ROBOFLOW_API_KEY,
+            "&name=activeLearning.json"
+        ])
+        print(annotation_upload_url)
+        # POST to the API
+        print("below is string converted from list using str method:")
+        annotationStr = str(annotationList)
+        r = requests.post(annotation_upload_url, data=annotationStr2, headers={
+            "Content-Type": "text/plain"
+        })
+        print("annotate sent!")
+        print(annotationStr2)
+        print(type(annotationStr2))
+
+        try:
+            print(r.json()['success'])
         except:
-            print("Failed to send annotation to roboflow.")
+            pass
+            print('annotation not received by roboflow')
+
+    
+        print("Done Bossku")
+        # except:
+        #     print("Failed to send annotation to roboflow.")
 
 def update_server_directory_images():
     """ check directory to update any new images added through SFTP or direct upload to server"""

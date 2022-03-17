@@ -293,7 +293,7 @@ def dashboard():
         current_battery_voltage = float(device.battery_voltage)
         devices_battery_voltage.append(current_battery_voltage)
         full_battery_voltage = 13
-        min_battery_voltage  = 11
+        min_battery_voltage  = 11.5
         battery_operating_range = full_battery_voltage - min_battery_voltage
         battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
         battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
