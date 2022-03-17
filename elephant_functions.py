@@ -198,7 +198,7 @@ def update_server_directory_images():
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
-            # try:
+            # try: #dont use try except here! it is only making things complicated!
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
                 if '-x-' in filename and 'thumbnail' not in filename:
                     #strip away file format extension
