@@ -150,3 +150,11 @@ if __name__ == "__main__":
     print("Default admin user created successfully")
 
 
+@app.route("/any_url")
+def model():
+    # get data from user input or database, i.e, username = elephantking 
+    # do something here
+    username = 'elephantking' 
+    number = 1 + 1
+
+    return render_template('view.html', name_to_be_displayed =username)

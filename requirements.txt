@@ -25,3 +25,4 @@ WTForms==3.0.0
 watchdog
 opencv-python
 Pillow
+locust

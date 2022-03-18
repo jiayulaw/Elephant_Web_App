@@ -748,7 +748,7 @@ def debug():
 @login_required
 def about_us():
     images = []
-    images.append(check_and_create_img_thumbnail('static/img/bigpicture.png', 1000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
 
 @app.route("/start_thread")

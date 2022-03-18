@@ -5,7 +5,7 @@ $
 $ # Install modules - SQLite Database
 $ pip3 install -r requirements.txt
 
-#update the env
+#update the env (Windows)
 cd C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2
 .\env\Scripts\activate
 pip3 install -r requirements.txt

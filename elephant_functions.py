@@ -106,7 +106,14 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         annotationList = ast.literal_eval(annotationStr)
         print(annotationList)
         print(type(annotationList))
-        annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
+
+
+
+        try: #sometimes unknown error occurs due to this line... so i use try except here
+            annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
+        except:
+            print("an error occured when annotating image. Image now set to original image.")
+            annotated_img = original_img
 
         cv2.imwrite(annotated_filepath_absolute, annotated_img)
         result = Images.query.filter_by(path=path).first()
@@ -417,7 +424,7 @@ def getDatetimeObject(datetime_str, formats):
     return datetime_object
 
 
-def check_and_create_img_thumbnail(path, max_size_in_kb, data):
+def check_and_create_img_thumbnail(BASE_DIR, path, max_size_in_kb, data):
     """ check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
     If image size is greater than max_size_in_kb, then the algorithm will continue compressing the image until it is smaller than maximum size.
     The function returns the boolean indicating whether input file is greater than specified size and the path of the compressed image.
@@ -425,18 +432,23 @@ def check_and_create_img_thumbnail(path, max_size_in_kb, data):
     #read the img
     # path = dir + filename
     filename = os.path.basename(path)
-    data.debug_arr.append(path)
+    absolute_path =  os.path.join(BASE_DIR, path)
     dir = os.path.dirname(path)
     path2 = dir + "/thumbnail_" + filename
+    absolute_path2 =  os.path.join(BASE_DIR, path2)
 
-    if os.path.exists(path2):
+
+    if os.path.exists(absolute_path2):
         print("existing thumbnail found")
+        # if we have thumbnail exist, change target path to that file
         path = path2
+        absolute_path = absolute_path2
 
-    im = Image.open(path)
+    im = Image.open(absolute_path)
     # check filesize
-    file_size = os.stat(path)
+    file_size = os.stat(absolute_path)
     print("Size of file :", file_size.st_size, "bytes")
+    # size_bool indicates whether the original file passed into function is over the limit
     size_bool = 0
     while (int(file_size.st_size)/1024) > max_size_in_kb:
         size_bool = 1
@@ -444,10 +456,11 @@ def check_and_create_img_thumbnail(path, max_size_in_kb, data):
         MAX_SIZE = (im.size[0]*0.8, im.size[1]*0.8)
         im.thumbnail(MAX_SIZE)
         # creating thumbnail
-        path = Path(dir + "/thumbnail_" + filename)
-        im.save(path)
+        path = dir + "/thumbnail_" + filename
+        absolute_path =  os.path.join(BASE_DIR, path)
+        im.save(absolute_path)
         # im.show()
-        file_size = os.stat(path)
+        file_size = os.stat(absolute_path)
         print("Compressed image to size:", file_size.st_size)
 
     return size_bool, path
