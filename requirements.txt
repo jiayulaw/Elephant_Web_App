@@ -26,3 +26,4 @@ watchdog
 opencv-python
 Pillow
 locust
+opencv-python

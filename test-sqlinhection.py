@@ -3,6 +3,10 @@ from operator import contains
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_wtf import FlaskForm
+
+from wtforms.validators import InputRequired, Length, ValidationError
+from flask_bcrypt import Bcrypt
 import sys
 import random
 import pytz
@@ -24,240 +28,6 @@ import threading
 
 #Import database rows declaration, and also Flask app objects
 from app_config import *
-
-#------------------------------------------------------------
-#-------------------------Initialization of variables-------------------------
-#------------------------------------------------------------
-
-class DataStorage():
-    dontRequest = None
-    station = "end device 1"
-    from_date_str = getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
-    to_date_str = getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
-    
-    detection_type = "any"
-    input_date_str = None
-    debug_arr = []
-
-data = DataStorage()
-
-#=============================================================================================
-# Forms initialization
-#=============================================================================================
-class RegisterForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-   
-    # access_level = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
-
-    access_level = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
-    submit = SubmitField("Register")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if existing_user_username:
-            raise ValidationError(
-                "That username already exists. Please choose a different one.")
-
-
-class ChangePasswordForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
-
-    new_password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "New password"})
-    new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
-   
-    submit = SubmitField("Change password")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if not existing_user_username:
-            raise ValidationError("The username does not exist.")
-
-class LoginForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-    
-    submit = SubmitField("Login")
-
-#=============================================================================================
-# User Authentication System
-#============================================================================================= 
-bcrypt = Bcrypt(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
-
-# login_manager.refresh_view = 'relogin'
-# login_manager.needs_refresh_message = (u"Session timedout, please re-login")
-# login_manager.needs_refresh_message_category = "info"
-
-# code to run before every request
-@app.before_request
-def before_request():
-    # permanent session
-    session.permanent = True
-    # session lifetime
-    app.permanent_session_lifetime = datetime.timedelta(minutes=20)
-    # reset lifetime timer for each new request
-    session.modified = True
-
-# define method to load user id
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-#=============================================================================================
-# Admin System
-#=============================================================================================            
-#------------------------------------------------------------
-#-------------------------User permission Config-------------------------
-#------------------------------------------------------------
-def require_role(role, role2):
-    """make sure user has this role"""
-    def decorator(func):
-        @wraps(func)
-        def wrapped_function(*args, **kwargs):
-            if not (current_user.has_role(role) or current_user.has_role(role2)):
-                return redirect("/")
-            else:
-                return func(*args, **kwargs)
-        return wrapped_function
-    return decorator
-
-#------------------------------------------------------------
-#-------------------------Flask Admin -------------------------
-#------------------------------------------------------------
-#Following class is user defined ModelView inherited from default 
-class MyModelView(ModelView):
-    #defines the condition for /admin/user to be accessible
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.has_role('admin')
-    #defines what to do if inaccesible
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
-
-#Following class is user defined AdminIndexView inherited from default 
-class MyAdminIndexView(AdminIndexView):
-    #defines the condition for URL '/admin' to be accessible
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.has_role('admin')
-    #defines what to do if inaccesible
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('dashboard'))
-
-#create admin object - template_mode defines which template we use from the lib for frontend
-admin = Admin(app, index_view = MyAdminIndexView(), template_mode = 'bootstrap4')
-#add ModelView class to admin
-admin.add_view(MyModelView(User, db.session))
-
-
-#=============================================================================================
-# REST API
-#=============================================================================================  
-device_stat_put_args = reqparse.RequestParser()
-#help parameter is similar to error message we send back to sender when there is no valid input
-#required parameter means the field is not optional
-device_stat_put_args.add_argument("name", type=str, help="Device name is required", required=True)
-device_stat_put_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
-device_stat_put_args.add_argument("message", type=str, help="Device message is required", required=True)
-device_stat_put_args.add_argument("status", type=str, help="Device status is required", required=True)
-device_stat_put_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
-device_stat_put_args.add_argument("battery_current", type=str, help="Device battery current?", required=True)
-
-device_stat_update_args = reqparse.RequestParser()
-device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
-device_stat_update_args.add_argument("last_seen", type=str, help="Device last_seen is required", required=True)
-device_stat_update_args.add_argument("message", type=str, help="Device message is required", required=True)
-device_stat_update_args.add_argument("status", type=str, help="Device status is required", required=True)
-device_stat_update_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
-device_stat_update_args.add_argument("battery_current", type=str, help="Device battery current?",required=True)
-
-
-resource_fields = {
-	'id': fields.Integer,
-	'name': fields.String,
-	'last_seen': fields.String,
-	'message': fields.String,
-    'status': fields.String,
-    'battery_voltage': fields.String,
-    'battery_current': fields.String
-}
-
-#marshal_with to serialize object
-class Device_Stat_pipeline(Resource):
-	@marshal_with(resource_fields)
-	def get(self, device_id):
-		result = end_device.query.filter_by(id=device_id).first()
-		if not result:
-			abort(404, message="Could not find device record in database")
-		return result
-
-	@marshal_with(resource_fields)
-	def put(self, device_id):
-		args = device_stat_put_args.parse_args()
-		result = end_device.query.filter_by(id=device_id).first()
-		if result:
-			abort(409, message="Device id taken...")
-
-		device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'])
-		db.session.add(device_record)
-		db.session.commit()
-		return device_record, 201 #this number is just a number in http protocol, can change to other num
-
-	@marshal_with(resource_fields)
-	def patch(self, device_id):
-		args = device_stat_update_args.parse_args()
-		result = end_device.query.filter_by(id=device_id).first()
-		if not result:
-			abort(404, message="Device record doesn't exist, cannot update")
-
-		if args['name']:
-			result.name = args['name']
-
-		if args['last_seen']:
-			result.last_seen = args['last_seen']
-			
-		if args['message']:
-			result.message = args['message']
-
-		if args['battery_voltage']:
-			result.battery_voltage = args['battery_voltage']
-
-		if args['battery_current']:
-			result.battery_current = args['battery_current']
-        
-		if args['status']:
-			if result.status != args['status']:
-				logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
-
-			result.status = args['status']
-	
-		db.session.commit()
-		return result
-
-	# def delete(self, device_id):
-	# 	# need to abort if the database doesnt exist, else might cause error
-    #     # #abort_if_video_id_doesnt_exist(video_id)
-	# 	del end_device[device_id]
-	# 	return '', 204
-
-
-api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
-
-#------------------------------------------------------------
-#------------------------------------------------------------
-#------------------------------------------------------------
-
-
-
 
 
 @app.route("/roboflow")
@@ -371,14 +141,14 @@ def dashboard():
 
     return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
 
-# @app.route('/update_server', methods=['POST'])
-# def webhook():
-#     repo = git.Repo('./Elephant_Project_Web_Application')
-#     origin = repo.remotes.origin
+@app.route('/update_server', methods=['POST'])
+def webhook():
+    repo = git.Repo('./Elephant_Project_Web_Application')
+    origin = repo.remotes.origin
 
-#     repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
-#     origin.pull()
-#     return 'Updated PythonAnywhere successfully', 200
+    repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+    origin.pull()
+    return 'Updated PythonAnywhere successfully', 200
 
 @app.route("/login", methods = ['GET', 'POST'])
 def login():
@@ -387,7 +157,22 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         #Following line checks whether user is in database
-        user = User.query.filter_by(username=form.username.data).first() 
+        command = "SELECT * FROM User WHERE username=\'" + form.username.data + "\';"
+        conn = sqlite3.connect(db_path)
+        cursor = conn.execute(command, form.username.data)
+
+        # STR1 = (form.username.data,)
+        # command = "SELECT * FROM User WHERE username= ?"
+        # conn = sqlite3.connect(db_path)
+        # cursor = conn.execute(command, STR1)
+        test_user = [999, 'xx']
+        for row in cursor:
+            test_user = row
+        test_username = test_user[1] 
+
+        user = User.query.filter_by(username=test_username).first()
+
+        # user = User.query.filter_by(username=form.username.data).first() 
         if user: #if user in database
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=False)
@@ -564,7 +349,7 @@ def update_status():
     return render_template('update_status.html', active_state = "data_center", navbar_items = navbar_items)
 
 @app.route("/data_center/update_multiple_images", methods = ['POST'])
-@login_required     
+@login_required
 @require_role(role="admin", role2 = "explorer")
 def upload_multiple_image():
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
@@ -837,7 +622,7 @@ def end_devices():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
-    navbar_items = [["Update database", url_for('roboflow')], ["Upload", url_for('update_status')]]
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type = get_records()
         start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
@@ -899,17 +684,17 @@ def display_image():
             image_id.append(image.id)
             datetime_str_formatted = datetime.datetime.strftime(date_time_obj, '%Y-%m-%d %H:%M:%S')
             image_timestamps.append(datetime_str_formatted)
-            image_paths.append(check_and_create_img_thumbnail(BASE_DIR, image.path, 300, data)[1])
-            # image_paths.append(image.path)
+            # image_paths.append(check_and_create_img_thumbnail(image.path, 300, data)[1])
+            image_paths.append(image.path)
             image_paths_high_res.append(image.path)
 
-            if image.path2:
-            #this if loop is to prevent when file path is none type
-                image_paths2.append(check_and_create_img_thumbnail(BASE_DIR, image.path2, 300, data)[1])
-            else:
-                image_paths2.append(image.path2)
+            # if image.path2:
+            # #this if loop is to prevent when file path is none type
+            #     image_paths2.append(check_and_create_img_thumbnail(image.path2, 300, data)[1])
+            # else:
+            #     image_paths2.append(image.path2)
 
-            # image_paths2.append(image.path2)
+            image_paths2.append(image.path2)
 
             image_source.append(image.source)
             image_uploader.append(image.uploader)
@@ -933,7 +718,6 @@ def display_image():
     image_tag.reverse()
     image_latitude.reverse()
     image_longitude.reverse()
-    image_upload_date.reverse()
     
     return render_template( "display_image.html", 
                             from_date = data.from_date_str,

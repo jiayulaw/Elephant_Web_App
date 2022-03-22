@@ -42,7 +42,6 @@ else:
     allImages = Images.query.all()
 
 
-
 for image in allImages:
     try:
         #find the index number of the same timestamp in

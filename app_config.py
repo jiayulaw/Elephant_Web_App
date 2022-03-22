@@ -1,21 +1,25 @@
 # Run this script as main to initialize database
 # default admin user will also be created
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy 
 import os
 from flask_bcrypt import Bcrypt
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import datetime
-from elephant_functions import *
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
-
+from wtforms.validators import InputRequired, Length, ValidationError
+from functools import wraps
+# Initialize Flask App
 app = Flask(__name__, static_folder='static')
+# REST API setup
 api = Api(app)
-#need to set base dir to prevent path issue in pythonanywhere
+#need to set base dir to prevent path issue in server
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# absolute path for database
 db_path = os.path.join(BASE_DIR, "database.sqlite")
+
 #=============================================================================================
 # Database tables initialization
 #=============================================================================================
@@ -80,52 +84,8 @@ class User(db.Model, UserMixin):
         else:
             return False
 
-#=============================================================================================
-# Forms initialization
-#=============================================================================================
-class RegisterForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-   
-    # access_level = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
 
-    access_level = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
-    submit = SubmitField("Register")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if existing_user_username:
-            raise ValidationError(
-                "That username already exists. Please choose a different one.")
-
-
-class ChangePasswordForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
-
-    new_password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "New password"})
-    new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
-   
-    submit = SubmitField("Change password")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if not existing_user_username:
-            raise ValidationError("The username does not exist.")
-
-class LoginForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
-    
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
-    
-    submit = SubmitField("Login")
-            
+# if this file is run as main, create database and append admin users.
 if __name__ == "__main__":
     db.create_all()
     # Create default admin user
@@ -148,13 +108,3 @@ if __name__ == "__main__":
     db.session.add(new_user)
     db.session.commit()
     print("Default admin user created successfully")
-
-
-@app.route("/any_url")
-def model():
-    # get data from user input or database, i.e, username = elephantking 
-    # do something here
-    username = 'elephantking' 
-    number = 1 + 1
-
-    return render_template('view.html', name_to_be_displayed =username)

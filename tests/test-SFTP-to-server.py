@@ -19,8 +19,8 @@ path = '/var/www/Elephant_Web_App/static/image uploads/' + station
 # the file should have the format of '2021-10-17 22-30' at server side
 # image = r"C:\Users\user10\Desktop\2022-02-21 21-21-21-x-maggimee.jpg"
 
-image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2021-09-15 16-18-18-x-whale2.jpg'
-jsonn = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2021-09-15 16-18-18-x-whale2.json'
+image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-22 12-20-17-x-testingqq2.jpg'
+jsonn = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-22 12-20-17-x-testingqq2.json'
 
 
 

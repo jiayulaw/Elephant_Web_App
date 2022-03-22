@@ -20,8 +20,9 @@ from flask_admin.contrib.sqla import ModelView
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from os.path import exists
 import random
-from app_config import *
+# 
 import pytz
+from app_config import *
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import logging
@@ -36,31 +37,44 @@ import ast
 from pathlib import Path
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
-        # if the directory already contain file with same name, then rename before 
-        # saving the file to prevent overwrite
-        while exists(absolute_file_path):
-            n = random.randint(0,999999)
-            namestr = img_source + "/" + str(n) + "_" + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], namestr)
-            absolute_file_path = os.path.join(BASE_DIR, file_path)
-        return file_path, absolute_file_path
+    """ 
+    Checks whether directory name exists. 
+    If directory already exists, it returns a directory name with random integers appended.
+    Else, the original directory name will be returned.
+    """
+    while exists(absolute_file_path):
+        n = random.randint(0,999999)
+        namestr = img_source + "/" + str(n) + "_" + filename
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], namestr)
+        absolute_file_path = os.path.join(BASE_DIR, file_path)
+    return file_path, absolute_file_path
 
 
-# this function converts a datetime object that contains 
-# a local timezone attribute to UTC time
 def Local2UTC_time(LocalTime):
+    """
+    Converts a datetime object that contains local timezone information to UTC datetime object.
+    """
     EpochSecond = time.mktime(LocalTime.timetuple())
     utcTime = datetime.datetime.utcfromtimestamp(EpochSecond)
     return utcTime
 
-# this function converts to Malaysia timezone by adding 8 hours
 def getMalaysiaTime(timestamp, format):
+    """
+    Converts a local datetime object to UTC and then to UTC+8 (Malaysia) timezone.
+    Returns Malaysia timezone datetime string with specified format.
+    """
+    # Convert to UTC
     UTC_timestamp = Local2UTC_time(timestamp)
+    # Adds 8 hours to UTC to get Malaysia time 
     Malaysia_timezone_timestamp = UTC_timestamp + datetime.timedelta(hours=8)
     date_created = Malaysia_timezone_timestamp.strftime(format)
     return date_created
 
 def bounding_box_and_text(annotations, img):
+    """
+    Accepts image annottaion and an image in numpy array format (BGR).
+    Returns an annotated image with boxes and labels, in numpy array format (BGR).
+    """
     for box in annotations:
         label = box['label']
         x = box['coordinates']['x']
@@ -87,6 +101,11 @@ def bounding_box_and_text(annotations, img):
     return img
 
 def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat):
+    """
+    Triggers the annotation of image if a corresponding json file is found within the same directory of image.
+    Save the annotated image at the same directory.
+    Send the unannotated image together with annotation files to Roboflow platform through REST API.
+    """
     absolute_path = os.path.join(BASE_DIR, path)
     original_img = cv2.imread(absolute_path)
     JsonFileName = common_name + ".json"
@@ -107,18 +126,19 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         print(annotationList)
         print(type(annotationList))
 
-
-
         try: #sometimes unknown error occurs due to this line... so i use try except here
             annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Success", "Image @ " + path + " was successfully annotated." , db)
         except:
             print("an error occured when annotating image. Image now set to original image.")
             annotated_img = original_img
-
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Failed", "Image @ " + path + " failed to be annotated." , db)
+            
         cv2.imwrite(annotated_filepath_absolute, annotated_img)
         result = Images.query.filter_by(path=path).first()
         result.path2 = annotated_filepath
         result.json_path = JsonFilePath
+        img_id = result.id
         db.session.commit()
 
         # remember to remove confidence from the annotations before sending to roboflow api
@@ -189,9 +209,9 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
 
         try:
             print(r.json()['success'])
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Success", "Image with id " + img_id  + " succesfully uploaded to Roboflow platform.", db)
         except:
-            pass
-            print('annotation not received by roboflow')
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Failed", "Image with id " + img_id  + " failed to be uploaded to Roboflow platform.", db)
 
     
         print("Done Bossku")
@@ -199,7 +219,10 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         #     print("Failed to send annotation to roboflow.")
 
 def update_server_directory_images():
-    """ check directory to update any new images added through SFTP or direct upload to server"""
+    """ 
+    Check directory to look for any image file (of certain naming format) that is not recorded in database.
+    Proceed to record the unrecorded image if any.
+    """
     print("Updating server directory images and detection information...")
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
         directory = rf"static/image uploads/{device_name}" 
@@ -207,7 +230,7 @@ def update_server_directory_images():
         for filename in os.listdir(directory2):
             # try: #dont use try except here! it is only making things complicated!
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                if '-x-' in filename and 'thumbnail' not in filename:
+                if '-x-' in filename and 'thumbnail' and 'edited' not in filename:
                     #strip away file format extension
                     common_name = filename.split(".")[0]
                     fileformat = filename.split(".")[1]
@@ -243,9 +266,13 @@ def update_server_directory_images():
             #     pass
 
 def logServerActivity(timestmp, type, description, db):
-   new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
-   db.session.add(new_activity)
-   db.session.commit()
+    """
+    Record server activity to database table based on timestamp, activity type, 
+    and description provided.
+    """
+    new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
+    db.session.add(new_activity)
+    db.session.commit()
 
 # def update_end_device_database_thread():
 #         ###########################################################################
@@ -282,6 +309,12 @@ def logServerActivity(timestmp, type, description, db):
     
 
 def update_server_thread():
+    """
+    An infinite loop that listens for change in directory and triggers
+    the check and record of unrecorded image file.
+    The loop also update the status of device if not being seen for more than
+    certain amount of time, then log for any status change.
+    """
     ###########################################################################
     # Check for change in directory
     ###########################################################################
@@ -350,6 +383,12 @@ def update_server_thread():
         print ("Exiting ")
 
 def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime):
+    """
+    Returns 2 arrays containing image information that satisfy the img_source, 
+    detection type and time range input.
+    1st array contains the number of occurence of each image per day.
+    2nd array contains day (date) corrresponding to the array of image occurence.
+    """
     x_array = []
     y_array = []
     if img_source:
@@ -401,6 +440,10 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
 
 
 def map_XYvalues_to_Larger_range(bigger_x_array, inputX_array, inputY_array):
+    """
+    Maps information from a smaller x and y arrays to a bigger x array containing more elements.
+    This is done for plotting using same x array.
+    """
     counter = 0
     bigger_y_array = [0]*len(bigger_x_array)
     for item in inputX_array:
@@ -415,7 +458,10 @@ def map_XYvalues_to_Larger_range(bigger_x_array, inputX_array, inputY_array):
 
 
 def getDatetimeObject(datetime_str, formats):
-    """This function returns a datetime object by trying out multiple formats given."""
+    """
+    This function returns a datetime object by trying to
+    read datetime string using multiple formats specified within list.
+    """
     for format in formats:
         try:
             datetime_object = datetime.datetime.strptime(datetime_str,format)
@@ -425,10 +471,11 @@ def getDatetimeObject(datetime_str, formats):
 
 
 def check_and_create_img_thumbnail(BASE_DIR, path, max_size_in_kb, data):
-    """ check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
-    If image size is greater than max_size_in_kb, then the algorithm will continue compressing the image until it is smaller than maximum size.
-    The function returns the boolean indicating whether input file is greater than specified size and the path of the compressed image.
-    In the event where input file is already smaller than speciied size, the function returns the same path as input."""
+    """ 
+    check_and_create_img_thumbnail(dir, filename, max_size_in_kb)
+    Returns the boolean indicating whether input file is greater than max_size_in_kb.
+    Also returns the path of the compressed image (if oversized), else returns original file path.
+    """
     #read the img
     # path = dir + filename
     filename = os.path.basename(path)
@@ -436,7 +483,6 @@ def check_and_create_img_thumbnail(BASE_DIR, path, max_size_in_kb, data):
     dir = os.path.dirname(path)
     path2 = dir + "/thumbnail_" + filename
     absolute_path2 =  os.path.join(BASE_DIR, path2)
-
 
     if os.path.exists(absolute_path2):
         print("existing thumbnail found")

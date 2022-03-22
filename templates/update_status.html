@@ -217,12 +217,14 @@ $(function() {
                 reader.onload = function(event) {
                     // $($.parseHTML('<img>')).attr('src', event.target.result).appendTo(placeToInsertImagePreview);
                     $($.parseHTML('<img>')).attr({'src': event.target.result, 'style': "width:30%; height:auto; border-style: solid; border-width: 4px; margin: 3px;"}).appendTo(placeToInsertImagePreview);
+                    
+                    
+
                 }
                 // { title:"Test", alt:"Test2" } 
                 reader.readAsDataURL(input.files[i]);
             }
         }
-
     };
 
     $('#gallery-photo-add').on('change', function() {
