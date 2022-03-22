@@ -209,9 +209,9 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
 
         try:
             print(r.json()['success'])
-            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Success", "Image with id " + img_id  + " succesfully uploaded to Roboflow platform.", db)
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Success", "Image with id " + str(img_id)  + " succesfully uploaded to Roboflow platform.", db)
         except:
-            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Failed", "Image with id " + img_id  + " failed to be uploaded to Roboflow platform.", db)
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Failed", "Image with id " + str(img_id)  + " failed to be uploaded to Roboflow platform.", db)
 
     
         print("Done Bossku")
@@ -230,7 +230,7 @@ def update_server_directory_images():
         for filename in os.listdir(directory2):
             # try: #dont use try except here! it is only making things complicated!
             if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                if '-x-' in filename and 'thumbnail' and 'edited' not in filename:
+                if '-x-' in filename and 'thumbnail' not in filename and 'edited' not in filename:
                     #strip away file format extension
                     common_name = filename.split(".")[0]
                     fileformat = filename.split(".")[1]
