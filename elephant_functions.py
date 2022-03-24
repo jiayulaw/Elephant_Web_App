@@ -241,7 +241,7 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         print("Done Bossku")
 
 
-def update_server_directory_images():
+def update_server_directory_images(BASE_DIR):
     """ 
     Check directory to look for any image file (of certain naming format) that is not recorded in database.
     Proceed to record the unrecorded image if any.
@@ -284,7 +284,6 @@ def update_server_directory_images():
                             ######################################################
                             # Savea copy of image to NodeRed folder 
                             ######################################################
-                            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
                             src_absolute_path = os.path.join(BASE_DIR, path)
                             dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
                             dest_absolute_path = os.path.join(BASE_DIR, dest_path)
@@ -347,18 +346,18 @@ def update_server_thread():
     ###########################################################################
     def on_created(event):
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
-        update_server_directory_images()
+        update_server_directory_images(BASE_DIR)
 
     def on_deleted(event):
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-        update_server_directory_images()
+        update_server_directory_images(BASE_DIR)
     def on_modified(event):
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-        update_server_directory_images()
+        update_server_directory_images(BASE_DIR)
 
     def on_moved(event):
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-        update_server_directory_images()
+        update_server_directory_images(BASE_DIR)
 
     patterns = ["*"]
     ignore_patterns = None
