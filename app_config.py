@@ -11,6 +11,7 @@ import datetime
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
 from wtforms.validators import InputRequired, Length, ValidationError
 from functools import wraps
+from elephant_functions import *
 # Initialize Flask App
 app = Flask(__name__, static_folder='static')
 # REST API setup
@@ -27,13 +28,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SECRET_KEY'] = 'thisisasecretkey'
 db = SQLAlchemy(app)
 
-class Detection(db.Model):
+class Server_debugger(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.String(100), nullable=False)
-    device = db.Column(db.String(100), nullable=False)
-    latitude = db.Column(db.Integer, nullable=True)
-    longitude = db.Column(db.Integer, nullable=True)
-    
+    type = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(300), nullable=False)
+    timestamp = db.Column(db.String(100), nullable=True)
+    timezone = db.Column(db.String(100), nullable=True)
 
 class Server_activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)

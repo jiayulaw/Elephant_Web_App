@@ -64,7 +64,7 @@ class RegisterForm(FlaskForm):
 
 
 class ChangePasswordForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
+    # username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
     
     password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Current password"})
 
@@ -72,13 +72,6 @@ class ChangePasswordForm(FlaskForm):
     new_password2 = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Confirm new password"})
    
     submit = SubmitField("Change password")
-    #Checks whether the username is redundant
-    def validate_username(self, username):
-        existing_user_username = User.query.filter_by(
-            username = username.data).first()
-
-        if not existing_user_username:
-            raise ValidationError("The username does not exist.")
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Username"})
@@ -241,7 +234,7 @@ class Device_Stat_pipeline(Resource):
 			result.status = args['status']
 	
 		db.session.commit()
-		return result
+		return result, 200
 
 	# def delete(self, device_id):
 	# 	# need to abort if the database doesnt exist, else might cause error
@@ -266,7 +259,7 @@ def roboflow():
 
     update_server_directory_images()
         
-    return redirect("/dashboard")
+    return redirect("/display_image")
 
 @app.route("/")
 @app.route("/dashboard")
@@ -436,7 +429,9 @@ def register():
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        result = User.query.filter_by(username = form.username.data).first()
+        result = User.query.filter_by(username = current_user.username).first()
+        if not result:
+            return render_template("change_password.html", active_state = "account", form = form, msg = "Error! This no account no longer exist.") 
         if not  bcrypt.check_password_hash(result.password, form.password.data):
             return render_template("change_password.html", active_state = "account", form = form, msg = "Current password is incorrect.") 
             
@@ -785,7 +780,21 @@ def edit_img(img_id):
 
 @app.route("/debug")
 def debug():
-    return render_template("debug.html", active_state = "debug", debug_arr = data.debug_arr)
+    activity_description = []
+    activity_date = []
+    activity_type = []
+    result = Server_debugger.query.all()
+    for row in result:
+        activity_description.append(row.description)
+        activity_date.append(row.timestamp)
+        
+        activity_type.append(row.type)
+    db.session.commit()
+    activity_description.reverse()
+    activity_date.reverse()
+    activity_type.reverse()
+
+    return render_template("debug.html", active_state = "debug", activity_description = activity_description, activity_date = activity_date, activity_type = activity_type)
 
 # @app.route("/test")
 # def test():
@@ -813,25 +822,25 @@ def start_thread():
 
     return render_template('thread.html')
 
-@app.route("/end_devices")
-@login_required
-@require_role(role="admin", role2="explorer")
-def end_devices():
-    end_device_name1 = "?"
-    end_device_name2 = "?"
-    end_device_name3 = "?"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 1")
-    for row in cursor:
-        end_device_name1 = row[0]
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 2")
-    for row in cursor:
-        end_device_name2 = row[0]
-    cursor = conn.execute("SELECT name FROM end_device WHERE id = 3")
-    for row in cursor:
-        end_device_name3 = row[0]
+# @app.route("/end_devices")
+# @login_required
+# @require_role(role="admin", role2="explorer")
+# def end_devices():
+#     end_device_name1 = "?"
+#     end_device_name2 = "?"
+#     end_device_name3 = "?"
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.execute("SELECT name FROM end_device WHERE id = 1")
+#     for row in cursor:
+#         end_device_name1 = row[0]
+#     cursor = conn.execute("SELECT name FROM end_device WHERE id = 2")
+#     for row in cursor:
+#         end_device_name2 = row[0]
+#     cursor = conn.execute("SELECT name FROM end_device WHERE id = 3")
+#     for row in cursor:
+#         end_device_name3 = row[0]
 
-    return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
+#     return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
     
 @app.route("/display_image")
 @login_required

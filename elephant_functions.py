@@ -1,6 +1,6 @@
 #turorial: https://www.tutorialspoint.com/sqlite/sqlite_python.htm
 
-
+import shutil
 import sqlite3
 from sqlite3.dbapi2 import enable_shared_cache
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -35,6 +35,25 @@ from PIL import Image
 import io
 import ast
 from pathlib import Path
+
+
+def logServerActivity(timestmp, type, description, db):
+    """
+    Record server activity to database table based on timestamp, activity type, 
+    and description provided.
+    """
+    new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
+    db.session.add(new_activity)
+    db.session.commit()
+
+def logServerDebugger(timestmp, type, description, db):
+    """
+    Record server debugger to database table based on timestamp, activity type, 
+    and description provided.
+    """
+    new_activity = Server_debugger(timestamp = timestmp, type = type, description=description)
+    db.session.add(new_activity)
+    db.session.commit()
 
 def checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app):
     """ 
@@ -100,7 +119,7 @@ def bounding_box_and_text(annotations, img):
         cv2.putText(img, text_box, (x+10, y-7), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 0), 2)
     return img
 
-def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat):
+def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat, db):
     """
     Triggers the annotation of image if a corresponding json file is found within the same directory of image.
     Save the annotated image at the same directory.
@@ -129,10 +148,12 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         try: #sometimes unknown error occurs due to this line... so i use try except here
             annotated_img = bounding_box_and_text(annotationList[0]['annotations'],original_img)
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Success", "Image @ " + path + " was successfully annotated." , db)
+            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Success", "Image @ " + path + " was successfully annotated." , db)
         except:
             print("an error occured when annotating image. Image now set to original image.")
             annotated_img = original_img
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Failed", "Image @ " + path + " failed to be annotated." , db)
+            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image Annotation Failed", "Image @ " + path + " failed to be annotated." , db)
             
         cv2.imwrite(annotated_filepath_absolute, annotated_img)
         result = Images.query.filter_by(path=path).first()
@@ -172,6 +193,7 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         # try:
         imageId = r.json()['id']
         print(imageId)
+        logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Image Id", "Image id " + str(imageId)  + " was obtained from Roboflow platform.", db)
 
         #Writing  out .json will have permission error on Linux server
         # # After all detections,
@@ -210,13 +232,14 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         try:
             print(r.json()['success'])
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Success", "Image with id " + str(img_id)  + " succesfully uploaded to Roboflow platform.", db)
+            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Success", "Image with id " + str(img_id)  + " succesfully uploaded to Roboflow platform.", db)
         except:
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Failed", "Image with id " + str(img_id)  + " failed to be uploaded to Roboflow platform.", db)
+            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow Upload Failed", "Image with id " + str(img_id)  + " failed to be uploaded to Roboflow platform.", db)
 
     
         print("Done Bossku")
-        # except:
-        #     print("Failed to send annotation to roboflow.")
+
 
 def update_server_directory_images():
     """ 
@@ -228,51 +251,55 @@ def update_server_directory_images():
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
-            # try: #dont use try except here! it is only making things complicated!
-            if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                if '-x-' in filename and 'thumbnail' not in filename and 'edited' not in filename:
-                    #strip away file format extension
-                    common_name = filename.split(".")[0]
-                    fileformat = filename.split(".")[1]
-                    #strip between datetime and detection type
-                    arr1 = common_name.split("-x-")
-                    detection_date_time = arr1[0]
-                    date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
-                    date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
-                    
-                    detection_type = arr1[1]
-                    # path = os.path.join(directory, filename)
-                    path = rf"static/image uploads/{device_name}/"+filename
+            try: #dont use try except here! it is only making things complicated!
+                if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+                    if '-x-' in filename and 'thumbnail' not in filename and 'edited' not in filename:
+                        #strip away file format extension
+                        common_name = filename.split(".")[0]
+                        fileformat = filename.split(".")[1]
+                        #strip between datetime and detection type
+                        arr1 = common_name.split("-x-")
+                        detection_date_time = arr1[0]
+                        date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
+                        date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
+                        
+                        detection_type = arr1[1]
+                        # path = os.path.join(directory, filename)
+                        path = rf"static/image uploads/{device_name}/"+filename
 
-                    result = Images.query.filter_by(path=path).first()
-                    if result:
-                        # print("the file with same name already saved")
-                        annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat)
-                    else:
-                        ######################################################
-                        # Record new image to database 
-                        ######################################################
-                        new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
-                        db.session.add(new_image)
-                        db.session.commit()
-                        print("New image detected and recorded to database")
-                        ######################################################
-                        # Check and send .json file associated with the image (if any)
-                        ######################################################
-                        annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat)
-            else:
-                continue
-            # except:
-            #     pass
+                        result = Images.query.filter_by(path=path).first()
+                        if result:
+                            # print("the file with same name already saved")
+                            annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
+                        else:
+                            ######################################################
+                            # Record new image to database 
+                            ######################################################
+                            new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
+                            db.session.add(new_image)
+                            db.session.commit()
+                            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
+                            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
 
-def logServerActivity(timestmp, type, description, db):
-    """
-    Record server activity to database table based on timestamp, activity type, 
-    and description provided.
-    """
-    new_activity = Server_activity(timestamp = timestmp, type = type, description=description)
-    db.session.add(new_activity)
-    db.session.commit()
+                            ######################################################
+                            # Savea copy of image to NodeRed folder 
+                            ######################################################
+                            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+                            src_absolute_path = os.path.join(BASE_DIR, path)
+                            dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
+                            dest_absolute_path = os.path.join(BASE_DIR, dest_path)
+                            shutil.copy2(src_absolute_path, dest_absolute_path)
+                            ######################################################
+                            # Check and send .json file associated with the image (if any)
+                            ######################################################
+                            annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
+                else:
+                    continue
+            except Exception as e:
+                logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Exception: Update image directory", str(e), db)
+                
+
+
 
 # def update_end_device_database_thread():
 #         ###########################################################################

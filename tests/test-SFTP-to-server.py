@@ -5,7 +5,7 @@ import os
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
 
-HOST_NAME = "13.213.11.91"
+HOST_NAME = "13.213.160.244"
 USERNAME = "ubuntu"
 
 # This is the path to the .pem file
@@ -20,6 +20,8 @@ path = '/var/www/Elephant_Web_App/static/image uploads/' + station
 # image = r"C:\Users\user10\Desktop\2022-02-21 21-21-21-x-maggimee.jpg"
 
 image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-08 19-20-17-x-bones.png'
+# image = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\MChanga_1624536553868_hpMain_4x5_608 - Copy.jpg'
+
 jsonn = r'C:\Users\user10\Desktop\Hobby\Programming\EEEY3 Project\Web App\Elephant_Web_App_v2\static\image uploads\end device 2\2022-03-08 19-20-17-x-bones.json'
 
 
