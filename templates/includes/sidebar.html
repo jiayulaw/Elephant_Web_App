@@ -12,7 +12,6 @@
     <ul class="list-unstyled components">
         <p>Version 0.5.1</p>
         {% if current_user.is_authenticated == True %}
-
         <li class="{% if 'account' in active_state %} active {% endif %}">
             <a href="#AccountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> <i class="fas fa-user-circle mr-2"></i>{{current_user.username}}</a>
             <ul class="collapse list-unstyled" id="AccountSubmenu">
@@ -69,11 +68,24 @@
                     <a href="/data_center/update_status">Upload Image(s)</a>
                 </li>
 
-
             </ul>
         </li>
-
-
+        <ul class="list-unstyled CTAs">
+            <li>
+                <a href="{{ url_for('logout') }}" class="logout_button"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+            </li>
+            {% if current_user.has_role('admin') == True %}
+            <li>
+                <a href="{{ url_for('debug') }}" class="debug_button"><i class="fas fa-bug mr-2"></i>Debugger</a>
+            </li>
+            {% endif %}
+            
+            <!--
+            <li>
+                <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Back to article</a>
+            </li>
+            -->
+        </ul>
         {% else %}
         <li>
             <a href="{{ url_for('login') }}">Please log in</a>
@@ -81,18 +93,6 @@
         {% endif %}
     </ul>
 
-    <ul class="list-unstyled CTAs">
-        <li>
-            <a href="{{ url_for('logout') }}" class="download"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
-        </li>
-        <li>
-            <a href="{{ url_for('debug') }}" class="download">Debug</a>
-        </li>
-        <!--
-        <li>
-            <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Back to article</a>
-        </li>
-        -->
 
-    </ul>
+  
 </nav>

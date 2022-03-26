@@ -191,7 +191,7 @@ class Device_Stat_pipeline(Resource):
 		result = end_device.query.filter_by(id=device_id).first()
 		if not result:
 			abort(404, message="Could not find device record in database")
-		return result
+		return result, 200
 
 	@marshal_with(resource_fields)
 	def put(self, device_id):
@@ -779,6 +779,8 @@ def edit_img(img_id):
 #------------------------------------------------------------
 
 @app.route("/debug")
+@login_required
+@require_role(role="admin", role2 = "admin")
 def debug():
     activity_description = []
     activity_date = []
@@ -787,7 +789,6 @@ def debug():
     for row in result:
         activity_description.append(row.description)
         activity_date.append(row.timestamp)
-        
         activity_type.append(row.type)
     db.session.commit()
     activity_description.reverse()

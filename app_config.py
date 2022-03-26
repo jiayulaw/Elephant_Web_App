@@ -12,6 +12,54 @@ from wtforms import StringField, PasswordField, SubmitField, IntegerField, Selec
 from wtforms.validators import InputRequired, Length, ValidationError
 from functools import wraps
 from elephant_functions import *
+
+
+# import threading
+# import atexit
+# POOL_TIME = 5 #Seconds
+    
+# # variables that are accessible from anywhere
+# commonDataStruct = {}
+# # lock to control access to variable
+# dataLock = threading.Lock()
+# # thread handler
+# yourThread = threading.Thread()
+
+# def create_app():
+#     app = Flask(__name__, static_folder='static')
+
+#     def interrupt():
+#         global yourThread
+#         yourThread.cancel()
+
+#     def doStuff():
+#         global commonDataStruct
+#         global yourThread
+#         with dataLock:
+#             pass
+#         print("running thread!")
+#             # Do your stuff with commonDataStruct Here
+
+#         # Set the next thread to happen
+#         yourThread = threading.Timer(POOL_TIME, doStuff, ())
+#         yourThread.start()   
+
+#     def doStuffStart():
+#         # Do initialisation stuff here
+#         global yourThread
+#         # Create your thread
+#         yourThread = threading.Timer(POOL_TIME, doStuff, ())
+#         yourThread.start()
+
+#     # Initiate
+#     doStuffStart()
+#     # When you kill Flask (SIGTERM), clear the trigger for the next thread
+#     atexit.register(interrupt)
+#     return app
+
+# app = create_app()
+
+
 # Initialize Flask App
 app = Flask(__name__, static_folder='static')
 # REST API setup
@@ -76,6 +124,7 @@ class User(db.Model, UserMixin):
     access_level = db.Column(db.String(20), nullable=False)
     date_created = db.Column(db.String(100), nullable=True)
     last_seen = db.Column(db.String(100), nullable=True)
+    
     
     def has_role(self, role_name):
         #my_role = User.query.filter_by(access_level=role_name).first()

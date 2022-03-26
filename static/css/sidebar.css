@@ -181,9 +181,23 @@ ul.CTAs a {
     margin-bottom: 5px;
 }
 
-a.download {
-    background: #fff;
-    color: #041d8f;
+a.debug_button {
+    background: rgba(0, 0, 0, 0.5);
+    
+    color: #5eff00;
+    border-color: rgba(12, 6, 68, 0.85);
+    border-style: solid;
+    border-width: 3px;
+    border-radius: 15px !important;
+}
+
+a.logout_button {
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    border-color: rgba(12, 6, 68, 0.85);
+    border-style: solid;
+    border-width: 3px;
+    border-radius: 15px !important;
 }
 
 a.article, a.article:hover {
