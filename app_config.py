@@ -11,7 +11,7 @@ import datetime
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
 from wtforms.validators import InputRequired, Length, ValidationError
 from functools import wraps
-from elephant_functions import *
+# from elephant_functions import *
 import threading
 
 
@@ -135,9 +135,8 @@ class User(db.Model, UserMixin):
             return False
 
 
-thread1 = threading.Thread(target = update_server_thread)
-thread1.daemon = True
-thread1.start()
+
+
 
 
 # if this file is run as main, create database and append admin users.

@@ -41,6 +41,10 @@ class DataStorage():
 
 data = DataStorage()
 
+thread1 = threading.Thread(target = update_server_thread)
+thread1.daemon = True
+thread1.start()
+
 #=============================================================================================
 # Forms initialization
 #=============================================================================================
