@@ -508,7 +508,47 @@ def delete_user(user_id):
 def analytics():
     navbar_items = []
 
+    # User inputs
+    data.from_date_str   = request.args.get('from', getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")) #Get the from date value from the URL
+    data.to_date_str     = request.args.get('to', getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M"))   #Get the to date value from the URL
+    
+    if getDatetimeObject(data.from_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S']) == 0:
+        from_date_str   = getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
+    if getDatetimeObject(data.to_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S']) == 0:
+        to_date_str   = getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")
+
+
+    # use try except to convert datetime string to datetime object
+    from_date_obj = getDatetimeObject(data.from_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])
+    to_date_obj = getDatetimeObject(data.to_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])
+    #ensure time input is valid
+    current_time = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+    if to_date_obj > current_time:
+        to_date_obj = current_time
+
+    
+    if from_date_obj > to_date_obj:
+        from_date_obj = to_date_obj
+    # get the desired format from datetime object
+    data.from_date_str = datetime.datetime.strftime(from_date_obj, "%Y-%m-%d %H:%M:%S")
+    data.to_date_str = datetime.datetime.strftime(to_date_obj, "%Y-%m-%d %H:%M:%S")
+
+    detection_type       = request.args.get('detection_type','any')
+    data.detection_type = detection_type
     # Hint: getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime)
+    #Filter the number of images based on input
+
+    input_filter_x_array, input_filter_y_array = getImageNumOverTime(None, detection_type, from_date_obj, to_date_obj)
+    input_filter_device1_x_array, input_filter_device1_y_array = getImageNumOverTime("end device 1", detection_type, from_date_obj, to_date_obj)
+    input_filter_device2_x_array, input_filter_device2_y_array = getImageNumOverTime("end device 2", detection_type, from_date_obj, to_date_obj)
+    input_filter_device3_x_array, input_filter_device3_y_array = getImageNumOverTime("end device 3", detection_type, from_date_obj, to_date_obj)
+
+
+    input_filter_big_Y_array_device1 = map_XYvalues_to_Larger_range(input_filter_x_array, input_filter_device1_x_array, input_filter_device1_y_array)
+    input_filter_big_Y_array_device2 = map_XYvalues_to_Larger_range(input_filter_x_array, input_filter_device2_x_array, input_filter_device2_y_array)
+    input_filter_big_Y_array_device3 = map_XYvalues_to_Larger_range(input_filter_x_array, input_filter_device3_x_array, input_filter_device3_y_array)
+
+    
     #Filter the number of images for all time
     all_time_x_array, all_time_y_array = getImageNumOverTime(None, None, None, None)
     all_time_device1_x_array, all_time_device1_y_array = getImageNumOverTime("end device 1", None, None, None)
@@ -538,7 +578,10 @@ def analytics():
     all_time_x_array = all_time_x_array, all_time_y_array = all_time_y_array, all_time_big_Y_array_device1 = all_time_big_Y_array_device1,
     all_time_big_Y_array_device2 = all_time_big_Y_array_device2, all_time_big_Y_array_device3 = all_time_big_Y_array_device3,
     this_week_x_array = this_week_x_array, this_week_y_array = this_week_y_array, this_week_big_Y_array_device1 = this_week_big_Y_array_device1,
-    this_week_big_Y_array_device2 = this_week_big_Y_array_device2, this_week_big_Y_array_device3 = this_week_big_Y_array_device3 )
+    this_week_big_Y_array_device2 = this_week_big_Y_array_device2, this_week_big_Y_array_device3 = this_week_big_Y_array_device3,
+    input_filter_x_array = input_filter_x_array, input_filter_y_array = input_filter_y_array, input_filter_big_Y_array_device1 = input_filter_big_Y_array_device1,
+    input_filter_big_Y_array_device2 = input_filter_big_Y_array_device2, input_filter_big_Y_array_device3 = input_filter_big_Y_array_device3,
+    from_date = data.from_date_str, to_date = data.to_date_str, current_detection_type =  data.detection_type)
 
 #------------------------------------------------------------
 #-------------------------Image upload-------------------------
@@ -963,8 +1006,8 @@ def display_image():
 
 def get_records():
     """getting records from users at website's form"""
-    from_date_str   = request.args.get('from',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
-    to_date_str     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
+    from_date_str   = request.args.get('from', getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M")) #Get the from date value from the URL
+    to_date_str     = request.args.get('to', getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M"))   #Get the to date value from the URL
 
     # use try except to convert datetime string to datetime object
     from_date_obj = getDatetimeObject(from_date_str, ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])

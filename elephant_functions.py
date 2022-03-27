@@ -442,6 +442,8 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
         if detection_type:
             if detection_type in image.tag:
                 bool2 = 1
+            elif detection_type == "any":
+                bool2 = 1
         else:
             bool2 = 1
 
@@ -490,12 +492,19 @@ def getDatetimeObject(datetime_str, formats):
     This function returns a datetime object by trying to
     read datetime string using multiple formats specified within list.
     """
+    bool = 0
     for format in formats:
+        
         try:
             datetime_object = datetime.datetime.strptime(datetime_str,format)
+            bool = 1
         except:
             pass
-    return datetime_object
+
+    if bool == 1:
+        return datetime_object
+    else:
+        return None
 
 
 def check_and_create_img_thumbnail(BASE_DIR, path, max_size_in_kb, data):

@@ -12,56 +12,110 @@
 
 {% block content %}
 <div class = "text-white">
-  <h3>Detection Frequency (Based on number of uploaded images)</h3>
+  
+  <h3>Analytics</h3><br>
+</div>
+<div class="row">
+  <!--Filter field-->
+    <div class="col-lg-6">
+      <div class="card card-chart ml-1 bg-dark text-white">
+        <div class="card-header">
+          <h4 class = "card-title">Number of custom image type over custom time range</h4>
+
+        </div>
+        <div class="card-body">
+          <form style = "width:100%;" id="datetime_range" action="{{ url_for('analytics') }}" method="GET" autocomplete="off">
+            <div class = "form-group row ml-1"> 
+              <label for="detection" class="col-sm-2 col-form-label" style = "max-width: 80%;">Image type</label>
+              <div class="col-sm-10">
+                <select class="u-full-width" id="detection_type" type="text" value="" name="detection_type">
+
+                  {% if current_detection_type == "elephant" %}
+                  <option value = "elephant" selected>Elephant detection</option>
+           
+                  {% else %}
+                  <option value = "elephant">Elephant detection</option>
+                  {% endif %}
+                  {% if current_detection_type == "human" %}
+                  <option value = "human" selected>Human detection</option>
+               
+                  {% else %}
+                  <option value = "human">Human detection</option>
+                  {% endif %}
+                  {% if current_detection_type == "any" %}
+                  <option value = "any" selected>Any</option>
+                 
+                  {% else %}
+                  <option value = "any">Any</option>
+                  {% endif %}
+                </select>
+               </div>
+            </div>
+
+            <div class = "form-group row ml-1">
+              <!-- <div class="col-sm-6"> -->
+                <label for="from" class="col-sm-2 col-form-label">Start time</label>
+                <div class="col-sm-4">
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker1" type="text" value="{{from_date}}" name="from">
+                </div>
+              <!-- </div> -->
+
+              <!-- <div class="col-sm-6"> -->
+                <label for="to" class="col-sm-2 col-form-label">End time</label>
+                <div class="col-sm-4">
+                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to">              
+                </div>
+
+              <!-- </div> -->
+
+            </div>
+            
+
+            <div class = "form-group ml-3">
+              <input type="hidden" class="timezone" name="timezone" />
+              <input class="btn btn-fill btn-primary" type="submit" value="Submit"  id="submit_button" /> 
+            </div>
+          
+          </form>
+                
+          <div class="card-body">
+              <div><canvas id="CustomChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+          </div>
+          
+  
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card mt-3 bg-dark text-white">
+          <div class="card-header ">
+              <h4 class="card-title">Number of uploaded images over all time</h4>
+          </div>
+          
+          <div class="card-body">
+              <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+          </div>
+          
+      </div>
+  </div>
+
+  <div class="col-lg-6">
+      <div class="card mt-3 bg-dark text-white">
+          <div class="card-header bg-dark text-white">
+              <h4 class="card-title">Number of uploaded images over past 7 days</h4>
+          </div>
+          
+          <div class="card-body">
+              <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+          </div>
+          
+      </div>
+  </div>
+         
 </div>
 
-<div class = "row">
-    <div class="col-lg-6">
-        <div class="card mt-3 bg-dark text-white">
-            <div class="card-header">
-                <h4 class="card-title">All time </h4>
-            </div>
-            <div class="card-body">
-                <div><canvas id="AllTimeChart" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card mt-3 bg-dark text-white">
-            <div class="card-header ">
-                <h4 class="card-title">All time </h4>
-            </div>
-            
-            <div class="card-body">
-                <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
-            </div>
-            
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card mt-3 bg-dark text-white">
-            <div class="card-header bg-dark text-white">
-                <h4 class="card-title">Past 7 days </h4>
-            </div>
-            <div class="card-body">
-                <div><canvas id="Past7daysChart" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card mt-3 bg-dark text-white">
-            <div class="card-header bg-dark text-white">
-                <h4 class="card-title">Past 7 days </h4>
-            </div>
-            
-            <div class="card-body">
-                <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
-            </div>
-            
-        </div>
-    </div>
 
-</div>
 
 
 {% endblock content %}
@@ -84,18 +138,78 @@
     var this_week_big_Y_array_device2 = {{this_week_big_Y_array_device2| tojson}};
     var this_week_big_Y_array_device3 = {{this_week_big_Y_array_device3| tojson}};
     
+    var input_filter_x_array = {{input_filter_x_array| tojson}};
+    var input_filter_y_array = {{input_filter_y_array| tojson}};
+    var input_filter_big_Y_array_device1 = {{input_filter_big_Y_array_device1| tojson}};
+    var input_filter_big_Y_array_device2 = {{input_filter_big_Y_array_device2| tojson}};
+    var input_filter_big_Y_array_device3 = {{input_filter_big_Y_array_device3| tojson}};
 
+    // new Chart("CustomChart", {
+    //   type: "line",
+    //   data: {
+    //     labels: input_filter_x_array,
+    //     datasets: [{
+    //       label: 'All end devices', 
+    //       data: input_filter_y_array,
+    //       borderColor: "rgba(140, 89, 199, 1)",
+    //       fill: false
+        
+    //     }]
+    //   },
+    //   options: {
+    //     legend: {display: true,
+    //     labels: {
+    //       fontColor: "white"
+    //     }
+    //   },
 
-    new Chart("AllTimeChart", {
+    //     scales: {
+    //             yAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 18,
+    //                     callback: function(value) {if (value % 1 === 0) {return value;}},
+    //                     beginAtZero: true
+    //                 }
+    //             }],
+    //             xAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 14,
+    //                     stepSize: 1,
+    //                     beginAtZero: true
+    //                 }
+    //             }]
+    //     }
+    //   }
+    // });
+
+    new Chart("CustomChart2", {
       type: "line",
       data: {
-        labels: all_time_x_array,
+        labels: input_filter_x_array,
         datasets: [{
-          label: 'End devices and uploaded', 
-          data: all_time_y_array,
+           
+          data: input_filter_y_array,
           borderColor: "rgba(140, 89, 199, 1)",
-          fill: false
+          fill: false,
+          label: 'All end devices'
         
+      }, { 
+          data: input_filter_big_Y_array_device1,
+          borderColor: "rgba(216, 53, 53, 1)",
+          fill: false,
+          label: "end device 1"
+        }, { 
+          data: input_filter_big_Y_array_device2,
+          borderColor: "rgb(37, 206, 74)",
+          fill: false,
+          label: "end device 2"
+        }, { 
+          data: input_filter_big_Y_array_device3,
+          borderColor: "rgba(0, 154, 243, 1)",
+          fill: false,
+          label: "end device 3"
         }]
       },
       options: {
@@ -110,8 +224,8 @@
                     ticks: {
                         fontColor: "white",
                         // fontSize: 18,
-                        beginAtZero: true,
-                        callback: function(value) {if (value % 1 === 0) {return value;}}
+                        callback: function(value) {if (value % 1 === 0) {return value;}},
+                        beginAtZero: true
                     }
                 }],
                 xAxes: [{
@@ -126,11 +240,59 @@
       }
     });
 
+
+    // new Chart("AllTimeChart", {
+    //   type: "line",
+    //   data: {
+    //     labels: all_time_x_array,
+    //     datasets: [{
+    //       label: 'All end devices', 
+    //       data: all_time_y_array,
+    //       borderColor: "rgba(140, 89, 199, 1)",
+    //       fill: false
+        
+    //     }]
+    //   },
+    //   options: {
+    //     legend: {display: true,
+    //     labels: {
+    //       fontColor: "white"
+    //     }
+    //   },
+
+    //     scales: {
+    //             yAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 18,
+    //                     beginAtZero: true,
+    //                     callback: function(value) {if (value % 1 === 0) {return value;}}
+    //                 }
+    //             }],
+    //             xAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 14,
+    //                     stepSize: 1,
+    //                     beginAtZero: true
+    //                 }
+    //             }]
+    //     }
+    //   }
+    // });
+
     new Chart("AllTimeChart2", {
       type: "line",
       data: {
         labels: all_time_x_array,
-        datasets: [{ 
+        datasets: [{
+          label: 'All end devices', 
+          data: all_time_y_array,
+          borderColor: "rgba(140, 89, 199, 1)",
+          fill: false
+
+
+        },{ 
           data: all_time_big_Y_array_device1,
           borderColor: "rgba(216, 53, 53, 1)",
           fill: false,
@@ -176,51 +338,57 @@
     });
 
 
-    new Chart("Past7daysChart", {
-      type: "line",
-      data: {
-        labels: this_week_x_array,
-        datasets: [{
-          label: 'End devices and uploaded', 
-          data: this_week_y_array,
-          borderColor: "rgba(140, 89, 199, 1)",
-          fill: false
+    // new Chart("Past7daysChart", {
+    //   type: "line",
+    //   data: {
+    //     labels: this_week_x_array,
+    //     datasets: [{
+    //       label: 'All end devices', 
+    //       data: this_week_y_array,
+    //       borderColor: "rgba(140, 89, 199, 1)",
+    //       fill: false
         
-        }]
-      },
-      options: {
-        legend: {display: true,
-        labels: {
-          fontColor: "white"
-        }
-      },
+    //     }]
+    //   },
+    //   options: {
+    //     legend: {display: true,
+    //     labels: {
+    //       fontColor: "white"
+    //     }
+    //   },
 
-        scales: {
-                yAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        // fontSize: 18,
-                        callback: function(value) {if (value % 1 === 0) {return value;}},
-                        beginAtZero: true
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        // fontSize: 14,
-                        stepSize: 1,
-                        beginAtZero: true
-                    }
-                }]
-        }
-      }
-    });
+    //     scales: {
+    //             yAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 18,
+    //                     callback: function(value) {if (value % 1 === 0) {return value;}},
+    //                     beginAtZero: true
+    //                 }
+    //             }],
+    //             xAxes: [{
+    //                 ticks: {
+    //                     fontColor: "white",
+    //                     // fontSize: 14,
+    //                     stepSize: 1,
+    //                     beginAtZero: true
+    //                 }
+    //             }]
+    //     }
+    //   }
+    // });
 
     new Chart("Past7daysChart2", {
       type: "line",
       data: {
         labels: this_week_x_array,
-        datasets: [{ 
+        datasets: [{
+
+          label: 'All end devices', 
+          data: this_week_y_array,
+          borderColor: "rgba(140, 89, 199, 1)",
+          fill: false
+        },{ 
           data: this_week_big_Y_array_device1,
           borderColor: "rgba(216, 53, 53, 1)",
           fill: false,
@@ -266,6 +434,38 @@
     });
 
 </script>
+
+<!-- Fetch jQuery -->
+<script src="//code.jquery.com/jquery-3.5.0.min.js"></script>
+
+<!-- Datetimepicker files start, copy from cdnjs.com (easier to maintain), instead of downloading -->
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+
+<!-- jstimezonedetect script start -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js" ></script>
+
+<!--use Jquery function to attach datetime picker to 2 form fields & specify date format-->
+<!--reference to from_date variable where python script will pass to template-->
+<script>
+// jQuery( "#datetime_range" ).submit(function( event ) {
+//   timezone = jstz.determine();
+//   jQuery(".timezone").val(timezone.name());
+// });
+
+jQuery('#datetimepicker1').datetimepicker(
+  {
+  format:'Y-m-d H:i',
+  theme: 'light',
+  defaultDate:'{{from_date}}' 
+  });
+jQuery('#datetimepicker2').datetimepicker({
+  format:'Y-m-d H:i',
+  theme: 'light',
+  defaultDate:'{{to_date}}'
+  });
+</script>
+
 
 {% endblock javascripts %}   
 
