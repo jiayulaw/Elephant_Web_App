@@ -257,7 +257,7 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 @login_required
 def roboflow():
 
-    update_server_directory_images(BASE_DIR)
+    update_server_directory_images(Images, BASE_DIR)
         
     return redirect("/display_image")
 

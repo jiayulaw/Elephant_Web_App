@@ -81,14 +81,14 @@ class Server_debugger(db.Model):
     type = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(300), nullable=False)
     timestamp = db.Column(db.String(100), nullable=True)
-    timezone = db.Column(db.String(100), nullable=True)
+    # timezone = db.Column(db.String(100), nullable=True)
 
 class Server_activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.String(100), nullable=True)
-    timezone = db.Column(db.String(100), nullable=True)
+    # timezone = db.Column(db.String(100), nullable=True)
 
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -102,7 +102,7 @@ class Images(db.Model):
     latitude = db.Column(db.Integer, nullable=True)
     longitude = db.Column(db.Integer, nullable=True)
     upload_date = db.Column(db.String(100), nullable=True)
-    timezone = db.Column(db.String(100), nullable=True)
+    # timezone = db.Column(db.String(100), nullable=True)
 
 class end_device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -112,7 +112,7 @@ class end_device(db.Model):
     message = db.Column(db.String(100), nullable=True)
     battery_voltage = db.Column(db.String(100), nullable=True)
     battery_current = db.Column(db.String(100), nullable=True)
-    timezone = db.Column(db.String(100), nullable=True)
+    # timezone = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
         return f"Device_Stat_pipeline(name = {name}, last_seen = {last_seen}, message = {message})"
