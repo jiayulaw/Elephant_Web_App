@@ -190,61 +190,87 @@ resource_fields = {
 
 #marshal_with to serialize object
 class Device_Stat_pipeline(Resource):
-	@marshal_with(resource_fields)
-	def get(self, device_id):
-		result = end_device.query.filter_by(id=device_id).first()
-		if not result:
-			abort(404, message="Could not find device record in database")
-		return result, 200
+    @marshal_with(resource_fields)
+    def get(self, device_id):
+        result = end_device.query.filter_by(id=device_id).first()
+        if not result:
+            abort(404, message="Could not find device record in database")
+        return result, 200
 
-	@marshal_with(resource_fields)
-	def put(self, device_id):
-		args = device_stat_put_args.parse_args()
-		result = end_device.query.filter_by(id=device_id).first()
-		if result:
-			abort(409, message="Device id taken...")
+    @marshal_with(resource_fields)
+    def put(self, device_id):
+        args = device_stat_put_args.parse_args()
+        result = end_device.query.filter_by(id=device_id).first()
+        if not result:
+            device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'], message=args['message'], battery_voltage =args['battery_voltage'] , battery_current =args['battery_current'] )
+            db.session.add(device_record)
+            db.session.commit()
+            return_val = device_record
+            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "End device added", "Device - " + args['name'] + " added to database.", db)
+            number = 201
 
-		device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'])
-		db.session.add(device_record)
-		db.session.commit()
-		return device_record, 201 #this number is just a number in http protocol, can change to other num
+        else: 
+            if args['name']: 
+                result.name = args['name']
 
-	@marshal_with(resource_fields)
-	def patch(self, device_id):
-		args = device_stat_update_args.parse_args()
-		result = end_device.query.filter_by(id=device_id).first()
-		if not result:
-			abort(404, message="Device record doesn't exist, cannot update")
+            if args['last_seen']:
+                result.last_seen = args['last_seen']
+                
+            if args['message']:
+                result.message = args['message']
 
-		if args['name']:
-			result.name = args['name']
+            if args['battery_voltage']:
+                result.battery_voltage = args['battery_voltage']
 
-		if args['last_seen']:
-			result.last_seen = args['last_seen']
-			
-		if args['message']:
-			result.message = args['message']
-
-		if args['battery_voltage']:
-			result.battery_voltage = args['battery_voltage']
-
-		if args['battery_current']:
-			result.battery_current = args['battery_current']
+            if args['battery_current']:
+                result.battery_current = args['battery_current']
+            
+            if args['status']:
+                if result.status != args['status']:
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
+                result.status = args['status']
+            db.session.commit()
+            return_val = result
+            number = 200
+        return return_val, number
         
-		if args['status']:
-			if result.status != args['status']:
-				logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
 
-			result.status = args['status']
-	
-		db.session.commit()
-		return result, 200
+    @marshal_with(resource_fields)
+    def patch(self, device_id):
+        args = device_stat_update_args.parse_args()
+        result = end_device.query.filter_by(id=device_id).first()
+        if not result:
+            abort(404, message="Device record doesn't exist, cannot update")
 
-	# def delete(self, device_id):
-	# 	# need to abort if the database doesnt exist, else might cause error
+        if args['name']:
+            result.name = args['name']
+
+        if args['last_seen']:
+            result.last_seen = args['last_seen']
+            
+        if args['message']:
+            result.message = args['message']
+
+        if args['battery_voltage']:
+            result.battery_voltage = args['battery_voltage']
+
+        if args['battery_current']:
+            result.battery_current = args['battery_current']
+        
+        if args['status']:
+            if result.status != args['status']:
+                logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
+
+            result.status = args['status']
+    
+        db.session.commit()
+        return result, 200
+
+    # def delete(self, device_id):
+    # 	# need to abort if the database doesnt exist, else might cause error
     #     # #abort_if_video_id_doesnt_exist(video_id)
-	# 	del end_device[device_id]
-	# 	return '', 204
+    # 	del end_device[device_id]
+    # 	return '', 204
 
 
 api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
@@ -1060,6 +1086,7 @@ else:
     # thread1 = threading.Thread(target = update_server_thread)
     # thread1.daemon = True
     # thread1.start()
+
 
 
 

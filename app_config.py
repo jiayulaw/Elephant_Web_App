@@ -162,3 +162,5 @@ if __name__ == "__main__":
     db.session.add(new_user)
     db.session.commit()
     print("Default admin user created successfully")
+
+
