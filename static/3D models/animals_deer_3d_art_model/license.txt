@@ -1,0 +1,11 @@
+Model Information:
+* title:	Animals: Deer 3D Art Model
+* source:	https://sketchfab.com/3d-models/animals-deer-3d-art-model-0ea35442d20649f39adf73e781ff6939
+* author:	Adil.Fell (https://sketchfab.com/Aadil.Fell)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Animals: Deer 3D Art Model" (https://sketchfab.com/3d-models/animals-deer-3d-art-model-0ea35442d20649f39adf73e781ff6939) by Adil.Fell (https://sketchfab.com/Aadil.Fell) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
