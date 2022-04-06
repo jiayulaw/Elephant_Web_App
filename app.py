@@ -394,9 +394,9 @@ def dashboard():
 
     return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
 
-@app.route("/dashboard")
+@app.route("/device_monitoring")
 @login_required #we can only access dashboard when logged in
-def dashboard():
+def device_monitoring():
     navbar_items = [["Device status", "#device_status"], ["Elephant Radar", "#elephant_radar"]]
     # Filter images from database
     image1 = []
