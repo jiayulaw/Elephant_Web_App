@@ -394,6 +394,108 @@ def dashboard():
 
     return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
 
+@app.route("/dashboard")
+@login_required #we can only access dashboard when logged in
+def dashboard():
+    navbar_items = [["Device status", "#device_status"], ["Elephant Radar", "#elephant_radar"]]
+    # Filter images from database
+    image1 = []
+    image2 = []
+    image3 = []
+    devices_name = []
+    devices_last_seen = []
+    devices_message = []
+    devices_status = []
+    devices_battery_voltage = []
+    devices_battery_current = []
+    devices_battery_level = []
+    devices_power_level = []
+    devices_battery_status = []
+
+
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 1")
+
+    result = descending.first()
+    if result:
+        image1.append(result.path)
+        image1.append(result.timestamp)
+        image1.append(result.tag)
+        image1.append(result.latitude)
+        image1.append(result.longitude)
+    db.session.commit()
+
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 2")
+
+    result = descending.first()
+    if result:
+        image2.append(result.path)
+        image2.append(result.timestamp)
+        image2.append(result.tag)
+        image2.append(result.latitude)
+        image2.append(result.longitude)
+    db.session.commit()
+
+    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 3")
+
+    result = descending.first()
+    if result:
+        image3.append(result.path)
+        image3.append(result.timestamp)
+        image3.append(result.tag)
+        image3.append(result.latitude)
+        image3.append(result.longitude)
+    db.session.commit()
+
+    cursor = end_device.query.all()
+    for device in cursor:
+        datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
+        #hardcode the timezone as Malaysia timezone
+        timezone = pytz.timezone("Asia/Kuala_Lumpur")
+        #add timezone attribute to datetime object
+        datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+        datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+
+        # append all data to arrays to be displayed on web page
+        devices_name.append(device.name)
+        devices_last_seen.append(datetime_str_formatted)
+        devices_message.append(device.message)
+        devices_status.append(device.status)
+        current_battery_current = float(device.battery_current)
+        devices_battery_current.append(current_battery_current)
+        # Battery stats
+        current_battery_voltage = float(device.battery_voltage)
+        devices_battery_voltage.append(current_battery_voltage)
+        full_battery_voltage = 13
+        min_battery_voltage  = 11.5
+        battery_operating_range = full_battery_voltage - min_battery_voltage
+        battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
+        battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
+        devices_battery_level.append(battery_level)
+
+
+        current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
+        current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
+        devices_power_level.append(current_power_level)
+        
+
+        if current_battery_voltage > 13:
+            stat = "Charging"
+        elif current_battery_voltage == 13:
+            stat = "Fully charged"
+        elif current_battery_voltage > 11.3 and current_battery_voltage < 13:
+            stat = "Operating"
+        elif current_battery_voltage <= 11.3:
+            stat = "Running out"
+        else:
+            stat = "Unknown"
+            
+        devices_battery_status.append(stat)
+
+
+        db.session.commit()
+
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
+
 # @app.route('/update_server', methods=['POST'])
 # def webhook():
 #     repo = git.Repo('./Elephant_Project_Web_Application')

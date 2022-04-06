@@ -208,7 +208,7 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
 
         
         annotationStr2 = str(annotationList)
-        annotationStr2 = annotationStr2.replace("\'", "\"")
+        annotationStr2 = annotationStr2.replace("\"", "\'")
         print("below is string read converted from list:")
         print(annotationStr2)
 
