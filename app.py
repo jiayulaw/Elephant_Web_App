@@ -996,19 +996,16 @@ def about_us():
 
 
 
-@app.route("/start_thread")
-@login_required
-@require_role(role="admin", role2="admin")
-def start_thread():
-    thread1 = threading.Thread(target = update_server_thread)
-    thread1.daemon = True
-    thread1.start()
-    
-    # thread2 = threading.Thread(target = update_end_device_database_thread)
-    # thread2.daemon = True
-    # thread2.start()
+# @app.route("/start_thread")
+# @login_required
+# @require_role(role="admin", role2="admin")
+# def start_thread():
+#     thread1 = threading.Thread(target = update_server_thread)
+#     thread1.daemon = True
+#     thread1.start()
 
-    return render_template('thread.html')
+
+#     return render_template('thread.html')
 
 # @app.route("/end_devices")
 # @login_required
