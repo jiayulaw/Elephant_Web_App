@@ -380,9 +380,9 @@ def dashboard():
             stat = "Charging"
         elif current_battery_voltage == 13:
             stat = "Fully charged"
-        elif current_battery_voltage > 10 and current_battery_voltage < 13:
+        elif current_battery_voltage > 11.3 and current_battery_voltage < 13:
             stat = "Operating"
-        elif current_battery_voltage <= 10:
+        elif current_battery_voltage <= 11.3:
             stat = "Running out"
         else:
             stat = "Unknown"
@@ -870,10 +870,20 @@ def debug():
 
     return render_template("debug.html", active_state = "debug", activity_description = activity_description, activity_date = activity_date, activity_type = activity_type)
 
+##################################################################
+###################### Load testing URLs #####################
+##################################################################
 # @app.route("/test")
 # def test():
 #     return render_template("test.html")
 
+@app.route("/test_about_us")
+def test_about_us():
+    images = []
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
+    return render_template("about_us.html", active_state = "about_us", images = images)
+
+##################################################################
 
 @app.route("/about_us")
 @login_required
@@ -881,6 +891,8 @@ def about_us():
     images = []
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
+
+
 
 @app.route("/start_thread")
 @login_required

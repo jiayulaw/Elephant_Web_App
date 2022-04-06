@@ -228,6 +228,7 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         print("annotate sent!")
         print(annotationStr2)
         print(type(annotationStr2))
+        logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Roboflow annotation str", "Image with id " + str(img_id)  + ": annotation str generated >> " + annotationStr2, db)
 
         try:
             print(r.json()['success'])

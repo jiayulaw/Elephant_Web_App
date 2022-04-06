@@ -1,33 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %} Home {% endblock title%} 
+{% block title %} Device Monitoring {% endblock title%} 
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 {{ super() }}
 
 
-<script>
-  
-  var myLat = {{image1| tojson}};
-  
-</script>
+
 {% endblock stylesheets %}
 
 {% block content %}
-<div class = "row">
-  <div class="col-lg-12">
-    <div class="card mb-3 bg-transparent text-white">
-      <div class="card-header">
-        <h4 class="card-title"> Welcome, {{current_user.username}}</h4>
 
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
 
 <div class = "row mt-3">
   <div class="col-lg-12">
@@ -177,32 +161,8 @@
 
 
 
-<div class="row mt-3">
-  
-  <div class="col-lg-12">
-    <div class="card bg-dark text-white" id = "elephant_radar">
-      <div class="card-header">
-        <h5 class="card-category">Aerial map</h5>
-        <h3 class="card-title" style = "display:inline-block;"> Elephant Radar</h3>
-        <div class="btn-group float-right" role="group" aria-label="">
-          <button id = "normal_view_button" type="button" onclick = "normal_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
-          <button id = "satelite_view_button" type="button" onclick = "satelite_view()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
-        </div>
-        
-        
-      </div>
-      <div class = "card-body">
-        <div id="mapid"></div>
-      </div>
-      
-    </div>
-  </div>
-</div>
 
-<!-- This section is just to remind me how to use JavaScript array in JSON format -->
-<!-- <div class="row">
-  <button class = "btn" onclick="alert('Geocode: ' + myLat[0] + ' ' + myLat[1] + ' ' + myLat[2] + ' ' + myLat[20])" style = "height: 100px; width:200px;"/>
-</div> -->
+
 
 {% endblock content %}
 
@@ -213,53 +173,7 @@
 <!--
   =======================================Leaflet Map API=======================================
 -->
-  <script>
-    
-    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a> © <a href = "https://www.maxar.com/"> Maxar </a> <a href = "https://www.mapbox.com/map-feedback/">Improve this map</a>',
-      maxZoom: 18,
-      id: 'mapbox/streets-v11', //mapbox/satellite-v9
-      // id: 'mapbox/satellite-v9',
-      tileSize: 512,
-      zoomOffset: -1,
-      accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
-    }).addTo(mymap);
-
-    // var marker = L.marker([1.818, 103.843]).addTo(mymap);
-    // var marker2 = L.marker([1.788, 103.928]).addTo(mymap);
-    // var marker3 = L.marker([1.863, 103.89]).addTo(mymap);
-    // var marker4 = L.marker([1.833, 103.951]).addTo(mymap);
-
-    var site1_marker = L.marker([2.1228960, 103.4278710], {fillColor: 'rgb(0,0,0)', color: 'red', fillOpacity: 0.5}).addTo(mymap);
-    var site2_marker = L.marker([2.178698, 103.830802]).addTo(mymap);
-    var site3_marker = L.marker([2.0609780, 103.8798060]).addTo(mymap);
-
-
-
-//     var circle = L.circle([1.833, 103.951], {
-//     color: 'red',
-//     fillColor: '#f03',
-//     fillOpacity: 0.5,
-//     radius: 500
-// }).addTo(mymap);
-// var polygon = L.polygon([
-//     [1.818, 103.843],
-//     [1.788, 103.928],
-//     [1.863, 103.89]
-// ]).addTo(mymap);
-
-// marker.bindPopup("<b>Hello world!</b><br>I am {{current_user.username}}").openPopup();
-// marker2.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-// marker3.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-// marker4.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-
-site1_marker.bindPopup("<strong>Site 1 <br> {{image1[1]}} <br> {{image1[2]}} <br></strong> <br><img src='{{image1[0]}}' class = 'map_popup_img'/> ").openPopup();
-site2_marker.bindPopup("<strong>Site 2 <br> {{image2[1]}} <br> {{image2[2]}} <br></strong> <br><img src='{{image2[0]}}' class = 'map_popup_img'/>").openPopup();
-site3_marker.bindPopup("<strong>Site 3 <br> {{image3[1]}} <br> {{image3[2]}} <br></strong> <br><img src='{{image3[0]}}' class = 'map_popup_img'/>").openPopup();
-
-// circle.bindPopup("I am a circle.");
-// polygon.bindPopup("I am a polygon.");
+<script>
 
 function device_general_table() {
   document.getElementById("device_general_table").style.display = "block";
@@ -282,7 +196,6 @@ function device_battery_table() {
 
   document.getElementById("device_general_table_button").classList.add("btn-info");
   document.getElementById("device_general_table_button").classList.remove("btn-success");
-
 
 }
 
