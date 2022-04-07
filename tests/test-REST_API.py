@@ -12,13 +12,13 @@ BASE = "http://127.0.0.1:5000/"
 # set message to attach a message
 # the name will be what will be displayed on server
 # set status as online
-device_id = "11"
-name = "end device 11"
-last_seen = "2022-03-27 20-50-20"
+device_id = "3"
+name = "end device 3"
+last_seen = "2022-04-06 20-46-20"
 message  = "Elephant sleeping!"
 status = "Online"
-battery_voltage = "13"
-battery_current = "0.66"
+battery_voltage = "15"
+battery_current = "0.667"
 
 # this is a function to send 
 def update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current):

@@ -269,7 +269,7 @@ a.article, a.article:hover {
     right: 0;
     bottom: 0;
     background-color: rgb(0,0,0);
-    z-index: 99;
+    z-index: 9999;
     cursor: pointer;
   }
 

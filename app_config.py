@@ -141,6 +141,7 @@ class User(db.Model, UserMixin):
 
 # if this file is run as main, create database and append admin users.
 if __name__ == "__main__":
+    from elephant_functions import getMalaysiaTime
     db.create_all()
     # Create default admin user
     bcrypt = Bcrypt(app)

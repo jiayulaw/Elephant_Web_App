@@ -138,7 +138,7 @@
   <div class="row">
     <!--Filter field-->
       <div class="col-lg-6 col-md-12">
-        <div class="card card-chart ml-1 bg-dark text-white">
+        <div class="card card-chart ml-1 bg-dark text-white border-radius-cardd">
           <div class="card-header">
             <h2 class = "card-title">Data Center - View Image(s)</h2>
 
@@ -246,7 +246,7 @@
     {% for image in image_paths %}
       <div class="col-lg-4 col-md-12">
         <div class="col">
-          <div class="card border-light mb-3 bg-dark text-white">
+          <div class="card border-light mb-3 bg-dark text-white border-radius-cardd">
               <center><strong class="card-header" style = "color:rgb(119, 205, 255)">{{image_source[counter.value]}}</strong></center>
               {% set my_string = "dispImg" ~ counter.value %}
             <img id = {{my_string}} src="{{image}}">

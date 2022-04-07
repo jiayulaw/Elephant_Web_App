@@ -5,7 +5,8 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 {{ super() }}
-
+<!-- For Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
 <script>
   
@@ -15,11 +16,12 @@
 {% endblock stylesheets %}
 
 {% block content %}
+
 <div class = "row">
   <div class="col-lg-12">
-    <div class="card mb-3 bg-transparent text-white">
+    <div class="card mb-1 bg-transparent text-white">
       <div class="card-header">
-        <h4 class="card-title"> Welcome, {{current_user.username}}</h4>
+        <h3 class="card-title"> Welcome, {{current_user.username}}</h3>
 
       </div>
 
@@ -28,39 +30,53 @@
   </div>
 
 </div>
+<div class="row">
+  
+  <div class="col-lg-12">
+    <div class="card bg-dark text-white border-radius-cardd" id = "elephant_radar">
+      <div class="card-header">
+        <!-- <h5 class="card-category">Aerial map</h5> -->
+        <h3 class="card-title" style = "display:inline-block;"> Elephant Radar</h3>
+        <div class="btn-group float-right" role="group" aria-label="">
+          <button id = "normal_view_button" type="button" onclick = "normal_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
+          <button id = "satelite_view_button" type="button" onclick = "satelite_view()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
+        </div>
+        
+        
+      </div>
+      <div class = "card-body">
+        <div id="mapid"></div>
+      </div>
+      
+    </div>
+  </div>
+</div>
 
 <div class = "row mt-3">
-  <div class="col-lg-12">
+  <div class="col-lg-6">
 
-    <div class="card bg-dark text-white" id = "device_status">
+    <div class="card mb-2 bg-dark text-white border-radius-cardd" id = "device_status">
       <div class="card-header">
-        <h4 class="card-title" style = "display:inline-block;"> Device Information</h4>
-        <div class="btn-group float-right" role="group" aria-label="">
-          <button id = "device_general_table_button" type="button" onclick = "device_general_table()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">General</button>
-          <button id = "device_battery_table_button" type="button" onclick = "device_battery_table()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Battery health</button>
-        </div>
+        <h4 class="card-title" style = "display:inline-block;"> Device Status Overview</h4>
       </div>
       <div class="card-body">
         <div class="table-responsive" id = "device_general_table">
           <table class="table tablesorter fontsize-table " id="">
             <thead class=" text-info">
               <tr>
-                <th>
+                <th class="text-center">
                   Name
                 </th>
+                <th class="text-center">
+                  Status
+                </th>
                 <th>
-                  Location
+                  Battery level
                 </th>
                 <th>
                   Last Seen [UTC+8]
                 </th>
 
-                <th>
-                  Message
-                </th>
-                <th class="text-center">
-                  Status
-                </th>
 
               </tr>
             </thead>
@@ -68,19 +84,8 @@
               {% set counter = namespace(value = 0) %}
               {% for name in devices_name %}
                 <tr>
-                  <td>
+                  <td class="text-center">
                     {{name}}
-                  </td>
-                  <td>
-                    Latitude Longitude
-                  </td>
-            
-                  <td>
-                    {{devices_last_seen[counter.value]}}
-                  </td>
-
-                  <td>
-                    {{devices_message[counter.value]}}
                   </td>
 
                   <td class="text-center">
@@ -100,65 +105,15 @@
                      
 
                   </td>
-                </tr>
-                {% set counter.value = counter.value + 1 %}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="table-responsive" id = "device_battery_table" style = "display:none;">
-          <table class="table tablesorter fontsize-table " id="">
-            <thead class=" text-info">
-              <tr>
-                <th>
-                  Name
-                </th>
-                <th>
-                  Battery voltage
-                </th>
-                <th>
-                  Battery current
-                </th>
-
-                <th>
-                  Power level
-                </th>
-                <th>
-                  Battery level
-                </th>
-                <th>
-                  Battery status
-                </th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {% set counter = namespace(value = 0) %}
-              {% for name in devices_name %}
-                <tr>
-                  <td>
-                    {{name}}
-                  </td>
-                  <td>
-                    {{devices_battery_voltage[counter.value]}} V
-                  </td>
-                  <td>
-                    {{devices_battery_current[counter.value]}} mA
-                  </td>
-                  <td>
-                    {{devices_power_level[counter.value]}} W
-                  </td>
                   <td class="text-center">
 
-                      <label for="progress_bar_online">{{devices_battery_level[counter.value]}} %</label>
-                      <progress id="progress_bar_online" value="{{devices_battery_level[counter.value]}}" max="100"> </progress>
-                    
-            
+                    <label for="progress_bar_online">{{devices_battery_level[counter.value]}} %</label>
+                    <progress id="progress_bar_online" value="{{devices_battery_level[counter.value]}}" max="100"> </progress>
+                  
+          
                   </td>
-
                   <td>
-                    {{devices_battery_status[counter.value]}}
+                    {{devices_last_seen[counter.value]}}
                   </td>
                 </tr>
                 {% set counter.value = counter.value + 1 %}
@@ -166,38 +121,32 @@
             </tbody>
           </table>
         </div>
+      
       </div>
     </div>
+    
   </div>
-
-</div>
-
-
-
-
-
-
-<div class="row mt-3">
-  
-  <div class="col-lg-12">
-    <div class="card bg-dark text-white" id = "elephant_radar">
-      <div class="card-header">
-        <h5 class="card-category">Aerial map</h5>
-        <h3 class="card-title" style = "display:inline-block;"> Elephant Radar</h3>
-        <div class="btn-group float-right" role="group" aria-label="">
-          <button id = "normal_view_button" type="button" onclick = "normal_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
-          <button id = "satelite_view_button" type="button" onclick = "satelite_view()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
+  <div class="col-lg-6">
+    <div class="card  mb-2 bg-dark text-white border-radius-cardd">
+        <div class="card-header bg-dark text-white">
+            <h4 class="card-title">Number of uploaded images over past 7 days</h4>
         </div>
         
+        <div class="card-body">
+            <div><canvas id="homepagePast7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+        </div>
         
-      </div>
-      <div class = "card-body">
-        <div id="mapid"></div>
-      </div>
-      
     </div>
-  </div>
 </div>
+
+</div>
+
+
+
+
+
+
+
 
 <!-- This section is just to remind me how to use JavaScript array in JSON format -->
 <!-- <div class="row">
@@ -319,6 +268,69 @@ function satelite_view() {
     document.getElementById("normal_view_button").classList.add("btn-info");
     document.getElementById("normal_view_button").classList.remove("btn-success");
 }
+</script>
+// Below are codes for past 7 days analytics
+<script>
+var this_week_x_array = {{this_week_x_array| tojson}};
+var this_week_y_array = {{this_week_y_array| tojson}};
+var this_week_big_Y_array_device1 = {{this_week_big_Y_array_device1| tojson}};
+var this_week_big_Y_array_device2 = {{this_week_big_Y_array_device2| tojson}};
+var this_week_big_Y_array_device3 = {{this_week_big_Y_array_device3| tojson}};
+
+new Chart("homepagePast7daysChart2", {
+      type: "line",
+      data: {
+        labels: this_week_x_array,
+        datasets: [{
+
+          label: 'All end devices', 
+          data: this_week_y_array,
+          borderColor: "rgba(140, 89, 199, 1)",
+          fill: false
+        },{ 
+          data: this_week_big_Y_array_device1,
+          borderColor: "rgba(216, 53, 53, 1)",
+          fill: false,
+          label: "end device 1"
+        }, { 
+          data: this_week_big_Y_array_device2,
+          borderColor: "rgb(37, 206, 74)",
+          fill: false,
+          label: "end device 2"
+        }, { 
+          data: this_week_big_Y_array_device3,
+          borderColor: "rgba(0, 154, 243, 1)",
+          fill: false,
+          label: "end device 3"
+        }]
+      },
+      options: {
+        legend: {display: true,
+        labels: {
+          fontColor: "white"
+        }
+      },
+
+        scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 18,
+                        callback: function(value) {if (value % 1 === 0) {return value;}},
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        // fontSize: 14,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+        }
+      }
+    });
 </script>
   
 

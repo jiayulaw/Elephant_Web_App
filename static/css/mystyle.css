@@ -157,7 +157,7 @@
 
 
 #mapid{
-  height: 50vh;
+  height: 40vh;
   width: 100%;
 }
 
@@ -318,3 +318,8 @@
   width: 100%;
 }
 }   */
+
+
+.border-radius-cardd{
+  border-radius: 10px;
+}

@@ -392,16 +392,40 @@ def dashboard():
 
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
+        #  Analytics graph display on home page
+
+
+    #Filter the number of images for past 7 days
+    end_datetime = datetime.datetime.now()
+    start_datetime = end_datetime - datetime.timedelta(days=7)
+    this_week_x_array, this_week_y_array = getImageNumOverTime(None, None, start_datetime, end_datetime)
+    this_week_device1_x_array, this_week_device1_y_array = getImageNumOverTime("end device 1", None, start_datetime, end_datetime)
+    this_week_device2_x_array, this_week_device2_y_array = getImageNumOverTime("end device 2", None, start_datetime, end_datetime)
+    this_week_device3_x_array, this_week_device3_y_array = getImageNumOverTime("end device 3", None, start_datetime, end_datetime)
+
+
+    this_week_big_Y_array_device1 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device1_x_array, this_week_device1_y_array)
+    this_week_big_Y_array_device2 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device2_x_array, this_week_device2_y_array)
+    this_week_big_Y_array_device3 = map_XYvalues_to_Larger_range(this_week_x_array, this_week_device3_x_array, this_week_device3_y_array)
+
+    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, 
+    devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, 
+    devices_status = devices_status, devices_battery_current = devices_battery_current, 
+    devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, 
+    devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items,
+    this_week_x_array = this_week_x_array, this_week_y_array = this_week_y_array, this_week_big_Y_array_device1 = this_week_big_Y_array_device1,
+    this_week_big_Y_array_device2 = this_week_big_Y_array_device2, this_week_big_Y_array_device3 = this_week_big_Y_array_device3)
 
 @app.route("/device_monitoring")
 @login_required #we can only access dashboard when logged in
 def device_monitoring():
-    navbar_items = [["Device status", "#device_status"], ["Elephant Radar", "#elephant_radar"]]
-    # Filter images from database
-    image1 = []
-    image2 = []
-    image3 = []
+    # Battery stats initialization
+    full_battery_voltage = 13
+    min_battery_voltage  = 11.3
+
+
+    navbar_items = []
+
     devices_name = []
     devices_last_seen = []
     devices_message = []
@@ -412,39 +436,6 @@ def device_monitoring():
     devices_power_level = []
     devices_battery_status = []
 
-
-    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 1")
-
-    result = descending.first()
-    if result:
-        image1.append(result.path)
-        image1.append(result.timestamp)
-        image1.append(result.tag)
-        image1.append(result.latitude)
-        image1.append(result.longitude)
-    db.session.commit()
-
-    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 2")
-
-    result = descending.first()
-    if result:
-        image2.append(result.path)
-        image2.append(result.timestamp)
-        image2.append(result.tag)
-        image2.append(result.latitude)
-        image2.append(result.longitude)
-    db.session.commit()
-
-    descending = Images.query.order_by(Images.id.desc()).filter_by(source = "end device 3")
-
-    result = descending.first()
-    if result:
-        image3.append(result.path)
-        image3.append(result.timestamp)
-        image3.append(result.tag)
-        image3.append(result.latitude)
-        image3.append(result.longitude)
-    db.session.commit()
 
     cursor = end_device.query.all()
     for device in cursor:
@@ -458,15 +449,15 @@ def device_monitoring():
         # append all data to arrays to be displayed on web page
         devices_name.append(device.name)
         devices_last_seen.append(datetime_str_formatted)
-        devices_message.append(device.message)
+        
         devices_status.append(device.status)
+        devices_message.append(device.message)
         current_battery_current = float(device.battery_current)
         devices_battery_current.append(current_battery_current)
         # Battery stats
         current_battery_voltage = float(device.battery_voltage)
         devices_battery_voltage.append(current_battery_voltage)
-        full_battery_voltage = 13
-        min_battery_voltage  = 11.5
+  
         battery_operating_range = full_battery_voltage - min_battery_voltage
         battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
         battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
@@ -478,23 +469,26 @@ def device_monitoring():
         devices_power_level.append(current_power_level)
         
 
-        if current_battery_voltage > 13:
+        if current_battery_voltage > full_battery_voltage:
             stat = "Charging"
-        elif current_battery_voltage == 13:
+        elif current_battery_voltage == full_battery_voltage:
             stat = "Fully charged"
-        elif current_battery_voltage > 11.3 and current_battery_voltage < 13:
+        elif current_battery_voltage > min_battery_voltage and current_battery_voltage < 13:
             stat = "Operating"
-        elif current_battery_voltage <= 11.3:
+        elif current_battery_voltage <= min_battery_voltage:
             stat = "Running out"
         else:
             stat = "Unknown"
             
         devices_battery_status.append(stat)
 
-
         db.session.commit()
 
-    return render_template('index.html', active_state = "dashboard", image1 = image1, image2 = image2, image3 = image3, devices_name = devices_name, devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, devices_power_level = devices_power_level, navbar_items = navbar_items)
+    return render_template('device_monitoring.html', active_state = "device", devices_name = devices_name, 
+    devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, 
+    devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, 
+    devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, 
+    devices_power_level = devices_power_level, navbar_items = navbar_items)
 
 # @app.route('/update_server', methods=['POST'])
 # def webhook():
@@ -797,78 +791,7 @@ def upload_multiple_image():
     data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
     return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
         
-   
 
-# @app.route("/data_center/update_status", methods = ['POST'])
-# @login_required
-# @require_role(role="admin", role2 = "explorer")
-# def upload_image():
-#     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
-#     if 'file' not in request.files:
-#         flash('Upload Failed. No file part', 'error_msg_singleimgupload')
-#         return redirect(request.url)
-#     file = request.files['file']
-#     if file.filename == '':
-#         flash('Upload Failed. No image selected for uploading', 'error_msg_singleimgupload')
-#         return redirect(request.url)
-
-#     if file and allowed_file(file.filename): 
-#         img_source = request.form['img_source']
-#         filename = secure_filename(file.filename)
-#         timestamp = datetime.datetime.now().strftime("uploaded-on_%y-%m-%d_%H-%M-%S_")
-#         str = img_source + "/" + timestamp + filename
-#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], str)
-#         absolute_file_path = os.path.join(BASE_DIR, file_path)
-
-#         file_path, absolute_file_path = checkFilePath(file_path, absolute_file_path, img_source, filename, BASE_DIR, app)
-
-#         # checks whether file path is redundant
-#         redundant_file_bool = Images.query.filter_by(path=file_path).first()
-
-#         if redundant_file_bool:
-#             flash('Upload Failed. Image with same filename exist in database directory. Please rename.', 'error_msg_singleimgupload')
-#             return redirect(request.url)
-#         else:
-
-
-     
-#             flash('Image successfully uploaded to database.', 'success_msg_singleimgupload')
-#             #=============== Get other user input =============== 
-#             timestamp_str   = request.form['timestamp_input']
-#             # Create datetime object so that we can convert to UTC from the browser's local time
-#             timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-#             img_time = timestamp_str.strftime("%Y-%m-%d %H:%M:%S")
-
-#             img_tag_input = request.form['img_tag_input']
-            
-#             img_latitude = request.form['img_latitude']
-#             img_longitude = request.form['img_longitude']
-#             upload_date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
-
-#             #save the file to server directory
-#             file.save(absolute_file_path)
-            
-#             new_image = Images(timestamp = img_time, path = file_path, source= img_source, uploader = current_user.username, tag = img_tag_input, latitude = img_latitude, longitude = img_longitude, upload_date = upload_date)
-#             db.session.add(new_image)
-#             db.session.commit()
-
-#             # server activity
-#             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
-
-#             timestamp_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-#             data.input_date_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M')
-#             data.input_date_str = data.input_date_str.strftime("%Y-%m-%d %H:%M:%S")
-            
-#             return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
-
-#     else:
-#         flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_singleimgupload')
-#         return redirect(request.url)
-        
-# @app.route('/display/<file_path>')
-# def display_img(filename):
-#     #print('display_image filename: ' + filename)
-#     return redirect(url_for('static', filename='image uploads/uploaded/' + filename), code=301)
 
 @app.route('/delete_img/<img_id>')
 @login_required
