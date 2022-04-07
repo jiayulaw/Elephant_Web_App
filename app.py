@@ -168,6 +168,9 @@ device_stat_put_args.add_argument("message", type=str, help="Device message is r
 device_stat_put_args.add_argument("status", type=str, help="Device status is required", required=True)
 device_stat_put_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
 device_stat_put_args.add_argument("battery_current", type=str, help="Device battery current?", required=True)
+device_stat_put_args.add_argument("battery_temp_1", type=str, help="Device battery temp?", required=True)
+device_stat_put_args.add_argument("battery_temp_2", type=str, help="Device battery temp?", required=True)
+device_stat_put_args.add_argument("ambient_temp", type=str, help="Device ambient temp?", required=True)
 
 device_stat_update_args = reqparse.RequestParser()
 device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
@@ -176,6 +179,9 @@ device_stat_update_args.add_argument("message", type=str, help="Device message i
 device_stat_update_args.add_argument("status", type=str, help="Device status is required", required=True)
 device_stat_update_args.add_argument("battery_voltage", type=str, help="Device battery voltage?", required=True)
 device_stat_update_args.add_argument("battery_current", type=str, help="Device battery current?",required=True)
+device_stat_update_args.add_argument("battery_temp_1", type=str, help="Device battery temp?", required=True)
+device_stat_update_args.add_argument("battery_temp_2", type=str, help="Device battery temp?", required=True)
+device_stat_update_args.add_argument("ambient_temp", type=str, help="Device ambient temp?", required=True)
 
 
 resource_fields = {
@@ -184,8 +190,11 @@ resource_fields = {
 	'last_seen': fields.String,
 	'message': fields.String,
     'status': fields.String,
-    'battery_voltage': fields.String,
-    'battery_current': fields.String
+    'battery_current': fields.String,
+    'battery_current': fields.String,   
+    'battery_temp_1': fields.String,
+    'battery_temp_2': fields.String,
+    'ambient_temp': fields.String
 }
 
 #marshal_with to serialize object
@@ -202,7 +211,7 @@ class Device_Stat_pipeline(Resource):
         args = device_stat_put_args.parse_args()
         result = end_device.query.filter_by(id=device_id).first()
         if not result:
-            device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'], message=args['message'], battery_voltage =args['battery_voltage'] , battery_current =args['battery_current'] )
+            device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'], message=args['message'], battery_voltage =args['battery_voltage'] , battery_current =args['battery_current'], battery_temp_1 =args['battery_temp_1'], battery_temp_2 =args['battery_temp_2'], ambient_temp =args['ambient_temp'] )
             db.session.add(device_record)
             db.session.commit()
             return_val = device_record
@@ -224,6 +233,15 @@ class Device_Stat_pipeline(Resource):
 
             if args['battery_current']:
                 result.battery_current = args['battery_current']
+
+            if args['battery_temp_1']:
+                result.battery_temp_1 = args['battery_temp_1']
+
+            if args['battery_temp_2']:
+                result.battery_temp_2 = args['battery_temp_2']
+
+            if args['ambient_temp']:
+                result.ambient_temp = args['ambient_temp']
             
             if args['status']:
                 if result.status != args['status']:
@@ -256,6 +274,15 @@ class Device_Stat_pipeline(Resource):
 
         if args['battery_current']:
             result.battery_current = args['battery_current']
+
+        if args['battery_temp_1']:
+            result.battery_temp_1 = args['battery_temp_1']
+
+        if args['battery_temp_2']:
+            result.battery_temp_2 = args['battery_temp_2']
+
+        if args['ambient_temp']:
+            result.ambient_temp = args['ambient_temp']
         
         if args['status']:
             if result.status != args['status']:
@@ -435,6 +462,9 @@ def device_monitoring():
     devices_battery_level = []
     devices_power_level = []
     devices_battery_status = []
+    devices_battery_temp_1 = []
+    devices_battery_temp_2 = []
+    devices_ambient_temp = []
 
 
     cursor = end_device.query.all()
@@ -467,6 +497,10 @@ def device_monitoring():
         current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
         current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
         devices_power_level.append(current_power_level)
+
+        devices_battery_temp_1.append(device.battery_temp_1)
+        devices_battery_temp_2.append(device.battery_temp_2)
+        devices_ambient_temp.append(device.ambient_temp)
         
 
         if current_battery_voltage > full_battery_voltage:
@@ -488,7 +522,8 @@ def device_monitoring():
     devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, 
     devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, 
     devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, 
-    devices_power_level = devices_power_level, navbar_items = navbar_items)
+    devices_power_level = devices_power_level, devices_battery_temp_1 = devices_battery_temp_1,
+    devices_battery_temp_2 = devices_battery_temp_2, devices_ambient_temp = devices_ambient_temp, navbar_items = navbar_items)
 
 # @app.route('/update_server', methods=['POST'])
 # def webhook():

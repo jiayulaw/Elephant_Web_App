@@ -113,6 +113,9 @@ class end_device(db.Model):
     message = db.Column(db.String(100), nullable=True)
     battery_voltage = db.Column(db.String(100), nullable=True)
     battery_current = db.Column(db.String(100), nullable=True)
+    battery_temp_1= db.Column(db.String(100), nullable=True)
+    battery_temp_2 = db.Column(db.String(100), nullable=True)
+    ambient_temp = db.Column(db.String(100), nullable=True)
     # timezone = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):

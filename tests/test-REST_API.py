@@ -19,11 +19,14 @@ message  = "Elephant sleeping!"
 status = "Online"
 battery_voltage = "15"
 battery_current = "0.667"
+battery_temp_1 = "31"
+battery_temp_2 = "32"
+ambient_temp = "28"
 
 # this is a function to send 
-def update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current):
+def update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current, battery_temp_1, battery_temp_2, ambient_temp):
     print("Trying to create or update row in DB")
-    response = requests.put(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status, "battery_voltage": battery_voltage, "battery_current": battery_current})
+    response = requests.put(BASE + "device_stat/" + device_id, {"name":name, "last_seen":last_seen,"message":message, "status": status, "battery_voltage": battery_voltage, "battery_current": battery_current, "battery_temp_1": battery_temp_1, "battery_temp_2": battery_temp_2, "ambient_temp": ambient_temp})
     print(response.json())
 
     # print("Update existing row in DB")
@@ -34,4 +37,4 @@ def update_device_stat(device_id, name, last_seen, message, status, battery_volt
     # response = requests.get(BASE + "device_stat/" + device_id)
     # print(response.json())
 
-update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current)
+update_device_stat(device_id, name, last_seen, message, status, battery_voltage, battery_current, battery_temp_1, battery_temp_2, ambient_temp)

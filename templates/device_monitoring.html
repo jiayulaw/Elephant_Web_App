@@ -96,21 +96,30 @@
                 <th class="text-center">
                   Name
                 </th>
-                <th>
+                <th class="text-center">
                   Battery voltage
                 </th>
-                <th>
+                <th class="text-center">
                   Battery current
                 </th>
 
-                <th>
+                <th class="text-center">
                   Power level
                 </th>
-                <th>
+                <th class="text-center">
                   Battery level
                 </th>
-                <th>
+                <th class="text-center">
                   Battery status
+                </th>
+                <th>
+                  Battery temp 1
+                </th class="text-center">
+                <th>
+                  Battery temp 2
+                </th>
+                <th class="text-center">
+                  Ambient temp
                 </th>
 
               </tr>
@@ -122,15 +131,18 @@
                   <td class="text-center">
                     {{name}}
                   </td>
-                  <td>
+                  <td class="text-center">
                     {{devices_battery_voltage[counter.value]}} V
                   </td>
-                  <td>
+                  <td class="text-center">
                     {{devices_battery_current[counter.value]}} mA
                   </td>
-                  <td>
+                  <td class="text-center">
                     {{devices_power_level[counter.value]}} W
                   </td>
+
+
+                  
                   <td class="text-center">
 
                       <label for="progress_bar_online">{{devices_battery_level[counter.value]}} %</label>
@@ -139,8 +151,17 @@
             
                   </td>
 
-                  <td>
+                  <td class="text-center">
                     {{devices_battery_status[counter.value]}}
+                  </td>
+                  <td>
+                    {{devices_battery_temp_1[counter.value]}} °C
+                  </td>
+                  <td class="text-center">
+                    {{devices_battery_temp_2[counter.value]}} °C
+                  </td>
+                  <td class="text-center">
+                    {{devices_ambient_temp[counter.value]}} °C
                   </td>
                 </tr>
                 {% set counter.value = counter.value + 1 %}
