@@ -991,23 +991,34 @@ def about_us():
 def display_image():
     navbar_items = [["Update database", url_for('roboflow')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
-        timezone, start_datetime, end_datetime, data.station, data.detection_type = get_records()
+        timezone, start_datetime, end_datetime, data.station, data.detection_type, range_h = get_records()
         start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
         end = datetime.datetime.strptime(end_datetime, "%Y-%m-%d %H:%M:%S")
     else:
-        timezone 		= request.args.get('timezone','Etc/UTC')
+        # timezone 		= request.args.get('timezone','Etc/UTC')
         data.dontRequest = 0
         start = datetime.datetime.strptime(data.from_date_str, "%Y-%m-%d %H:%M:%S")
         end = datetime.datetime.strptime(data.to_date_str, "%Y-%m-%d %H:%M:%S")
 
+    try:
+        range_h = int(range_h)
+    except:
+        print("range_h cannot be converted to an integer")
+    
+
 
     current_time = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-    if end > current_time:
+    if isinstance(range_h, int):
         end = current_time
+        start = current_time - datetime.timedelta(hours=range_h)
 
-    #if start time is later than end time, then force start time to be = end
-    if start > end:
-        start = end
+
+    else:
+        if end > current_time:
+            end = current_time
+        #if start time is later than end time, then force start time to be = end
+        if start > end:
+            start = end
 
     # append the start and end time to memory (class variable that is accesible by all)
     data.to_date_str = end.strftime("%Y-%m-%d %H:%M:%S")
@@ -1119,7 +1130,9 @@ def get_records():
 
     timezone 		= request.args.get('timezone','Etc/UTC')
     img_source       = request.args.get('station','end device 1')                           #Get img_source, or fall back to end device 1
-    detection_type       = request.args.get('detection_type','any') 
+    detection_type       = request.args.get('detection_type','any')
+
+    range_h       = request.args.get('range_h','none') 
 
     print ("Received from browser: %s, %s, %s" % (from_date_str, to_date_str, timezone))
 
@@ -1127,7 +1140,7 @@ def get_records():
 
     print ('2. From: %s, to: %s, timezone: %s' % (from_date_str,to_date_str,timezone))
 
-    return [timezone, from_date_str, to_date_str, img_source, detection_type]
+    return [timezone, from_date_str, to_date_str, img_source, detection_type, range_h]
 
 
 def validate_date(d):
