@@ -13,15 +13,18 @@
   var myLat = {{image1| tojson}};
   
 </script>
+
+<!-- Google Font JS -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia">
 {% endblock stylesheets %}
 
 {% block content %}
 
 <div class = "row">
   <div class="col-lg-12">
-    <div class="card mb-1 bg-transparent text-white">
+    <div class="card mb-1 bg-transparent text-white border-none">
       <div class="card-header">
-        <h3 class="card-title"> Welcome, {{current_user.username}}</h3>
+        <h2 class="card-title" style = "font-family: 'Sofia', Helvetica, sans-serif;"> Welcome, {{current_user.username}}</h2>
 
       </div>
 
@@ -61,7 +64,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive" id = "device_general_table">
-          <table class="table tablesorter fontsize-table text-center" id="">
+          <table class="table tablesorter fontsize-table text-center table-dark table-hover table-bordered" id="">
             <thead class=" text-info">
               <tr>
                 <th class="text-center">

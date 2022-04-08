@@ -7,6 +7,8 @@
 {{ super() }}
 
 <!-- <meta http-equiv="refresh" content="15"> -->
+
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -123,6 +125,7 @@
               <div class = "form-group row ms-3 me-3">
                 <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
               </div>
+              
               <div class="modal-footer">
                 <p>
                   <input type="submit" value="Save changes" class="btn btn-info ms-3">
@@ -183,6 +186,11 @@
                   </select>
                  </div>
               </div>
+              
+              <!-- This is a default HTML datetime-local input
+              It looks good, but not supported on Firefox browser at this time. -->
+             <!-- <label for="birthdaytime">Birthday (date and time):</label>
+             <input type="datetime-local" id="birthdaytime" name="birthdaytime" style = "width: 100px; height: 100 px;"> -->
 
               <div class = "form-group row ms-1 mb-2"> 
                 <label for="detection" class="col-sm-3 col-form-label">Image type</label>
@@ -211,29 +219,57 @@
                  </div>
               </div>
 
-              <div class = "form-group row ms-1">
-                <label for="from" class="col-sm-3 col-form-label">Start time</label>
-                <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker1" type="text" value="{{from_date}}" name="from">
-                </div>
-              </div>
 
+              <div class = "card bg-dark mt-3 ms-2 border-white">
+                <div class = "form-group row ms-1 mt-2">
+                  <label for="from" class="col-sm-3 col-form-label">Start time</label>
+                  <div class="col-sm-9">
+                    <input style="max-width: 80%;" class="" id="datetimepicker1" type="text" value="{{from_date}}" name="from">
+                  </div>
+                </div>
+  
+  
+                
+                <div class = "form-group row ms-1">
+                  <label for="to" class="col-sm-3 col-form-label">End time</label>
+                  <div class="col-sm-9">
+                    <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to">              
+                  </div>
+                </div>
+                <br>
+                <h6 class = "ms-2 mt-1">Optional buttons</h6>
+                <div class="form-group row ms-1" id = "hour_range_buttons">
+    
+                  <!-- <input type="hidden" name="timezone" class="timezone" /> -->
+                  <!-- <input type="hidden" name="station" class="station" /> -->
+                  <h6>Set from N hours ago to current time.</h6>
+                  <div class="col-sm-2">
+                    <input type="radio" name="range_h" value="3" id="radio_3"/><label for="radio_3"> &nbsp3 hours</label>
+                  </div>
+                  <div class="col-sm-2">
+                    <input type="radio" name="range_h" value="6" id="radio_6" /><label for="radio_6">&nbsp6 hours</label>
+                  </div>
+                  <div class="col-sm-2">
+                    <input type="radio" name="range_h" value="12" id="radio_12" /><label for="radio_12">&nbsp12 hours</label>
+                  </div>
+                  <div class="col-sm-2">
+                    <input type="radio" name="range_h" value="24" id="radio_24" /><label for="radio_24">&nbsp24 hours</label>
+                  </div>
+                
+                </div>
+
+              </div>
 
               
-              <div class = "form-group row ms-1">
-                <label for="to" class="col-sm-3 col-form-label">End time</label>
-                <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to">              
+              <div class = "card-footer">
+                <div class = "form-group mt-2">
+                  <!-- <input type="hidden" class="timezone" name="timezone" /> -->
+                  <input class="btn btn-fill btn-primary" type="submit" value="Submit"  id="submit_button" /> 
                 </div>
-              </div>
 
+              </div>
 
               
-
-              <div class = "form-group ms-3">
-                <input type="hidden" class="timezone" name="timezone" />
-                <input class="btn btn-fill btn-primary" type="submit" value="Submit"  id="submit_button" /> 
-              </div>
             
             </form>
           </div>
@@ -241,10 +277,17 @@
       </div>
            
   </div>
-  
+  <div class="arrow">
+    <span></span>
+    <span></span>
+    <span></span>
+
+  </div>
+  <hr size="5" style = "background-color: rgb(0, 68, 255); border-width: 20px; border-color: aqua; box-shadow: 10px 100px;"> 
   <div class="row ms-3 mt-2 text-white">
     <br><br>
     <h3>Filtered images</h3>
+    
   </div>
   <div class="row">
     {% set counter = namespace(value = 0) %}
@@ -349,6 +392,8 @@
 //   timezone = jstz.determine();
 //   jQuery(".timezone").val(timezone.name());
 // });
+
+
 
 jQuery('#datetimepicker1').datetimepicker(
   {
@@ -464,5 +509,12 @@ else {
 }
 return false;
 }
+
+//  submit form when radio button in the form is clicked
+jQuery("#hour_range_buttons input[type=radio]").click(function(){
+  jQuery("#datetime_range").submit();
+  });
 </script>
+
+
 {% endblock javascripts %}   
