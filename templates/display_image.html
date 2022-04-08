@@ -18,8 +18,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+            <!-- <span aria-hidden="true">&times;</span> -->
           </button>
         </div>
         <div class="modal-body">
@@ -43,22 +43,22 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Edit Image</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+            <!-- <span aria-hidden="true">&times;</span> -->
           </button>
         </div>
         <div class="modal-body">
-          Modify image information by editting fields.<br><br>
+          Modify image information by editting the fields.<br><br>
             <img name="modal-box-edit-img-display" id="modal-box-edit-img-display" src="">
             <form method="GET" id = "editImgIdform" action="#" enctype="multipart/form-data" autocomplete="off">
-              <div class = "form-group row ml-1 mt-3">
+              <div class = "form-group row ms-1 mt-3">
                 <label for="timstamp_input" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
                 <div class="col-sm-9">
-                  <input style="max-width: 80%;" class="u-full-width" id="datetimepicker3" type="text" value="{{input_date_str}}" name="timestamp_input" required>
+                  <input style="max-width: 80%;" class="" id="datetimepicker3" type="text" value="{{input_date_str}}" name="timestamp_input" required>
                 </div> 
               </div>
   
-              <div class="form-group row ml-1 mr-1">
+              <div class="form-group row ms-1 me-1">
                 <label for="inputTag" class="col-sm-2 col-form-label">Tag / Remark</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" id="inputTag" placeholder="Image description in less than 100 characters" name = "img_tag_input" value = "testing testing">
@@ -66,17 +66,17 @@
                 </div>
               </div>
   
-              <div class="form-group row ml-1 mr-1">
+              <div class="form-group row ms-1 me-1">
                 <label for="inputUploader" class="col-sm-2 col-form-label">Image uploader</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" id="inputUploader" placeholder="Uploader" value = "{{current_user.username}}"  name = "img_uploader" disabled>
                 </div>
               </div>
-              <fieldset class="form-group ml-3">
+              <fieldset class="form-group ms-3">
                 <div class="row">
                   <legend class="col-form-label col-sm-2 pt-0">Image source</legend>
                   <div class="col-sm-10">
-                    <select class="u-full-width" id="modal-select-station" type="text" value="end device 2" name="modal-img_source">
+                    <select class="form-select form-select-md" id="modal-select-station" type="text" value="end device 2" name="modal-img_source">
                       {% if current_source == "end device 1" %}
                       <option value = "end device 1" selected>End device 1</option>
                
@@ -107,7 +107,7 @@
                 </div>
               </fieldset>
   
-              <div class = "form-group row ml-1">
+              <div class = "form-group row ms-1">
   
                 <label for="img_latitude" class="col-sm-2 col-form-label">Latitude:</label>
                 <div class="col-sm-2">
@@ -120,12 +120,12 @@
                 </div>
               </div>
   
-              <div class = "form-group row ml-3 mr-3">
+              <div class = "form-group row ms-3 me-3">
                 <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
               </div>
               <div class="modal-footer">
                 <p>
-                  <input type="submit" value="Save changes" class="btn btn-info ml-3">
+                  <input type="submit" value="Save changes" class="btn btn-info ms-3">
                   <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                 </p>
               </div>  
@@ -138,7 +138,7 @@
   <div class="row">
     <!--Filter field-->
       <div class="col-lg-6 col-md-12">
-        <div class="card card-chart ml-1 bg-dark text-white border-radius-cardd">
+        <div class="card card-chart ms-1 bg-dark text-white border-radius-cardd">
           <div class="card-header">
             <h2 class = "card-title">Data Center - View Image(s)</h2>
 
@@ -146,10 +146,10 @@
           <div class="card-body">
             <h4>Image Filter</h4>
             <form style = "width:100%;" id="datetime_range" action="{{ url_for('display_image') }}" method="GET" autocomplete="off">
-              <div class = "form-group row ml-1"> 
+              <div class = "form-group row ms-1 mb-2"> 
                 <label for="station" class="col-sm-3 col-form-label">Image source</label>
                 <div class="col-sm-9">
-                  <select class="u-full-width" id="station" type="text" value="end device 2" name="station">
+                  <select class="form-select form-select-md" id="station" type="text" value="end device 2" name="station">
                     {% if current_source == "end device 1" %}
                     <option value = "end device 1" selected>End device 1</option>
              
@@ -184,10 +184,10 @@
                  </div>
               </div>
 
-              <div class = "form-group row ml-1"> 
+              <div class = "form-group row ms-1 mb-2"> 
                 <label for="detection" class="col-sm-3 col-form-label">Image type</label>
                 <div class="col-sm-9">
-                  <select class="u-full-width" id="detection_type" type="text" value="" name="detection_type">
+                  <select class="form-select form-select-md" id="detection_type" type="text" value="" name="detection_type">
 
                     {% if current_detection_type == "elephant" %}
                     <option value = "elephant" selected>Elephant detection</option>
@@ -211,21 +211,21 @@
                  </div>
               </div>
 
-              <div class = "form-group row ml-1">
+              <div class = "form-group row ms-1">
                 <label for="from" class="col-sm-3 col-form-label">Start time</label>
                 <div class="col-sm-9">
                   <input style="max-width: 80%;" class="u-full-width" id="datetimepicker1" type="text" value="{{from_date}}" name="from">
                 </div>
               </div>
               
-              <div class = "form-group row ml-1">
+              <div class = "form-group row ms-1">
                 <label for="to" class="col-sm-3 col-form-label">End time</label>
                 <div class="col-sm-9">
                   <input style="max-width: 80%;" class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to">              
                 </div>
               </div>
 
-              <div class = "form-group ml-3">
+              <div class = "form-group ms-3">
                 <input type="hidden" class="timezone" name="timezone" />
                 <input class="btn btn-fill btn-primary" type="submit" value="Submit"  id="submit_button" /> 
               </div>
@@ -237,7 +237,7 @@
            
   </div>
   
-  <div class="row ml-3 mt-2 text-white">
+  <div class="row ms-3 mt-2 text-white">
     <br><br>
     <h3>Filtered images</h3>
   </div>

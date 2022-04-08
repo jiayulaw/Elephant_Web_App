@@ -48,7 +48,7 @@
 
         <div class="card-body">
 
-            <div class="row">
+            <div class="row ms-1">
               <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Username</label>
@@ -65,7 +65,7 @@
             </div>
 
 
-            <div class="row">
+            <div class="row ms-1">
               <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Password</label>
@@ -77,11 +77,11 @@
               </div>
             </div>
 
-            <div class="row">
+            <div class="row ms-1">
               <div class="col-md-6 px-md-1">
                 <div class="form-group">
                   <label>Account type</label>
-                  {{form.access_level(class="form-control")}}
+                  {{form.access_level(class="form-control form-select form-select-md")}}
                  
                 </div>
                 {% for error in form.access_level.errors %}
@@ -91,7 +91,7 @@
             </div>
             
         </div>
-        <div class="card-footer">
+        <div class="card-footer ms-1">
           <button type="submit" name="register" class="btn btn-fill btn-primary">Create</button>
           &nbsp; &nbsp;
           Have an account? <a href="{{ url_for('login') }}" class="text-primary">Login</a>

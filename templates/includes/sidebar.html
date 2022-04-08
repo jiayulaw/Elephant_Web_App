@@ -13,7 +13,7 @@
         <p>Version 0.5.1</p>
         {% if current_user.is_authenticated == True %}
         <li class="{% if 'account' in active_state %} active {% endif %}">
-            <a href="#AccountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> <i class="fas fa-user-circle mr-2"></i>{{current_user.username}}</a>
+            <a href="#AccountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> <i class="fas fa-user-circle me-2"></i>{{current_user.username}}</a>
             <ul class="collapse list-unstyled" id="AccountSubmenu">
                 <li>
                     <a href="{{url_for('change_password')}}">Change password</a>
@@ -29,15 +29,15 @@
         
 
         <li class="{% if 'dashboard' in active_state %} active {% endif %}">
-            <a href="{{ url_for('dashboard') }}"><i class="fas fa-home mr-2"></i> Home</a>
+            <a href="{{ url_for('dashboard') }}"><i class="fas fa-home me-2"></i> Home</a>
         </li>
 
         <li class="{% if 'device' in active_state %} active {% endif %}">
-            <a href="{{ url_for('device_monitoring') }}"><i class="fas fa-camera-retro mr-2"></i> Device monitoring</a>
+            <a href="{{ url_for('device_monitoring') }}"><i class="fas fa-camera-retro me-2"></i> Device monitoring</a>
         </li>
 
         <li class="{% if 'data' in active_state %} active {% endif %}">
-            <a href="#DataCenterSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fas fa-folder-open mr-2"></i>Data Center</a>
+            <a href="#DataCenterSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fas fa-folder-open me-2"></i>Data Center</a>
             <ul class="collapse list-unstyled" id="DataCenterSubmenu">
                 <li>
                     <a href="{{ url_for('display_image') }}">View Image(s)</a>
@@ -49,11 +49,11 @@
             </ul>
         </li>
         <li class="{% if 'analytics' in active_state %} active {% endif %}">
-            <a href="{{ url_for('analytics') }}"><i class="fas fa-chart-line mr-2"></i> Analytics</a>
+            <a href="{{ url_for('analytics') }}"><i class="fas fa-chart-line me-2"></i> Analytics</a>
         </li>
         {% if current_user.has_role('admin') == True %}
         <li class="{% if 'admin' in active_state %} active {% endif %}">
-            <a href="#AdminSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fas fa-users-cog mr-2"></i>Admin Panel</a>
+            <a href="#AdminSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fas fa-users-cog me-2"></i>Admin Panel</a>
             <ul class="collapse list-unstyled" id="AdminSubmenu">
                 <li>
                     <a href="/admin/home">Admin Home</a>
@@ -70,16 +70,16 @@
         </li>
         {% endif %} 
         <li class="{% if 'about_us' in active_state %} active {% endif %}">
-            <a href="{{ url_for('about_us') }}"><i class="fas fa-info-circle mr-2"></i></i>About Us</a>
+            <a href="{{ url_for('about_us') }}"><i class="fas fa-info-circle me-2"></i></i>About Us</a>
         </li>
 
         <ul class="list-unstyled CTAs">
             <li>
-                <a href="{{ url_for('logout') }}" class="logout_button"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                <a href="{{ url_for('logout') }}" class="logout_button"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
             </li>
             {% if current_user.has_role('admin') == True %}
             <li>
-                <a href="{{ url_for('debug') }}" class="debug_button"><i class="fas fa-bug mr-2"></i>Debugger</a>
+                <a href="{{ url_for('debug') }}" class="debug_button"><i class="fas fa-bug me-2"></i>Debugger</a>
             </li>
             {% endif %}
             

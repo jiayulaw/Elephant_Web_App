@@ -18,7 +18,7 @@
   <div class="col">
     <div class="col-lg-6">
       <div class="card bg-dark text-white border-radius-cardd">
-        <div class = "ml-3 mt-3 mr-3">
+        <div class = "ms-3 mt-3 me-3">
           <h2>Data Center - Upload Image(s)</h2>
           <p>This section is for users to upload relevant data collected either manually or through any related activity.</p> 
 
@@ -41,40 +41,40 @@
         </div>
         
           <form method="POST" action="/data_center/update_multiple_images" enctype="multipart/form-data" autocomplete="off">
-            <div class="form-group ml-3 ">
+            <div class="form-group ms-3 ">
               <label for="multipleFileUpload">Choose images to upload <span style="color:red;">*</span></label>
               <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
               <input type="file" name="files" class="form-control-file" id = "gallery-photo-add" multiple>
               <div class="image-container"></div>
             </div>
-            <div class = "form-group row ml-3">
+            <div class = "form-group row ms-3">
               <h6> Note that the following info applies to all selected images in this section. <br>
               You may leave blank where not applicable, and edit individually afterward.</h6>
 
             </div>
             
           
-              <div class = "form-group row ml-1">
+              <div class = "form-group row ms-1">
                 <label for="timstamp_input" class="col-sm-3 col-form-label">Image timestamp <span style="color:red;">*</span></label>
                 <div class="col-sm-9">
                   <input style="max-width: 80%;" class="u-full-width" id="datetimepicker4" type="text" value="{{input_date_str}}" name="timestamp_input" required>
                 </div> 
               </div>
 
-              <div class="form-group row ml-1 mr-1">
+              <div class="form-group row ms-1 me-1">
                 <label for="inputTag" class="col-sm-2 col-form-label">Tag / Remark</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" id="inputTag" placeholder="Image description in less than 100 characters" name = "img_tag_input">
                 </div>
               </div>
 
-              <div class="form-group row ml-1 mr-1">
+              <div class="form-group row ms-1 me-1">
                 <label for="inputUploader" class="col-sm-2 col-form-label">Image uploader</label>
                 <div class="col-sm-10">
                   <input type="text" class="form-control" id="inputUploader" placeholder="Uploader" value = "{{current_user.username}}"  name = "img_uploader" disabled>
                 </div>
               </div>
-              <fieldset class="form-group ml-3">
+              <fieldset class="form-group ms-3">
                 <div class="row">
                   <legend class="col-form-label col-sm-2 pt-0">Image source</legend>
                   <div class="col-sm-10">
@@ -114,7 +114,7 @@
                 </div>
               </fieldset>
 
-              <div class = "form-group row ml-1">
+              <div class = "form-group row ms-1">
 
                 <label for="img_latitude" class="col-sm-2 col-form-label">Latitude:</label>
                 <div class="col-sm-2">
@@ -127,12 +127,12 @@
                 </div>
               </div>
 
-              <div class = "form-group row ml-3 mr-3">
+              <div class = "form-group row ms-3 me-3">
                 <p>Note: Latitude should be between -90 and 90, and longitude should be between -180 and 180</p>
               </div>
 
               <p>
-                  <input type="submit" value="Upload" class="btn btn-info ml-3">
+                  <input type="submit" value="Upload" class="btn btn-info ms-3">
               </p>
 
           </form>

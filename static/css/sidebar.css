@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: rgba(34, 34, 34, 0.99);
+    background-color: rgba(63, 63, 63, 0.99);
 }
 
 p {
@@ -219,7 +219,7 @@ a.article, a.article:hover {
     height: 100vh;
     overflow: auto;
     z-index:1;
-    background-color: rgba(34, 34, 34, 0.99);
+    background-color: rgba(63, 63, 63, 0.99);
     transition: all 0.3s;
     /* position: absolute */
 }

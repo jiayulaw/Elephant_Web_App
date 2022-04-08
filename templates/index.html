@@ -34,12 +34,12 @@
   
   <div class="col-lg-12">
     <div class="card bg-dark text-white border-radius-cardd" id = "elephant_radar">
-      <div class="card-header">
+      <div class="card-header" style = "display:inline-block">
         <!-- <h5 class="card-category">Aerial map</h5> -->
-        <h3 class="card-title" style = "display:inline-block;"> Elephant Radar</h3>
-        <div class="btn-group float-right" role="group" aria-label="">
-          <button id = "normal_view_button" type="button" onclick = "normal_view()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
-          <button id = "satelite_view_button" type="button" onclick = "satelite_view()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
+        <h3 class="card-title" style = "display:inline-block"> Elephant Radar</h3>
+        <div class="btn-group float-end" role="group" aria-label="">
+          <button id = "normal_view_button" type="button" onclick = "normal_view()" class="btn btn-success card-title" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Normal view</button>
+          <button id = "satelite_view_button" type="button" onclick = "satelite_view()" class="btn btn-secondary card-title" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Satelite view</button>
         </div>
         
         
@@ -61,7 +61,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive" id = "device_general_table">
-          <table class="table tablesorter fontsize-table " id="">
+          <table class="table tablesorter fontsize-table text-center" id="">
             <thead class=" text-info">
               <tr>
                 <th class="text-center">
@@ -83,7 +83,7 @@
             <tbody>
               {% set counter = namespace(value = 0) %}
               {% for name in devices_name %}
-                <tr>
+                <tr class ="text-white">
                   <td class="text-center">
                     {{name}}
                   </td>
@@ -93,12 +93,12 @@
                       {% if devices_status[counter.value] == "Offline" %}
                       <!-- <label for="progress_bar_offline">Offline</label>
                       <progress id="progress_bar_offline" value="100" max="100"> 100% </progress> -->
-                      <li class="status_indicator bg-red mr-2"></li>Offline 
+                      <li class="status_indicator bg-red me-2"></li>Offline 
 
                       {% else %}
                       <!-- <label for="progress_bar_online">Online</label>
                       <progress id="progress_bar_online" value="100" max="100"> 100% </progress> -->
-                      <li class="status_indicator bg-green mr-2"></li>Online 
+                      <li class="status_indicator bg-green me-2"></li>Online 
                       {% endif %}
 
                       
@@ -245,10 +245,10 @@ function normal_view() {
       accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
     }).addTo(mymap);
 
-    document.getElementById("normal_view_button").classList.remove("btn-info");
+    document.getElementById("normal_view_button").classList.remove("btn-secondary");
     document.getElementById("normal_view_button").classList.add("btn-success");
 
-    document.getElementById("satelite_view_button").classList.add("btn-info");
+    document.getElementById("satelite_view_button").classList.add("btn-secondary");
     document.getElementById("satelite_view_button").classList.remove("btn-success");
 }
 
@@ -262,10 +262,10 @@ function satelite_view() {
       accessToken: 'pk.eyJ1IjoiZHJpdmUxIiwiYSI6ImNrdXNsMmpyczB1cW8yd3FqNnNqaDB6dzcifQ.iLB9Fb5ExInw6SUIwCRnhQ'
     }).addTo(mymap);
 
-    document.getElementById("satelite_view_button").classList.remove("btn-info");
+    document.getElementById("satelite_view_button").classList.remove("btn-secondary");
     document.getElementById("satelite_view_button").classList.add("btn-success");
 
-    document.getElementById("normal_view_button").classList.add("btn-info");
+    document.getElementById("normal_view_button").classList.add("btn-secondary");
     document.getElementById("normal_view_button").classList.remove("btn-success");
 }
 </script>

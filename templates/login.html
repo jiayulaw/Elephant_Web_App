@@ -41,7 +41,7 @@
       <!--==========Form=========-->
     <form role="form" method="POST" action="">    
       {{ form.hidden_tag() }} 
-      <div class="card-header">
+      <div class="card-header ms-1">
         <h1 class="title">Login</h1>
 
         {% with messages = get_flashed_messages() %}
@@ -57,14 +57,14 @@
         <span class="text-danger">{{ msg}}</span>
         {% endif %} 
 
-        <h6 class="card-category">
+        <h6 class="card-category ms-1">
           Login with your credentials
           </h6>
       </div>
 
-      <div class="card-body">
+      <div class="card-body ms-1">
 
-          <div class="row gx-5">
+          <div class="row">
             <div class="col-md-10 px-md-1">
               <div class="form-group">
                 <label>Username</label>
@@ -96,7 +96,7 @@
       <div class="card-footer">
         <button type="submit" name="login" class="btn btn-fill btn-primary">Login</button>
         &nbsp; &nbsp;
-        Don't have an account? Please contact admin for account creation.
+        <br><br>Don't have an account? Please contact admin for account creation.
         
       </div>
     </form>

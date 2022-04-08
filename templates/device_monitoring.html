@@ -19,14 +19,14 @@
     <div class="card bg-dark text-white border-radius-cardd" id = "device_status">
       <div class="card-header">
         <h4 class="card-title" style = "display:inline-block;"> Device Monitoring</h4>
-        <div class="btn-group float-right" role="group" aria-label="">
-          <button id = "device_general_table_button" type="button" onclick = "device_general_table()" class="btn btn-success card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">General Stats</button>
-          <button id = "device_battery_table_button" type="button" onclick = "device_battery_table()" class="btn btn-info card-title align-items-end" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Battery health</button>
+        <div class="btn-group float-end" role="group" aria-label="">
+          <button id = "device_general_table_button" type="button" onclick = "device_general_table()" class="btn btn-success card-title" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">General Stats</button>
+          <button id = "device_battery_table_button" type="button" onclick = "device_battery_table()" class="btn btn-secondary card-title" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">Battery health</button>
         </div>
       </div>
       <div class="card-body">
         <div class="table-responsive" id = "device_general_table">
-          <table class="table tablesorter fontsize-table " id="">
+          <table class="table tablesorter text-center fontsize-table " id="">
             <thead class=" text-info">
               <tr>
                 <th class="text-center">
@@ -51,7 +51,7 @@
             <tbody>
               {% set counter = namespace(value = 0) %}
               {% for name in devices_name %}
-                <tr>
+                <tr class = "text-white">
                   <td class="text-center">
                     {{name}}
                   </td>
@@ -61,12 +61,12 @@
                       {% if devices_status[counter.value] == "Offline" %}
                       <!-- <label for="progress_bar_offline">Offline</label>
                       <progress id="progress_bar_offline" value="100" max="100"> 100% </progress> -->
-                      <li class="status_indicator bg-red mr-2"></li>Offline 
+                      <li class="status_indicator bg-red me-2"></li>Offline 
 
                       {% else %}
                       <!-- <label for="progress_bar_online">Online</label>
                       <progress id="progress_bar_online" value="100" max="100"> 100% </progress> -->
-                      <li class="status_indicator bg-green mr-2"></li>Online 
+                      <li class="status_indicator bg-green me-2"></li>Online 
                       {% endif %}
 
                       
@@ -90,7 +90,7 @@
         </div>
         
         <div class="table-responsive" id = "device_battery_table" style = "display:none;">
-          <table class="table tablesorter fontsize-table " id="">
+          <table class="table tablesorter text-center fontsize-table " id="">
             <thead class=" text-info">
               <tr>
                 <th class="text-center">
@@ -127,7 +127,7 @@
             <tbody>
               {% set counter = namespace(value = 0) %}
               {% for name in devices_name %}
-                <tr>
+                <tr class = "text-white">
                   <td class="text-center">
                     {{name}}
                   </td>
@@ -198,10 +198,10 @@ function device_general_table() {
   document.getElementById("device_general_table").style.display = "block";
   document.getElementById("device_battery_table").style.display = "none";
 
-  document.getElementById("device_general_table_button").classList.remove("btn-info");
+  document.getElementById("device_general_table_button").classList.remove("btn-secondary");
   document.getElementById("device_general_table_button").classList.add("btn-success");
 
-  document.getElementById("device_battery_table_button").classList.add("btn-info");
+  document.getElementById("device_battery_table_button").classList.add("btn-secondary");
   document.getElementById("device_battery_table_button").classList.remove("btn-success");
   
 }
@@ -210,10 +210,10 @@ function device_battery_table() {
   document.getElementById("device_general_table").style.display = "none";
   document.getElementById("device_battery_table").style.display = "block";
 
-  document.getElementById("device_battery_table_button").classList.remove("btn-info");
+  document.getElementById("device_battery_table_button").classList.remove("btn-secondary");
   document.getElementById("device_battery_table_button").classList.add("btn-success");
 
-  document.getElementById("device_general_table_button").classList.add("btn-info");
+  document.getElementById("device_general_table_button").classList.add("btn-secondary");
   document.getElementById("device_general_table_button").classList.remove("btn-success");
 
 }
