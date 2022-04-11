@@ -94,6 +94,7 @@ def bounding_box_and_text(annotations, img):
     Accepts image annottaion and an image in numpy array format (BGR).
     Returns an annotated image with boxes and labels, in numpy array format (BGR).
     """
+    copy_image = img.copy()
     for box in annotations:
         label = box['label']
         x = box['coordinates']['x']
@@ -107,8 +108,8 @@ def bounding_box_and_text(annotations, img):
         x = int(x)
         y = int(y)
         # draw rectangle
-        copy_image = img.copy()
-        cv2.rectangle(copy_image, (x, y), (x + w, h + y), color=(0, 255, 0), thickness=2)
+        
+        cv2.rectangle(copy_image, (x, y), (x + w, h + y), color=(0, 205, 255), thickness=2)
         # Setting label to print about bounding box
         text_box = label + str(" (") + str(round(confidence*100,2)) +str("%)")
 
@@ -116,7 +117,8 @@ def bounding_box_and_text(annotations, img):
         labelSize, baseLine = cv2.getTextSize(text_box, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)  # Get font size
 
         # Put text above bounding box
-        cv2.rectangle(copy_image, (x, y), (x+labelSize[0]+5, y+baseLine-30), (255, 255, 255), cv2.FILLED)
+        cv2.rectangle(copy_image, (x, y), (x+labelSize[0]+5, y+baseLine-30), (0, 205, 255), cv2.FILLED)
+        # cv2.rectangle(copy_image, (x - labelSize[0]/2 - 2, y), (x+labelSize[0]/2+2, y-baseLine-), (0, 205, 255), cv2.FILLED)
         cv2.putText(copy_image, text_box, (x+10, y-7), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 0), 2)
     return copy_image
 

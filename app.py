@@ -395,6 +395,10 @@ def dashboard():
         battery_operating_range = full_battery_voltage - min_battery_voltage
         battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
         battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
+        if battery_level > 100:
+            battery_level = 100
+        elif battery_level < 0:
+            battery_level = 0
         devices_battery_level.append(battery_level)
 
 
@@ -491,6 +495,11 @@ def device_monitoring():
         battery_operating_range = full_battery_voltage - min_battery_voltage
         battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
         battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
+
+        if battery_level > 100:
+            battery_level = 100
+        elif battery_level < 0:
+            battery_level = 0
         devices_battery_level.append(battery_level)
 
 
