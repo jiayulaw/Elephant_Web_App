@@ -103,11 +103,12 @@ def bounding_box_and_text(annotations, img):
         confidence = box['confidence']
         # shift x & y as annotations was meant for roboflow
         x  -= w/2
-        y  -= w/2
+        y  -= h/2
         x = int(x)
         y = int(y)
         # draw rectangle
-        cv2.rectangle(img, (x, y), (x + w, h + y), color=(0, 255, 0), thickness=2)
+        copy_image = img.copy()
+        cv2.rectangle(copy_image, (x, y), (x + w, h + y), color=(0, 255, 0), thickness=2)
         # Setting label to print about bounding box
         text_box = label + str(" (") + str(round(confidence*100,2)) +str("%)")
 
@@ -115,9 +116,9 @@ def bounding_box_and_text(annotations, img):
         labelSize, baseLine = cv2.getTextSize(text_box, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)  # Get font size
 
         # Put text above bounding box
-        cv2.rectangle(img, (x, y), (x+labelSize[0]+5, y+baseLine-30), (255, 255, 255), cv2.FILLED)
-        cv2.putText(img, text_box, (x+10, y-7), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 0), 2)
-    return img
+        cv2.rectangle(copy_image, (x, y), (x+labelSize[0]+5, y+baseLine-30), (255, 255, 255), cv2.FILLED)
+        cv2.putText(copy_image, text_box, (x+10, y-7), cv2.FONT_HERSHEY_COMPLEX, 0.6, (0, 0, 0), 2)
+    return copy_image
 
 def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat, db):
     """
