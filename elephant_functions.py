@@ -338,51 +338,12 @@ def update_server_directory_images(Images, BASE_DIR):
 #         print ("Exiting ")
     
 
-def update_server_thread():
+def update_device_status_thread():
     """
-    An infinite loop that listens for change in directory and triggers
-    the check and record of unrecorded image file.
-    The loop also update the status of device if not being seen for more than
-    certain amount of time, then log for any status change.
+    An infinite loop that checks the status of device and update status 
+    to "Offline" if not being seen for more than 30 minutes.
     """
-    ###########################################################################
-    # Check for change in directory
-    ###########################################################################
-    def on_created(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
-        update_server_directory_images(Images, BASE_DIR)
-
-    def on_deleted(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-        update_server_directory_images(Images, BASE_DIR)
-    def on_modified(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-        update_server_directory_images(Images, BASE_DIR)
-
-    def on_moved(event):
-        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-        update_server_directory_images(Images, BASE_DIR)
     try:
-        patterns = ["*"]
-        ignore_patterns = None
-        ignore_directories = False
-        case_sensitive = True
-        my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
-        my_event_handler.on_created = on_created
-        my_event_handler.on_deleted = on_deleted
-        my_event_handler.on_modified = on_modified
-        my_event_handler.on_moved = on_moved
-        #relative path that needs to be checked for changes
-        path = os.path.join(BASE_DIR, 'static/image uploads')
-        go_recursively = True
-        my_observer = Observer()
-        my_observer.schedule(my_event_handler, path, recursive=go_recursively)
-        my_observer.start()
-
-        print ("Starting ")
-        ###########################################################################
-        # Check for change in end device status
-        ###########################################################################
         while True:
             print("Updating end devices status...")
             cursor = end_device.query.all()        
@@ -403,13 +364,13 @@ def update_server_thread():
                 # Dividing seconds by 60 we get minutes
                 output = divmod(diff_in_seconds,60)
                 diff_in_minutes = output[0]
-                if diff_in_minutes > 30:
+                if diff_in_minutes > 15:
                     if device.status != "Offline":
                         logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + device.name + " changed status from " + device.status + " to " + "Offline", db)
                         device.status = "Offline"
             
             db.session.commit()
-            time.sleep(2)
+            time.sleep(15)
             print ("Exiting ")
     except Exception as e:
             logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Exception: Update server thread", str(e), db)

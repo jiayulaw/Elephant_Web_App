@@ -28,7 +28,6 @@ from app_config import *
 #------------------------------------------------------------
 #-------------------------Initialization of variables-------------------------
 #------------------------------------------------------------
-
 class DataStorage():
     dontRequest = None
     station = "end device 1"
@@ -40,8 +39,49 @@ class DataStorage():
     debug_arr = []
 
 data = DataStorage()
+#=============================================================================================
+# Background threads mechanism
+#=============================================================================================
+#------------------------------------------------------------
+#-------------------------Image update thread-------------------------
+#------------------------------------------------------------
+"""Following are the confgis of a thread that listens for change in 
+directory and triggers the check and record of unrecorded image file."""
+def on_created(event):
+        print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
+        update_server_directory_images(Images, BASE_DIR)
 
-thread1 = threading.Thread(target = update_server_thread)
+def on_deleted(event):
+    print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
+    update_server_directory_images(Images, BASE_DIR)
+def on_modified(event):
+    print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
+    update_server_directory_images(Images, BASE_DIR)
+
+def on_moved(event):
+    print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
+    update_server_directory_images(Images, BASE_DIR)
+
+patterns = ["*"]
+ignore_patterns = None
+ignore_directories = False
+case_sensitive = True
+my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+my_event_handler.on_created = on_created
+my_event_handler.on_deleted = on_deleted
+my_event_handler.on_modified = on_modified
+my_event_handler.on_moved = on_moved
+#relative path that needs to be checked for changes
+path = os.path.join(BASE_DIR, 'static/image uploads')
+go_recursively = True
+my_observer = Observer()
+my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+my_observer.start()       
+
+#------------------------------------------------------------
+#-------------------------Device status update thread-------------------------
+#------------------------------------------------------------
+thread1 = threading.Thread(target = update_device_status_thread)
 thread1.daemon = True
 thread1.start()
 
@@ -53,9 +93,9 @@ class RegisterForm(FlaskForm):
     
     password = PasswordField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Password"})
    
-    # access_level = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
+    # role = StringField(validators=[InputRequired(), Length(min = 4, max = 20)], render_kw = {"placeholder": "Access code"})
 
-    access_level = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
+    role = SelectField(u'account type', choices=[('admin', 'Admin'), ('explorer', 'Explorer'), ('guest', 'Guest')])
     submit = SubmitField("Register")
     #Checks whether the username is redundant
     def validate_username(self, username):
@@ -115,7 +155,7 @@ def load_user(user_id):
 # Admin System
 #=============================================================================================            
 #------------------------------------------------------------
-#-------------------------User permission Config-------------------------
+#-------------------------User role wrapper-------------------------
 #------------------------------------------------------------
 def require_role(role, role2):
     """make sure user has this role"""
@@ -130,30 +170,30 @@ def require_role(role, role2):
     return decorator
 
 #------------------------------------------------------------
-#-------------------------Flask Admin -------------------------
+#-------------------------Flask Admin (NOT USED ANYMORE) -------------------------
 #------------------------------------------------------------
 #Following class is user defined ModelView inherited from default 
-class MyModelView(ModelView):
-    #defines the condition for /admin/user to be accessible
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.has_role('admin')
-    #defines what to do if inaccesible
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
+# class MyModelView(ModelView):
+#     #defines the condition for /admin/user to be accessible
+#     def is_accessible(self):
+#         return current_user.is_authenticated and current_user.has_role('admin')
+#     #defines what to do if inaccesible
+#     def inaccessible_callback(self, name, **kwargs):
+#         return redirect(url_for('login'))
 
-#Following class is user defined AdminIndexView inherited from default 
-class MyAdminIndexView(AdminIndexView):
-    #defines the condition for URL '/admin' to be accessible
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.has_role('admin')
-    #defines what to do if inaccesible
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('dashboard'))
+# #Following class is user defined AdminIndexView inherited from default 
+# class MyAdminIndexView(AdminIndexView):
+#     #defines the condition for URL '/admin' to be accessible
+#     def is_accessible(self):
+#         return current_user.is_authenticated and current_user.has_role('admin')
+#     #defines what to do if inaccesible
+#     def inaccessible_callback(self, name, **kwargs):
+#         return redirect(url_for('dashboard'))
 
-#create admin object - template_mode defines which template we use from the lib for frontend
-admin = Admin(app, index_view = MyAdminIndexView(), template_mode = 'bootstrap4')
-#add ModelView class to admin
-admin.add_view(MyModelView(User, db.session))
+# #create admin object - template_mode defines which template we use from the lib for frontend
+# admin = Admin(app, index_view = MyAdminIndexView(), template_mode = 'bootstrap4')
+# #add ModelView class to admin
+# admin.add_view(MyModelView(User, db.session))
 
 
 #=============================================================================================
@@ -310,9 +350,9 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 
 
 
-@app.route("/roboflow")
+@app.route("/update_image")
 @login_required
-def roboflow():
+def update_image():
 
     update_server_directory_images(Images, BASE_DIR)
         
@@ -585,7 +625,7 @@ def register():
         date_created = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
 
 
-        new_user = User(username = form.username.data, password=hashed_password, access_level = form.access_level.data, date_created = date_created)
+        new_user = User(username = form.username.data, password=hashed_password, role = form.role.data, date_created = date_created)
         db.session.add(new_user)
         db.session.commit()
         flash('Registration Success', 'success_msg')
@@ -652,7 +692,7 @@ def admin_manage():
     for row in result:
         user_ids.append(row.id)
         usernames.append(row.username)
-        user_roles.append(row.access_level)
+        user_roles.append(row.role)
         user_date_created.append(row.date_created)
         user_last_seen.append(row.last_seen)
         
@@ -827,8 +867,6 @@ def upload_multiple_image():
                 # server activity
                 logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Image upload", "User - " + current_user.username + " uploaded an image", db)
 
-
-
         else:
             flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_multipleimgupload')
             return redirect('/data_center/update_status')
@@ -998,7 +1036,7 @@ def about_us():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
-    navbar_items = [["Update database", url_for('roboflow')], ["Upload", url_for('update_status')]]
+    navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('update_status')]]
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type, range_h = get_records()
         start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
@@ -1167,6 +1205,8 @@ if __name__ == "__main__":
     t1 = threading.Thread(target=runApp, daemon=True).start()
     while True:
         time.sleep(1)
+
+        
     # thread3 = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
     # app.run(debug=True, use_reloader=False)
     # app.run(debug=True)
