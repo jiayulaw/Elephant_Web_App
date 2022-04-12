@@ -140,6 +140,18 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
     annotated_filepath = os.path.dirname(path)+"/" + annotated_filename
     annotated_filepath_absolute = os.path.join(BASE_DIR, annotated_filepath)
 
+    #if the image is annotated and there exist an annotation file for it
+    if (os.path.exists(annotated_filepath_absolute)) and os.path.exists(JsonFilePath_absolute):
+        result = Images.query.filter_by(path=path).first()
+        #if there is no annotation record
+        if not result.path2:
+            #this happens when performing database reset where it forgets
+            # about previous annotation
+            # # then just update the database with annotation record 
+            result.path2 = annotated_filepath
+            result.json_path = JsonFilePath
+            db.session.commit()
+
     #if the image is not yet annotated and there exist an annotation file for it
     if (not os.path.exists(annotated_filepath_absolute)) and os.path.exists(JsonFilePath_absolute):
     #    Read Annotation as String
