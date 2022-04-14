@@ -31,10 +31,10 @@ class ElephantWebsiteTestUser(HttpUser):
     @task(1)
     def view_image_page(self):
         # get image view page HTML template 
-        self.client.get("https://d3m318b1ejw1x6.cloudfront.net/about_us")
+        self.client.get("https://d3m318b1ejw1x6.cloudfront.net/display_image")
         # get image files from server to simulate traffic of image request when rendering HTML template
         for x in range(80):
-            self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/img/thumbnail_bigpicture.png")
+            self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/image%20uploads/end%20device%203/2021-06-15%2016-18-18-x-elephant.jpg")
 
     @task(1)
     def upload_image_page(self):

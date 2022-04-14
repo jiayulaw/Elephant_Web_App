@@ -311,7 +311,7 @@
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Upload date: {{image_upload_date[counter.value]}} <br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
 
-              {% if current_user.has_role('admin') %}
+              <!-- #label{% if current_user.has_role('admin') %} -->
               <div class="container">
                 <div class = "row">
             
@@ -336,8 +336,8 @@
                 </div>
               </div>
 
-              {% elif current_user.has_role('explorer') %}
-                {% if current_user.username == image_uploader[counter.value] %}
+              <!-- #label{% elif current_user.has_role('explorer') %} -->
+              <!-- #label{% if current_user.username == image_uploader[counter.value] %} -->
                 <div class="container">
                   <div class = "row">
               
@@ -360,8 +360,8 @@
                     </div>
                   </div>
                 </div>
-                {% endif %}
-              {% endif %} 
+                <!-- #label{% endif %} -->
+              <!-- #label{% endif %}  -->
             </div>
           </div>
         </div>
