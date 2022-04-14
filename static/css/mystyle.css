@@ -276,6 +276,11 @@
 }
 
 
+#small3dmodel{
+  display:none
+}
+
+
 @media (max-width: 1400px) {
   .modal-dialog {
     width: 90vw;
@@ -286,6 +291,14 @@
   }
   .analytic_chart{
     /* height: 30vh !important; */
+  }
+  #small3dmodel{
+    display:block;
+
+  }
+  #big3dmodel{
+    display:none;
+
   }
 
 

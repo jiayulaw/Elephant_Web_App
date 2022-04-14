@@ -361,7 +361,7 @@ def update_device_status_thread():
             cursor = end_device.query.all()        
             UTCnow = datetime.datetime.utcnow() # current date and time in UTC
             for device in cursor:
-                datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
+                datetime_object = datetime.datetime.strptime(device.last_seen, '%I:%M:%S %p, %d/%m/%Y')
                 #hardcode the timezone as Malaysia timezone
                 timezone = pytz.timezone("Asia/Kuala_Lumpur")
                 #add timezone attribute to datetime object
@@ -525,3 +525,37 @@ def check_and_create_img_thumbnail(BASE_DIR, path, max_size_in_kb, data):
 
     return size_bool, path
 
+def battery_health_algorithm(battery_voltage, battery_current):
+        full_battery_voltage = 13
+        min_battery_voltage = 11.3
+        battery_operating_range = full_battery_voltage - min_battery_voltage
+        battery_level = ((float(battery_voltage) - min_battery_voltage)/battery_operating_range)*100
+        battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
+
+        if battery_level > 100:
+            battery_level = 100
+        elif battery_level < 0:
+            battery_level = 0
+        
+        # Battery stats
+        current_battery_voltage = float(battery_voltage)
+        current_battery_current = float(battery_current)
+
+
+        current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
+        current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
+
+
+        if current_battery_voltage > full_battery_voltage:
+            stat = "Charging"
+        elif current_battery_voltage == full_battery_voltage:
+            stat = "Fully charged"
+        elif current_battery_voltage > min_battery_voltage and current_battery_voltage < 13:
+            stat = "Operating"
+        elif current_battery_voltage <= min_battery_voltage:
+            stat = "Running out"
+        else:
+            stat = "Unknown"
+
+        db.session.commit()
+        return battery_level, current_power_level, stat

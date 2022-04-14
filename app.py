@@ -22,6 +22,7 @@ from os.path import exists
 from elephant_functions import *
 import threading
 
+
 #Import database rows declaration, and also Flask app objects
 from app_config import *
 
@@ -39,6 +40,8 @@ class DataStorage():
     debug_arr = []
 
 data = DataStorage()
+
+
 #=============================================================================================
 # Background threads mechanism
 #=============================================================================================
@@ -82,7 +85,7 @@ my_observer.start()
 #-------------------------Device status update thread-------------------------
 #------------------------------------------------------------
 thread1 = threading.Thread(target = update_device_status_thread)
-thread1.daemon = True
+# thread1.daemon = True
 thread1.start()
 
 #=============================================================================================
@@ -211,6 +214,9 @@ device_stat_put_args.add_argument("battery_current", type=str, help="Device batt
 device_stat_put_args.add_argument("battery_temp_1", type=str, help="Device battery temp?", required=True)
 device_stat_put_args.add_argument("battery_temp_2", type=str, help="Device battery temp?", required=True)
 device_stat_put_args.add_argument("ambient_temp", type=str, help="Device ambient temp?", required=True)
+device_stat_put_args.add_argument("battery_level", type=str, help="battery_level?")
+device_stat_put_args.add_argument("battery_status", type=str, help="battery_status?")
+device_stat_put_args.add_argument("instantaneous_power", type=str, help="instantaneous_power?")
 
 device_stat_update_args = reqparse.RequestParser()
 device_stat_update_args.add_argument("name", type=str, help="Device name is required", required=True)
@@ -222,6 +228,9 @@ device_stat_update_args.add_argument("battery_current", type=str, help="Device b
 device_stat_update_args.add_argument("battery_temp_1", type=str, help="Device battery temp?", required=True)
 device_stat_update_args.add_argument("battery_temp_2", type=str, help="Device battery temp?", required=True)
 device_stat_update_args.add_argument("ambient_temp", type=str, help="Device ambient temp?", required=True)
+device_stat_update_args.add_argument("battery_level", type=str, help="battery_level?")
+device_stat_update_args.add_argument("battery_status", type=str, help="battery_status?")
+device_stat_update_args.add_argument("instantaneous_power", type=str, help="instantaneous_power?")
 
 
 resource_fields = {
@@ -250,9 +259,19 @@ class Device_Stat_pipeline(Resource):
     def put(self, device_id):
         args = device_stat_put_args.parse_args()
         result = end_device.query.filter_by(id=device_id).first()
+
+        datetime_object = datetime.datetime.strptime(args['last_seen'], '%Y-%m-%d %H-%M-%S')
+        #hardcode the timezone as Malaysia timezone
+        timezone = pytz.timezone("Asia/Kuala_Lumpur")
+        #add timezone attribute to datetime object
+        datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+        datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+
         if not result:
-            device_record = end_device(id=device_id, name=args['name'], last_seen=args['last_seen'], status=args['status'], message=args['message'], battery_voltage =args['battery_voltage'] , battery_current =args['battery_current'], battery_temp_1 =args['battery_temp_1'], battery_temp_2 =args['battery_temp_2'], ambient_temp =args['ambient_temp'] )
+            battery_level, instantaneous_power, battery_status = battery_health_algorithm(args['battery_voltage'], args['battery_current'])
+            device_record = end_device(id=device_id, name=args['name'], last_seen=datetime_str_formatted, status=args['status'], message=args['message'], battery_voltage =args['battery_voltage'] , battery_current =args['battery_current'], battery_temp_1 =args['battery_temp_1'], battery_temp_2 =args['battery_temp_2'], ambient_temp =args['ambient_temp'], battery_level = battery_level, instantaneous_power = instantaneous_power, battery_status = battery_status)
             db.session.add(device_record)
+            
             db.session.commit()
             return_val = device_record
             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "End device added", "Device - " + args['name'] + " added to database.", db)
@@ -263,7 +282,7 @@ class Device_Stat_pipeline(Resource):
                 result.name = args['name']
 
             if args['last_seen']:
-                result.last_seen = args['last_seen']
+                result.last_seen = datetime_str_formatted
                 
             if args['message']:
                 result.message = args['message']
@@ -287,9 +306,12 @@ class Device_Stat_pipeline(Resource):
                 if result.status != args['status']:
                     logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Status change", "Device - " + args['name'] + " changed status from " + result.status + " to " + args['status'], db)      
                 result.status = args['status']
+
+            result.battery_level, result.instantaneous_power, result.battery_status = battery_health_algorithm(result.battery_voltage, result.battery_current)
             db.session.commit()
             return_val = result
             number = 200
+
         return return_val, number
         
 
@@ -304,7 +326,13 @@ class Device_Stat_pipeline(Resource):
             result.name = args['name']
 
         if args['last_seen']:
-            result.last_seen = args['last_seen']
+            datetime_object = datetime.datetime.strptime(args['last_seen'], '%Y-%m-%d %H-%M-%S')
+            #hardcode the timezone as Malaysia timezone
+            timezone = pytz.timezone("Asia/Kuala_Lumpur")
+            #add timezone attribute to datetime object
+            datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
+            datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
+            result.last_seen = datetime_str_formatted
             
         if args['message']:
             result.message = args['message']
@@ -352,6 +380,7 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 
 @app.route("/update_image")
 @login_required
+@require_role(role="admin", role2 ="explorer")
 def update_image():
 
     update_server_directory_images(Images, BASE_DIR)
@@ -413,59 +442,21 @@ def dashboard():
 
     cursor = end_device.query.all()
     for device in cursor:
-        datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
-        #hardcode the timezone as Malaysia timezone
-        timezone = pytz.timezone("Asia/Kuala_Lumpur")
-        #add timezone attribute to datetime object
-        datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-        datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-
         # append all data to arrays to be displayed on web page
         devices_name.append(device.name)
-        devices_last_seen.append(datetime_str_formatted)
-        devices_message.append(device.message)
-        devices_status.append(device.status)
-        current_battery_current = float(device.battery_current)
-        devices_battery_current.append(current_battery_current)
-        # Battery stats
-        current_battery_voltage = float(device.battery_voltage)
-        devices_battery_voltage.append(current_battery_voltage)
-        full_battery_voltage = 13
-        min_battery_voltage  = 11.5
-        battery_operating_range = full_battery_voltage - min_battery_voltage
-        battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
-        battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
-        if battery_level > 100:
-            battery_level = 100
-        elif battery_level < 0:
-            battery_level = 0
-        devices_battery_level.append(battery_level)
-
-
-        current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
-        current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
-        devices_power_level.append(current_power_level)
+        devices_last_seen.append(device.last_seen)
         
+        devices_status.append(device.status)
+        devices_message.append(device.message)
 
-        if current_battery_voltage > 13:
-            stat = "Charging"
-        elif current_battery_voltage == 13:
-            stat = "Fully charged"
-        elif current_battery_voltage > 11.3 and current_battery_voltage < 13:
-            stat = "Operating"
-        elif current_battery_voltage <= 11.3:
-            stat = "Running out"
-        else:
-            stat = "Unknown"
-            
-        devices_battery_status.append(stat)
+        devices_battery_current.append(device.battery_current)
+        devices_battery_voltage.append(device.battery_voltage)
 
+        devices_battery_level.append(device.battery_level)
+        devices_power_level.append(device.instantaneous_power)
+        devices_battery_status.append(device.battery_status)
 
-        db.session.commit()
-
-        #  Analytics graph display on home page
-
-
+    #  Analytics graph display on home page
     #Filter the number of images for past 7 days
     end_datetime = datetime.datetime.now()
     start_datetime = end_datetime - datetime.timedelta(days=7)
@@ -490,13 +481,7 @@ def dashboard():
 @app.route("/device_monitoring")
 @login_required #we can only access dashboard when logged in
 def device_monitoring():
-    # Battery stats initialization
-    full_battery_voltage = 13
-    min_battery_voltage  = 11.3
-
-
     navbar_items = []
-
     devices_name = []
     devices_last_seen = []
     devices_message = []
@@ -513,59 +498,23 @@ def device_monitoring():
 
     cursor = end_device.query.all()
     for device in cursor:
-        datetime_object = datetime.datetime.strptime(device.last_seen, '%Y-%m-%d %H-%M-%S')
-        #hardcode the timezone as Malaysia timezone
-        timezone = pytz.timezone("Asia/Kuala_Lumpur")
-        #add timezone attribute to datetime object
-        datetime_object_timezone = timezone.localize(datetime_object, is_dst=None)
-        datetime_str_formatted = datetime.datetime.strftime(datetime_object_timezone, '%I:%M:%S %p, %d/%m/%Y')
-
         # append all data to arrays to be displayed on web page
         devices_name.append(device.name)
-        devices_last_seen.append(datetime_str_formatted)
+        devices_last_seen.append(device.last_seen)
         
         devices_status.append(device.status)
         devices_message.append(device.message)
-        current_battery_current = float(device.battery_current)
-        devices_battery_current.append(current_battery_current)
-        # Battery stats
-        current_battery_voltage = float(device.battery_voltage)
-        devices_battery_voltage.append(current_battery_voltage)
-  
-        battery_operating_range = full_battery_voltage - min_battery_voltage
-        battery_level = ((float(device.battery_voltage) - min_battery_voltage)/battery_operating_range)*100
-        battery_level = int((battery_level * 100) + 0.5) / 100.0 # Adding 0.5 rounds it up
-
-        if battery_level > 100:
-            battery_level = 100
-        elif battery_level < 0:
-            battery_level = 0
-        devices_battery_level.append(battery_level)
-
-
-        current_power_level = current_battery_voltage*current_battery_current*10**-3 #10^-3 because current is in mA
-        current_power_level = int((current_power_level * 10000) + 0.5) / 10000.0 # Adding 0.5 rounds it up
-        devices_power_level.append(current_power_level)
 
         devices_battery_temp_1.append(device.battery_temp_1)
         devices_battery_temp_2.append(device.battery_temp_2)
         devices_ambient_temp.append(device.ambient_temp)
-        
 
-        if current_battery_voltage > full_battery_voltage:
-            stat = "Charging"
-        elif current_battery_voltage == full_battery_voltage:
-            stat = "Fully charged"
-        elif current_battery_voltage > min_battery_voltage and current_battery_voltage < 13:
-            stat = "Operating"
-        elif current_battery_voltage <= min_battery_voltage:
-            stat = "Running out"
-        else:
-            stat = "Unknown"
-            
-        devices_battery_status.append(stat)
+        devices_battery_current.append(device.battery_current)
+        devices_battery_voltage.append(device.battery_voltage)
 
-        db.session.commit()
+        devices_battery_level.append(device.battery_level)
+        devices_power_level.append(device.instantaneous_power)
+        devices_battery_status.append(device.battery_status)
 
     return render_template('device_monitoring.html', active_state = "device", devices_name = devices_name, 
     devices_last_seen = devices_last_seen, devices_message = devices_message, devices_status = devices_status, 
@@ -804,21 +753,21 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route("/data_center/update_status")
+@app.route("/data_center/upload_image")
 @login_required
 @require_role(role="admin", role2 ="explorer")
-def update_status():
-    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
-    return render_template('update_status.html', active_state = "data_center", navbar_items = navbar_items)
+def upload_image():
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('upload_image')]]
+    return render_template('upload_image.html', active_state = "data_center", navbar_items = navbar_items)
 
 @app.route("/data_center/update_multiple_images", methods = ['POST'])
 @login_required     
 @require_role(role="admin", role2 = "explorer")
 def upload_multiple_image():
-    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('update_status')]]
+    navbar_items = [["View", url_for('display_image')], ["Upload", url_for('upload_image')]]
     if 'files' not in request.files:
         flash('Upload Failed. No file part', 'error_msg_multipleimgupload')
-        return redirect('/data_center/update_status')
+        return redirect('/data_center/upload_image')
 
     for file in request.files.getlist('files'):
         if file.filename == '':
@@ -869,9 +818,9 @@ def upload_multiple_image():
 
         else:
             flash('Upload Failed. Allowed image types are - png, jpg, jpeg, gif', 'error_msg_multipleimgupload')
-            return redirect('/data_center/update_status')
+            return redirect('/data_center/upload_image')
     data.input_date_str = request.args.get('timestamp_input',time.strftime("%Y-%m-%d %H:%M"))
-    return render_template('update_status.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
+    return render_template('upload_image.html', file_path=file_path,  active_state = "data_center", input_date_str = data.input_date_str, navbar_items = navbar_items)
         
 
 
@@ -1036,7 +985,7 @@ def about_us():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
-    navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('update_status')]]
+    navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('upload_image')]]
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type, range_h = get_records()
         start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
