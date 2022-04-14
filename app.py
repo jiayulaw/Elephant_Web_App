@@ -379,8 +379,8 @@ api.add_resource(Device_Stat_pipeline, "/device_stat/<int:device_id>")
 
 
 @app.route("/update_image")
-@login_required
-@require_role(role="admin", role2 ="explorer")
+#@login_required
+#@require_role(role="admin", role2 ="explorer")
 def update_image():
 
     update_server_directory_images(Images, BASE_DIR)
@@ -389,7 +389,7 @@ def update_image():
 
 @app.route("/")
 @app.route("/dashboard")
-@login_required #we can only access dashboard when logged in
+#@login_required #we can only access dashboard when logged in
 def dashboard():
     navbar_items = [["Device status", "#device_status"], ["Elephant Radar", "#elephant_radar"]]
     # Filter images from database
@@ -479,7 +479,7 @@ def dashboard():
     this_week_big_Y_array_device2 = this_week_big_Y_array_device2, this_week_big_Y_array_device3 = this_week_big_Y_array_device3)
 
 @app.route("/device_monitoring")
-@login_required #we can only access dashboard when logged in
+#@login_required #we can only access dashboard when logged in
 def device_monitoring():
     navbar_items = []
     devices_name = []
@@ -555,7 +555,7 @@ def login():
 
     
 @app.route('/logout', methods = ['GET','POST'])
-@login_required
+#@login_required
 def logout():
     logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Logout", "User - " + current_user.username + " logged out.", db)
     logout_user()
@@ -564,8 +564,8 @@ def logout():
 
 
 @app.route("/admin/register", methods = ['GET', 'POST'])
-@login_required
-@require_role(role="admin", role2 = "admin")
+#@login_required
+#@require_role(role="admin", role2 = "admin")
 def register():
     navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
     form = RegisterForm()
@@ -584,7 +584,7 @@ def register():
 
 
 @app.route("/user/change_password", methods = ['GET', 'POST'])
-@login_required
+#@login_required
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
@@ -608,8 +608,8 @@ def change_password():
     return render_template("change_password.html", active_state = "account", form = form, msg = None)  
 
 @app.route("/admin/home", methods = ['GET', 'POST'])
-@login_required
-@require_role(role="admin", role2 = "admin")
+#@login_required
+#@require_role(role="admin", role2 = "admin")
 def admin_home():
     navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
     activity_description = []
@@ -628,8 +628,8 @@ def admin_home():
     return render_template("/admin/admin_home.html", active_state = "admin", activity_description = activity_description, activity_date = activity_date, activity_type = activity_type, navbar_items = navbar_items)
 
 @app.route("/admin/admin_manage", methods = ['GET', 'POST'])
-@login_required
-@require_role(role="admin", role2 = "admin")
+#@login_required
+#@require_role(role="admin", role2 = "admin")
 def admin_manage():
     navbar_items = [["Activity", url_for('admin_home')], ["Create account", url_for('register')], ["Manage", url_for('admin_manage')]]
     usernames = []
@@ -650,8 +650,8 @@ def admin_manage():
 
 
 @app.route("/admin/delete_user/<user_id>")
-@login_required
-@require_role(role="admin", role2 = "admin")
+#@login_required
+#@require_role(role="admin", role2 = "admin")
 def delete_user(user_id):
     result = User.query.filter(User.id == user_id).first()
     logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Account deletion", "User - " + current_user.username + " deleted another user account - " + result.username, db)
@@ -662,8 +662,8 @@ def delete_user(user_id):
 
 
 @app.route("/analytics", methods = ['GET', 'POST'])
-@login_required
-@require_role(role="admin", role2 = "explorer")
+#@login_required
+#@require_role(role="admin", role2 = "explorer")
 def analytics():
     navbar_items = []
 
@@ -754,15 +754,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/data_center/upload_image")
-@login_required
-@require_role(role="admin", role2 ="explorer")
+#@login_required
+#@require_role(role="admin", role2 ="explorer")
 def upload_image():
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('upload_image')]]
     return render_template('upload_image.html', active_state = "data_center", navbar_items = navbar_items)
 
 @app.route("/data_center/update_multiple_images", methods = ['POST'])
-@login_required     
-@require_role(role="admin", role2 = "explorer")
+#@login_required     
+#@require_role(role="admin", role2 = "explorer")
 def upload_multiple_image():
     navbar_items = [["View", url_for('display_image')], ["Upload", url_for('upload_image')]]
     if 'files' not in request.files:
@@ -825,8 +825,8 @@ def upload_multiple_image():
 
 
 @app.route('/delete_img/<img_id>')
-@login_required
-@require_role(role="admin", role2 = "explorer")
+#@login_required
+#@require_role(role="admin", role2 = "explorer")
 def delete_img(img_id):
     result = Images.query.filter_by(id=img_id).first()
 
@@ -851,8 +851,8 @@ def delete_img(img_id):
     return redirect(url_for('display_image'))
 
 @app.route('/edit_img/<img_id>')
-@login_required
-@require_role(role="admin", role2 = "explorer")
+#@login_required
+#@require_role(role="admin", role2 = "explorer")
 def edit_img(img_id):
     result = Images.query.filter_by(id=img_id).first()
     if not result:
@@ -908,8 +908,8 @@ def edit_img(img_id):
 #------------------------------------------------------------
 
 @app.route("/debug")
-@login_required
-@require_role(role="admin", role2 = "admin")
+#@login_required
+#@require_role(role="admin", role2 = "admin")
 def debug():
     activity_description = []
     activity_date = []
@@ -942,7 +942,7 @@ def test_about_us():
 ##################################################################
 
 @app.route("/about_us")
-@login_required
+#@login_required
 def about_us():
     images = []
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
@@ -951,8 +951,8 @@ def about_us():
 
 
 # @app.route("/start_thread")
-# @login_required
-# @require_role(role="admin", role2="admin")
+# #@login_required
+# #@require_role(role="admin", role2="admin")
 # def start_thread():
 #     thread1 = threading.Thread(target = update_server_thread)
 #     thread1.daemon = True
@@ -962,8 +962,8 @@ def about_us():
 #     return render_template('thread.html')
 
 # @app.route("/end_devices")
-# @login_required
-# @require_role(role="admin", role2="explorer")
+# #@login_required
+# #@require_role(role="admin", role2="explorer")
 # def end_devices():
 #     end_device_name1 = "?"
 #     end_device_name2 = "?"
@@ -982,8 +982,8 @@ def about_us():
 #     return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
     
 @app.route("/display_image")
-@login_required
-@require_role(role="admin", role2 = "explorer")
+#@login_required
+#@require_role(role="admin", role2 = "explorer")
 def display_image():
     navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('upload_image')]]
     range_h = 'none'

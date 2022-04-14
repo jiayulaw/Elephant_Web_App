@@ -1,5 +1,3 @@
-
-
         
 import time
 from locust import HttpUser, task, between
@@ -11,14 +9,6 @@ from locust import HttpUser, task, between
 class ElephantWebsiteTestUser(HttpUser):
     wait_time = between(0.5, 3.0)
     
-    # def on_start(self):
-    #     """ on_start is called when a Locust start before any task is scheduled """
-    #     pass
-
-    # def on_stop(self): -
-    #     """ on_stop is called when the TaskSet is stopping """
-    #     pass
-
     @task(1) # number inside bracket is the weight for each task
     def view_image(self):
         # go to view image page
