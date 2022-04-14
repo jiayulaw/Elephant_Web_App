@@ -382,8 +382,9 @@ def update_device_status_thread():
                         device.status = "Offline"
             
             db.session.commit()
+            print ("Update device thread starts sleeping for 15 s")
             time.sleep(15)
-            print ("Exiting ")
+            
     except Exception as e:
             logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Exception: Update server thread", str(e), db)
 

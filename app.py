@@ -986,6 +986,7 @@ def about_us():
 @require_role(role="admin", role2 = "explorer")
 def display_image():
     navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('upload_image')]]
+    range_h = 'none'
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type, range_h = get_records()
         start = datetime.datetime.strptime(start_datetime, "%Y-%m-%d %H:%M:%S")
@@ -1098,7 +1099,6 @@ def display_image():
                             from_date = data.from_date_str,
                             to_date = data.to_date_str,
                             query_string = request.query_string,
-                            timezone = timezone,
                             active_state = "data_center",
                             image_paths = image_paths, image_paths2 = image_paths2, image_paths_high_res = image_paths_high_res,
                             image_timestamps = image_timestamps,
