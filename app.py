@@ -867,7 +867,7 @@ def edit_img(img_id):
     except:
         timestamp_str = datetime.datetime.strptime(timestamp_str,'%Y-%m-%d %H:%M:%S')
 
-    img_time = timestamp_str.strftime("%Y-%m-%d %H-%M-%S")
+    img_time = timestamp_str.strftime("%Y-%m-%d %H:%M:%S")
 
     result.timestamp  =  img_time
 
