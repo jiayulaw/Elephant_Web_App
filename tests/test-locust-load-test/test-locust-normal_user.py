@@ -32,8 +32,12 @@ class ElephantWebsiteTestUser(HttpUser):
     def view_image_page(self):
         # get image view page HTML template 
         self.client.get("https://d3m318b1ejw1x6.cloudfront.net/display_image")
+
+        # simulate image filter HTML form submission 
+        # from 2021-09-01 02:04:00 to 2022-04-15 02:04:00, any source, any type
+        self.client.get("https://d3m318b1ejw1x6.cloudfront.net/display_image?station=any&detection_type=any&from=2021-09-01+02%3A04&to=2022-04-15+02%3A04%3A00")
         # get image files from server to simulate traffic of image request when rendering HTML template
-        for x in range(80):
+        for x in range(800):
             self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/image%20uploads/end%20device%203/2021-06-15%2016-18-18-x-elephant.jpg")
 
     @task(1)
