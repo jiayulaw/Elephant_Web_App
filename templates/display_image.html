@@ -311,7 +311,6 @@
               <h6 class="card-title">Timestamp: {{image_timestamps[counter.value]}}</h6>
               <p class="card-text">Uploader: {{image_uploader[counter.value]}}<br> Upload date: {{image_upload_date[counter.value]}} <br> Tag: {{image_tag[counter.value]}}<br> Latitude: {{image_latitude[counter.value]}} <br> Longitude: {{image_longitude[counter.value]}}</p>
 
-              {% if current_user.has_role('admin') %}
               <div class="container">
                 <div class = "row">
             
@@ -336,32 +335,6 @@
                 </div>
               </div>
 
-              {% elif current_user.has_role('explorer') %}
-              {% if current_user.username == image_uploader[counter.value] %}
-                <div class="container">
-                  <div class = "row">
-              
-                    <div class="col-sm-4 mb-2">
-                      
-                      <button style = "width:100%; font-size: 0.8em;"  class="modal-delete-button btn btn-fill btn-danger" data-delete_img_id_action="{{ url_for('delete_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-deletion" href="#none">
-                        Delete
-                      </button>
-  
-                    </div>
-                    <div class="col-sm-3 mb-2">
-                      <button style = "width:100%; font-size: 0.8em;" class="modal-edit-button btn btn-fill btn-success" data-edit_img_id_action="{{ url_for('edit_img', img_id=image_id[counter.value]) }}" data-img_name = "{{image}}" type="button"  data-toggle="modal" data-target="#modalbox-confirm-edit" href="#none">
-                        Edit
-                      </button>
-                    </div>
-                    <div class="col-sm-5 mb-2">
-                      <a href="{{image}}" download>
-                        <button style = "width:100%; font-size: 0.8em;" class="btn btn-fill btn-info"><i class="fa fa-download"></i> Download</button>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-              {% endif %} 
             </div>
           </div>
         </div>
