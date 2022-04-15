@@ -150,7 +150,7 @@ def before_request():
     session.modified = True
 
 # define method to load user id
-#@login_manager.user_loader
+@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
