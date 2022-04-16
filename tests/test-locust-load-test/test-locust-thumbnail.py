@@ -17,14 +17,14 @@ from locust import HttpUser, task, between
 
 class ElephantWebsiteTestUser(HttpUser):
     # set a random wait time after each task execution
-    wait_time = between(0, 1.0)         
+    wait_time = between(1.0, 1.0)         
     @task(1)
     def load_image(self):
         for x in range(1):
             # Uncomment below to get thumbnailed image
-            # self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/img/thumbnail_bigpicture.png")
+            self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/img/thumbnail_bigpicture.png")
 
             # Uncomment below to get original size image
-            self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/img/bigpicture.png")  
+            # self.client.get("https://d3m318b1ejw1x6.cloudfront.net/static/img/bigpicture.png")  
 
 
