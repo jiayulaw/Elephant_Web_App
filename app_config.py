@@ -104,7 +104,7 @@ if __name__ == "__main__":
     db.create_all()
     # Create default admin user
     bcrypt = Bcrypt(app)
-    hashed_password = bcrypt.generate_password_hash("pwpw")
+    hashed_password = bcrypt.generate_password_hash("pwpwppp")
     date = getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p")
     new_user = User(username = "elephantking", password=hashed_password, role = "admin", date_created = date)
     db.session.add(new_user)

@@ -3,22 +3,22 @@
 
 import requests
 
-BASE = "http://127.0.0.1:5000/"
+# BASE = "http://127.0.0.1:5000/"
 
-# BASE = "https://d3m318b1ejw1x6.cloudfront.net/"
+BASE = "https://d3m318b1ejw1x6.cloudfront.net/"
 # set device_id to specify the device to update
 # i.e., 1 is for end device 1, 2 is for end device 2, and 3 is for ...
 # set last_seen to modify time
 # set message to attach a message
 # the name will be what will be displayed on server
 # set status as online
-device_id = "3"
-name = "end device 3"
+device_id = "1"
+name = "end device 1"
 last_seen = "2022-04-13 17-22-20"
-message  = "Elephant sleeping!"
+message  = "alive"
 status = "Online"
-battery_voltage = "11.6"
-battery_current = "0.57"
+battery_voltage = "12"
+battery_current = "0.77"
 battery_temp_1 = "37"
 battery_temp_2 = "38"
 ambient_temp = "30"

@@ -1,3 +1,9 @@
+This folder contains all the files in developing the EIDDS web application
+
+
+
+Instructions below show the installation of Python virtual environment to run the app:
+
 $ # Virtualenv modules installation (Windows based systems)
 $ # virtualenv env
 $ # .\env\Scripts\activate

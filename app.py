@@ -850,6 +850,9 @@ def delete_img(img_id):
     conn.close()
     return redirect(url_for('display_image'))
 
+
+
+
 @app.route('/edit_img/<img_id>')
 @login_required
 @require_role(role="admin", role2 = "explorer")
@@ -981,6 +984,9 @@ def about_us():
 
 #     return render_template("end_devices.html", active_state = "end_devices", end_device_name1 = end_device_name1, end_device_name2 = end_device_name2, end_device_name3 = end_device_name3)
     
+
+
+
 @app.route("/display_image")
 @login_required
 @require_role(role="admin", role2 = "explorer")
