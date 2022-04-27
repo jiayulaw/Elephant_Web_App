@@ -176,6 +176,140 @@
 
 </div>
 
+<div class = "row mt-3">
+  {% set counter = namespace(value = 0) %}
+  {% for name in devices_name %}
+  <div class="col-md-3">
+    <div class="card border-light mb-3 bg-dark text-white border-radius-cardd">
+      <div class = "card-header">
+
+        <div class="table-responsive">
+          <table class="table tablesorter text-center fontsize-table table-dark table-hover">
+            <tbody>
+                <tr class = "text-white">
+                  <td class="text-center text-info">
+                    {{name}}
+                  </td>
+                  <td class="text-center">
+                    {% if devices_status[counter.value] == "Offline" %}
+                    <li class="status_indicator bg-red me-2"></li>Offline 
+                    {% else %}
+                    <li class="status_indicator bg-green me-2"></li>Online 
+                    {% endif %}
+                  </td>
+                </tr>
+                
+            </tbody>
+          </table>
+        </div>    
+
+      </div>
+
+      <img src="{{images[0]}}" alt="...">
+      <div class = "card-body fontsize-table">
+        <div class="table-responsive">
+          <table class="table tablesorter fontsize-table table-dark table-hover table-sm">
+            <tbody>
+                <tr class = "text-white">
+                  <td>
+                    Battery level
+                  </td>
+                  <td>
+                    <progress id="progress_bar_online" value="{{devices_battery_level[counter.value]}}" max="100"> </progress>
+                    <label for="progress_bar_online">{{devices_battery_level[counter.value]}} %</label>
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Last seen
+                  </td>
+                  <td>
+                    {{devices_last_seen[counter.value]}}
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Message
+                  </td>
+                  <td>
+                    {{devices_message[counter.value]}}
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Battery voltage
+                  </td>
+                  <td>
+                    {{devices_battery_voltage[counter.value]}} V
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Battery current
+                  </td>
+                  <td>
+                    {{devices_battery_current[counter.value]}} mA
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Instantaneous power
+                  </td>
+                  <td>
+                    {{devices_power_level[counter.value]}} W
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Battery status
+                  </td>
+                  <td>
+                    {{devices_battery_status[counter.value]}}
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Battery temperature 1
+                  </td>
+                  <td>
+                    {{devices_battery_temp_1[counter.value]}} °C
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Battery temperature 2
+                  </td>
+                  <td>
+                    {{devices_battery_temp_2[counter.value]}} °C
+                  </td>
+                </tr>
+                <tr class = "text-white">
+                  <td>
+                    Ambient temperature
+                  </td>
+                  <td>
+                    {{devices_ambient_temp[counter.value]}} °C
+                  </td>
+                  
+                </tr>
+                
+            </tbody>
+          </table>
+        </div>
+        
+
+
+        
+
+      </div>
+
+    </div>
+  </div>
+  {% set counter.value = counter.value + 1 %}
+  {% endfor %}
+
+</div>
+
 
 
 

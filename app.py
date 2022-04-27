@@ -494,6 +494,8 @@ def device_monitoring():
     devices_battery_temp_1 = []
     devices_battery_temp_2 = []
     devices_ambient_temp = []
+    images = []
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/end_device.png', 100, data)[1])
 
 
     cursor = end_device.query.all()
@@ -521,7 +523,7 @@ def device_monitoring():
     devices_battery_current = devices_battery_current, devices_battery_voltage = devices_battery_voltage, 
     devices_battery_level = devices_battery_level, devices_battery_status = devices_battery_status, 
     devices_power_level = devices_power_level, devices_battery_temp_1 = devices_battery_temp_1,
-    devices_battery_temp_2 = devices_battery_temp_2, devices_ambient_temp = devices_ambient_temp, navbar_items = navbar_items)
+    devices_battery_temp_2 = devices_battery_temp_2, devices_ambient_temp = devices_ambient_temp, navbar_items = navbar_items, images = images)
 
 # @app.route('/update_server', methods=['POST'])
 # def webhook():
