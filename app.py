@@ -934,15 +934,38 @@ def debug():
 ##################################################################
 ###################### Load testing URLs #####################
 ##################################################################
-# @app.route("/test")
-# def test():
-#     return render_template("test.html")
 
-@app.route("/test_about_us")
-def test_about_us():
-    images = []
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
-    return render_template("about_us.html", active_state = "about_us", images = images)
+
+@app.route("/debugger_xlxs")
+def debugger_xlxs():
+    workbook = Workbook('debugger_log.xlsx')
+    worksheet = workbook.add_worksheet()
+    conn=sqlite3.connect('database.sqlite')
+    c=conn.cursor()
+    c.execute("select * from Server_debugger")
+    mysel=c.execute("select * from Server_debugger ")
+    for i, row in enumerate(mysel):
+        for j, value in enumerate(row):
+            worksheet.write(i, j, value)
+    workbook.close()
+    return redirect("/debug")
+
+
+@app.route("/server_activity_xlxs")
+def server_activity_xlxs():
+    workbook = Workbook('server_activities_log.xlsx')
+    worksheet = workbook.add_worksheet()
+    conn=sqlite3.connect('database.sqlite')
+    c=conn.cursor()
+    c.execute("select * from Server_activity")
+    mysel=c.execute("select * from Server_activity")
+    for i, row in enumerate(mysel):
+        for j, value in enumerate(row):
+            worksheet.write(i, j, value)
+    workbook.close()
+    return redirect("/admin/home")
+
+
 
 ##################################################################
 
@@ -950,7 +973,10 @@ def test_about_us():
 @login_required
 def about_us():
     images = []
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/bigpicture.png', 1000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/motivation.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/introduction.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/features.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/vision.png', 5000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
 
 

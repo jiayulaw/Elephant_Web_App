@@ -3,14 +3,14 @@
 
     <div class="sidebar-header">
         
-        <h3>Project Elephant</h3>
+        <h3>EIDDS</h3>
         <!-- <div id="dismiss">
             <i class="fas fa-arrow-left"></i>
         </div> -->
     </div>
 
     <ul class="list-unstyled components">
-        <p>Version 0.5.1</p>
+        <p>Version 1.0 Beta</p>
         {% if current_user.is_authenticated == True %}
         <li class="{% if 'account' in active_state %} active {% endif %}">
             <a href="#AccountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> <i class="fas fa-user-circle me-2"></i>{{current_user.username}}</a>

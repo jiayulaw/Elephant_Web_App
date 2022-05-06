@@ -1,3 +1,20 @@
+@import url(https://fonts.googleapis.com/css?family=Audiowide);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu);
+@import url(https://fonts.googleapis.com/css?family=Droid+Sans);
+
+/* Import rule include something like
+@font-face {  
+    font-family: 'newfont';  
+    src: url('http://www.tsevdos.com/fonts/newfont.ttf');  
+}
+*/
+
+h1 {
+  color:#dcb0fa;
+  font-family: 'Droid Sans';
+}
+
+
 .center {
   display: block;
   margin-left: auto;
@@ -379,4 +396,96 @@
   }
 }
 
+.quadros > div {
+	position: relative;
+	display: grid;
+	align-items: center;
+}
 
+.quadros > div > .circle {
+	position: absolute;
+	top: -15px;
+	left: -15px;
+	width: 200px;
+	height: 200px;
+	background:
+  linear-gradient(45deg, transparent, transparent 40%, rgb(107, 75, 248)),
+  linear-gradient(#262626, #141414);
+	border-radius: 50%;
+	animation: animate_circle 2s linear infinite;
+	z-index: 0;
+}
+.quadros > div > .circle:before,
+.quadros > div > .circle:after {
+  content: " ";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: linear-gradient(#161616, #262626);
+  border-radius: inherit;
+}
+.quadros > div > .circle:before {
+  background: 
+    linear-gradient(45deg, transparent, transparent 40%, rgb(99, 158, 235));
+  filter: blur(32px);
+}
+
+@keyframes animate_circle {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.quadros > div > img {
+	width: 170px;
+	height: 170px;
+	/*border: 6px rgba(255, 234, 118, 0.8) solid;*/
+	border-radius: 50%;
+	filter: brightness(95%);
+	transition: all 0.5s;
+	z-index: 1;
+}
+
+.quadros > div > img:hover {
+	filter: brightness(115%);
+}
+
+
+body .box {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: 
+    linear-gradient(45deg, transparent, transparent 40%, yellow),
+    linear-gradient(#262626, #141414);
+  animation: rotate 1.5s linear infinite;
+}
+body .box:before,
+body .box:after {
+  content: " ";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: linear-gradient(#161616, #262626);
+  border-radius: inherit;
+}
+body .box:before {
+  background: 
+    linear-gradient(45deg, transparent, transparent 40%, yellow);
+  filter: blur(32px);
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+    filter: hue-rotate(360deg);
+  }
+}

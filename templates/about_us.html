@@ -8,32 +8,84 @@
 {% endblock stylesheets %}
 
 {% block content %}
-<div class = "text-white">
-    <h1>About Us</h1>
 
-</div>
 
 
 
 <div class = "row">
-    <div class="col-lg-8 col-md-12 ">
-        <div class = "card bg-dark text-white border-radius-cardd">
-            <img class = "ms-2 me-2 mt-2 mb-2" src = "{{images[0]}}">
+    <div class="col-sm-5">
+        <div class = "card bg-dark text-white border-radius-cardd bg-transparent border-none">
+            <h1 class = "ms-5 me-2 mt-2 mb-2">About Us</h1>
 
-            <div class = "ms-3">
-                <h4>User feedback</h4>
-                <p>Found any bug? We will be glad to receive your feedback.<br>
-                Report any issue by clicking <a href  = "http" style = "color:blue;">here</a><br>
-            You may also email your feedback to efyjl10@nottingham.edu.my</p>
+            
+        </div>
+        {% for img in images %}
+        <div class = "card bg-dark text-white border-radius-cardd bg-transparent border-none">
+            <img class = "ms-2 me-2 mt-2 mb-2" src = "{{img}}">
 
+            
+        </div>
+        {% endfor %}
+
+    </div>
+    <div class="col-sm-5">
+        <div class = "card bg-dark text-white border-radius-cardd bg-transparent border-none">
+        
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class = "quadros">
+                            <div>
+                                <div class="circle"></div>
+                                <img src="static/img/JiaYu.jpg" alt="Law Jia Yu" />
+                            </div>
+    
+                        </div>
+                    
+                    </div>
+                    <div class="col-sm mb-4">
+                        <div class = "quadros">
+                            <div>
+                                <div class="circle"></div>
+                                <img src="static/img/JiaYu.jpg" alt="Law Jia Yu" />
+                            </div>
+    
+                        </div>
+                    
+                    </div>
+    
+                </div>
+                <div class = "row mt-12 justify-content-center">
+                    <div class="col-sm">
+                        <div class = "quadros">
+                            <div>
+                                <div class="circle"></div>
+                                <img src="static/img/JiaYu.jpg" alt="Law Jia Yu" />
+                            </div>
+    
+                        </div>
+                    </div>
+    
+                    <div class="col-sm align-items-center">
+                        <div class = "quadros">
+                            <div>
+                                <div class="circle"></div>
+                                <img src="static/img/JiaYu.jpg" alt="Law Jia Yu" />
+                            </div>
+    
+                        </div>
+                    </div>
+                </div>
             </div>
-
-
-
+    
+    
+            <div class="name">Human </div>
+    
             
         </div>
 
     </div>
+
 
     
 
