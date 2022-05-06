@@ -327,11 +327,11 @@ def update_server_directory_images(Images, BASE_DIR, modified_path):
 
     # check all images in directory to prevent missing out any 
     check_image(device_name, filename, BASE_DIR)
-    for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
-        directory = rf"static/image uploads/{device_name}" 
-        directory2 = os.path.join(BASE_DIR, directory)
-        for filename in os.listdir(directory2):
-            check_image(device_name, filename, BASE_DIR)
+    # for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
+    #     directory = rf"static/image uploads/{device_name}" 
+    #     directory2 = os.path.join(BASE_DIR, directory)
+    #     for filename in os.listdir(directory2):
+    #         check_image(device_name, filename, BASE_DIR)
             
                 
 
