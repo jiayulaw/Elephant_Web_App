@@ -389,11 +389,10 @@ def update_device_status_thread():
             db_path = os.path.join(BASE_DIR, "database.sqlite")
             # generation of Excel file from SQLite referenced from https://stackoverflow.com/questions/24577349/flask-download-a-file
             print ("Updating debugger log excel")
-            workbook = Workbook('static/debugger_log.xlsx')
+            workbook = Workbook(os.path.join(BASE_DIR, 'static/debugger_log.xlsx'))
             worksheet = workbook.add_worksheet()
             conn=sqlite3.connect(db_path)
             c=conn.cursor()
-            c.execute("select * from Server_debugger")
             mysel=c.execute("select * from Server_debugger ")
             for i, row in enumerate(mysel):
                 for j, value in enumerate(row):
@@ -401,11 +400,10 @@ def update_device_status_thread():
             workbook.close()
 
             print ("Updating server activity log excel")
-            workbook = Workbook('static/server_activities_log.xlsx')
+            workbook = Workbook(os.path.join(BASE_DIR,'static/server_activities_log.xlsx'))
             worksheet = workbook.add_worksheet()
             conn=sqlite3.connect(db_path)
             c=conn.cursor()
-            c.execute("select * from Server_activity")
             mysel=c.execute("select * from Server_activity")
             for i, row in enumerate(mysel):
                 for j, value in enumerate(row):
