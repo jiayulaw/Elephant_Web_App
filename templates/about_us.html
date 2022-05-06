@@ -79,7 +79,7 @@
             </div>
     
     
-            <div class="name">Human </div>
+            <div class="name">Quadros </div>
     
             
         </div>
@@ -101,6 +101,15 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 {{ super() }}
+
+<script>
+    // This script prevents user from downloading image by right-clicking
+    (function($){
+      $(document).on('contextmenu', 'img', function() {
+          return false;
+      })
+    })(jQuery);
+  </script>
 
 {% endblock javascripts %}   
 

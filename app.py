@@ -976,6 +976,10 @@ def about_us():
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/motivation.png', 5000, data)[1])
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/introduction.png', 5000, data)[1])
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/features.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_overview.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_flowchart.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/results_and_discussion.png', 5000, data)[1])
+    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/future_development.png', 5000, data)[1])
     images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/vision.png', 5000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
 
