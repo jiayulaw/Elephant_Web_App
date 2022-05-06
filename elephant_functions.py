@@ -384,11 +384,14 @@ def update_device_status_thread():
             
             db.session.commit()
 
+
+
+            db_path = os.path.join(BASE_DIR, "database.sqlite")
             # generation of Excel file from SQLite referenced from https://stackoverflow.com/questions/24577349/flask-download-a-file
             print ("Updating debugger log excel")
             workbook = Workbook('static/debugger_log.xlsx')
             worksheet = workbook.add_worksheet()
-            conn=sqlite3.connect('database.sqlite')
+            conn=sqlite3.connect(db_path)
             c=conn.cursor()
             c.execute("select * from Server_debugger")
             mysel=c.execute("select * from Server_debugger ")
@@ -400,7 +403,7 @@ def update_device_status_thread():
             print ("Updating server activity log excel")
             workbook = Workbook('static/server_activities_log.xlsx')
             worksheet = workbook.add_worksheet()
-            conn=sqlite3.connect('database.sqlite')
+            conn=sqlite3.connect(db_path)
             c=conn.cursor()
             c.execute("select * from Server_activity")
             mysel=c.execute("select * from Server_activity")
