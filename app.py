@@ -52,18 +52,20 @@ data = DataStorage()
 directory and triggers the check and record of unrecorded image file."""
 def on_created(event):
         print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been created!")
-        update_server_directory_images(Images, BASE_DIR)
+        update_server_directory_images(Images, BASE_DIR, event.src_path)
 
 def on_deleted(event):
     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been deleted!")
-    update_server_directory_images(Images, BASE_DIR)
+    update_server_directory_images(Images, BASE_DIR, event.src_path)
 def on_modified(event):
     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} has been modified!")
-    update_server_directory_images(Images, BASE_DIR)
+    update_server_directory_images(Images, BASE_DIR, event.src_path)
 
 def on_moved(event):
     print(f"CHANGE DETECTED IN IMAGE DIRECTORY - {event.src_path} was moved to {event.dest_path}")
-    update_server_directory_images(Images, BASE_DIR)
+    update_server_directory_images(Images, BASE_DIR, event.src_path)
+
+    
 
 patterns = ["*"]
 ignore_patterns = None

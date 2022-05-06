@@ -258,61 +258,81 @@ def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_dat
         print("Done Bossku")
 
 
-def update_server_directory_images(Images, BASE_DIR):
+def check_image(device_name, filename, BASE_DIR):
+    try: #dont use try except here! it is only making things complicated!
+        if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
+            if '-x-' in filename and 'thumbnail' not in filename and 'edited' not in filename:
+                #strip away file format extension
+                common_name = filename.split(".")[0]
+                fileformat = filename.split(".")[1]
+                #strip between datetime and detection type
+                arr1 = common_name.split("-x-")
+                detection_date_time = arr1[0]
+                date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
+                date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
+                
+                detection_type = arr1[1]
+                # path = os.path.join(directory, filename)
+                path = rf"static/image uploads/{device_name}/"+filename
+
+                result = Images.query.filter_by(path=path).first()
+                if result:
+                    # print("the file with same name already saved")
+                    annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
+                else:
+                    ######################################################
+                    # Save a copy of image to NodeRed folder 
+                    ######################################################
+                    src_absolute_path = os.path.join(BASE_DIR, path)
+                    dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
+                    dest_absolute_path = os.path.join(BASE_DIR, dest_path)
+                    shutil.copy2(src_absolute_path, dest_absolute_path)
+                    ######################################################
+                    # Record new image to database 
+                    ######################################################
+                    new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
+                    db.session.add(new_image)
+                    db.session.commit()
+                    logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
+                    logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
+
+                    ######################################################
+                    # Check and send .json file associated with the image (if any)
+                    ######################################################
+                    annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
+        else:
+            pass
+    except Exception as e:
+                    logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Exception: Update image directory", str(e), db)
+
+
+
+def update_server_directory_images(Images, BASE_DIR, modified_path):
     """ 
     Check directory to look for any image file (of certain naming format) that is not recorded in database.
     Proceed to record the unrecorded image if any.
     """
+    
     print("Updating server directory images and detection information...")
+    filename = os.path.basename(modified_path)
+    device_name = "end device 1"
+    if "end device 1" in modified_path:
+        device_name = "end device 1"
+    elif "end device 2" in modified_path:
+        device_name = "end device 2"
+    elif "end device 3" in modified_path:
+        device_name = "end device 3"
+    # check the image first to prevent delay
+
+
+    # check all images in directory to prevent missing out any 
+    check_image(device_name, filename, BASE_DIR)
     for device_name in ['end device 1', 'end device 2', 'end device 3', 'uploaded']:
         directory = rf"static/image uploads/{device_name}" 
         directory2 = os.path.join(BASE_DIR, directory)
         for filename in os.listdir(directory2):
-            try: #dont use try except here! it is only making things complicated!
-                if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-                    if '-x-' in filename and 'thumbnail' not in filename and 'edited' not in filename:
-                        #strip away file format extension
-                        common_name = filename.split(".")[0]
-                        fileformat = filename.split(".")[1]
-                        #strip between datetime and detection type
-                        arr1 = common_name.split("-x-")
-                        detection_date_time = arr1[0]
-                        date_time_obj = datetime.datetime.strptime(detection_date_time,'%Y-%m-%d %H-%M-%S')
-                        date_time = datetime.datetime.strftime(date_time_obj, "%Y-%m-%d %H:%M:%S")
-                        
-                        detection_type = arr1[1]
-                        # path = os.path.join(directory, filename)
-                        path = rf"static/image uploads/{device_name}/"+filename
-
-                        result = Images.query.filter_by(path=path).first()
-                        if result:
-                            # print("the file with same name already saved")
-                            annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
-                        else:
-                            ######################################################
-                            # Save a copy of image to NodeRed folder 
-                            ######################################################
-                            src_absolute_path = os.path.join(BASE_DIR, path)
-                            dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
-                            dest_absolute_path = os.path.join(BASE_DIR, dest_path)
-                            shutil.copy2(src_absolute_path, dest_absolute_path)
-                            ######################################################
-                            # Record new image to database 
-                            ######################################################
-                            new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
-                            db.session.add(new_image)
-                            db.session.commit()
-                            logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
-                            logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
-
-                            ######################################################
-                            # Check and send .json file associated with the image (if any)
-                            ######################################################
-                            annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
-                else:
-                    continue
-            except Exception as e:
-                logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Exception: Update image directory", str(e), db)
+            check_image(device_name, filename, BASE_DIR)
+            
                 
 
 
