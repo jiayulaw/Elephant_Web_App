@@ -1089,6 +1089,10 @@ def display_image():
         if start <= date_time_obj <= end:
           if data.detection_type == "any":
               image_criteria_pass = 1
+          
+          elif data.detection_type == "human":
+              if "person" in image.tag or "human" in image.tag:
+                  image_criteria_pass = 1
           else:
               if data.detection_type in image.tag:
                   image_criteria_pass = 1
