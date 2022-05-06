@@ -458,7 +458,7 @@ def dashboard():
 
     #  Analytics graph display on home page
     #Filter the number of images for past 7 days
-    end_datetime = datetime.datetime.now()
+    end_datetime = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
     start_datetime = end_datetime - datetime.timedelta(days=7)
     this_week_x_array, this_week_y_array = getImageNumOverTime(None, None, start_datetime, end_datetime)
     this_week_device1_x_array, this_week_device1_y_array = getImageNumOverTime("end device 1", None, start_datetime, end_datetime)
@@ -722,7 +722,7 @@ def analytics():
 
 
     #Filter the number of images for past 7 days
-    end_datetime = datetime.datetime.now()
+    end_datetime = datetime.datetime.strptime(getMalaysiaTime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
     start_datetime = end_datetime - datetime.timedelta(days=7)
     this_week_x_array, this_week_y_array = getImageNumOverTime(None, None, start_datetime, end_datetime)
     this_week_device1_x_array, this_week_device1_y_array = getImageNumOverTime("end device 1", None, start_datetime, end_datetime)
@@ -973,14 +973,14 @@ def server_activity_xlxs():
 @login_required
 def about_us():
     images = []
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/motivation.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/introduction.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/features.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_overview.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_flowchart.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/results_and_discussion.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/future_development.png', 5000, data)[1])
-    images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/vision.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/motivation.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/introduction.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/features.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_overview.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/system_flowchart.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/results_and_discussion.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/future_development.png', 5000, data)[1])
+    # images.append(check_and_create_img_thumbnail(BASE_DIR, 'static/img/vision.png', 5000, data)[1])
     return render_template("about_us.html", active_state = "about_us", images = images)
 
 

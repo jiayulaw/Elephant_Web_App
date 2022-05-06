@@ -290,6 +290,13 @@ def update_server_directory_images(Images, BASE_DIR):
                             annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_date_time, detection_type, fileformat, db)
                         else:
                             ######################################################
+                            # Save a copy of image to NodeRed folder 
+                            ######################################################
+                            src_absolute_path = os.path.join(BASE_DIR, path)
+                            dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
+                            dest_absolute_path = os.path.join(BASE_DIR, dest_path)
+                            shutil.copy2(src_absolute_path, dest_absolute_path)
+                            ######################################################
                             # Record new image to database 
                             ######################################################
                             new_image = Images(timestamp = date_time, path = path, source=device_name, tag = detection_type, latitude ="", longitude = "")
@@ -298,13 +305,6 @@ def update_server_directory_images(Images, BASE_DIR):
                             logServerDebugger(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
                             logServerActivity(getMalaysiaTime(datetime.datetime.now(), "%d/%m/%Y %I:%M:%S %p"), "Object Detection", "New image from " + device_name + " detected and recorded to database.", db)
 
-                            ######################################################
-                            # Savea copy of image to NodeRed folder 
-                            ######################################################
-                            src_absolute_path = os.path.join(BASE_DIR, path)
-                            dest_path = f'NodeRed/{device_name}/new_image.' + fileformat
-                            dest_absolute_path = os.path.join(BASE_DIR, dest_path)
-                            shutil.copy2(src_absolute_path, dest_absolute_path)
                             ######################################################
                             # Check and send .json file associated with the image (if any)
                             ######################################################

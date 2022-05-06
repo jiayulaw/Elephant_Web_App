@@ -2,15 +2,15 @@
   <nav id="sidebar">
 
     <div class="sidebar-header">
-        
-        <h3>EIDDS</h3>
+        <strong><h2 style = "color:black">EIDDS</h2></strong>
+        <img src = "../static/img/sidebar_image.png" class = "img_sidebar">
         <!-- <div id="dismiss">
             <i class="fas fa-arrow-left"></i>
         </div> -->
+        <p style = "color:black">Version 1.0 Beta</p>
     </div>
 
     <ul class="list-unstyled components">
-        <p>Version 1.0 Beta</p>
         {% if current_user.is_authenticated == True %}
         <li class="{% if 'account' in active_state %} active {% endif %}">
             <a href="#AccountSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> <i class="fas fa-user-circle me-2"></i>{{current_user.username}}</a>

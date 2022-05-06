@@ -270,7 +270,7 @@ h1 {
 }
 
 .fontsize-table{
-  font-size: medium;
+  font-size: small;
 }
 
 .analytic_chart{
@@ -400,20 +400,26 @@ h1 {
 	position: relative;
 	display: grid;
 	align-items: center;
+  height: 200px;
+  width: 200px;
+  margin: 0 auto
 }
 
 .quadros > div > .circle {
 	position: absolute;
-	top: -15px;
-	left: -15px;
-	width: 200px;
-	height: 200px;
+	/* top: -15px; */
+	left: 25px;
+  /* the value of left should be the difference of parent width and circle width divided by 2 */
+  /* left: -15px; */
+	width: 150px;
+	height: 150px;
 	background:
   linear-gradient(45deg, transparent, transparent 40%, rgb(107, 75, 248)),
   linear-gradient(#262626, #141414);
 	border-radius: 50%;
 	animation: animate_circle 2s linear infinite;
 	z-index: 0;
+  
 }
 .quadros > div > .circle:before,
 .quadros > div > .circle:after {
@@ -442,13 +448,14 @@ h1 {
 }
 
 .quadros > div > img {
-	width: 170px;
-	height: 170px;
+	width: 140px;
+	height: 140px;
 	/*border: 6px rgba(255, 234, 118, 0.8) solid;*/
 	border-radius: 50%;
 	filter: brightness(95%);
 	transition: all 0.5s;
 	z-index: 1;
+  margin: 0 auto;
 }
 
 .quadros > div > img:hover {
@@ -456,36 +463,41 @@ h1 {
 }
 
 
-body .box {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: 
-    linear-gradient(45deg, transparent, transparent 40%, yellow),
-    linear-gradient(#262626, #141414);
-  animation: rotate 1.5s linear infinite;
-}
-body .box:before,
-body .box:after {
-  content: " ";
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  background: linear-gradient(#161616, #262626);
-  border-radius: inherit;
-}
-body .box:before {
-  background: 
-    linear-gradient(45deg, transparent, transparent 40%, yellow);
-  filter: blur(32px);
+.contributors > div {
+	position: relative;
+	display: grid;
+	align-items: center;
+  height: 200px;
+  width: 200px;
+  margin: 0 auto
 }
 
-@keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-    filter: hue-rotate(360deg);
-  }
+.contributors > div > .square_img {
+	width: 140px;
+	height: auto;
+	/*border: 6px rgba(255, 234, 118, 0.8) solid;*/
+	filter: brightness(95%);
+	z-index: 1;
+  margin: 0 auto;
+  border: 2px solid rgb(77, 54, 209);
+}
+
+.contributors > div > .special_img {
+	width: 230px;
+	height: auto;
+	/*border: 6px rgba(255, 234, 118, 0.8) solid;*/
+	filter: brightness(95%);
+	z-index: 1;
+  margin: 0 auto;
+
+}
+
+.contributors > div > img:hover {
+	filter: brightness(115%);
+}
+
+.img_sidebar{
+  width:250px;
+  height: auto;
+
 }

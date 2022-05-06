@@ -18,6 +18,7 @@
 
     <div class="card border-white bg-dark text-white border-radius-cardd" id = "device_status">
       <div class="card-header">
+        
         <h4 class="card-title" style = "display:inline-block;"> Device Monitoring</h4>
         <div class="btn-group float-end" role="group" aria-label="">
           <button id = "device_general_table_button" type="button" onclick = "device_general_table()" class="btn btn-success card-title" style = "border-width: 3px; border-style: solid; border-color: aliceblue;">General Stats</button>
@@ -188,7 +189,8 @@
             <tbody>
                 <tr class = "text-white">
                   <td class="text-center text-info">
-                    {{name}}
+                    
+                    <strong>{{name}}</strong>
                   </td>
                   <td class="text-center">
                     {% if devices_status[counter.value] == "Offline" %}
