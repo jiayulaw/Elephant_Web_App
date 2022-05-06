@@ -124,6 +124,7 @@ def bounding_box_and_text(annotations, img):
     return copy_image
 
 def annotate_img_and_send_to_roboflow(BASE_DIR, path, common_name, detection_datetime, detection_type, fileformat, db):
+    time.sleep(2)
     """
     Triggers the annotation of image if a corresponding json file is found within the same directory of image.
     Save the annotated image at the same directory.
@@ -334,9 +335,6 @@ def update_server_directory_images(Images, BASE_DIR, modified_path):
     #         check_image(device_name, filename, BASE_DIR)
             
                 
-
-
-
 # def update_end_device_database_thread():
 #         ###########################################################################
 #     # Update end device online/offline status
