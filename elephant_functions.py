@@ -466,6 +466,9 @@ def getImageNumOverTime(img_source, detection_type, start_datetime, end_datetime
         if detection_type:
             if detection_type in image.tag:
                 bool2 = 1
+            elif detection_type == "human":
+                if "person" in image.tag:
+                    bool2 = 1
             elif detection_type == "any":
                 bool2 = 1
         else:
