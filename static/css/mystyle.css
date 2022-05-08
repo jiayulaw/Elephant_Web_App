@@ -349,7 +349,14 @@ h1 {
 }
 }   */
 
-
+.border-radius-button{
+  
+  font-size: 0.7em;
+  border-width: 3px; 
+  border-style: solid; 
+  border-color: aliceblue;
+  border-radius: 5px;
+}
 .border-radius-cardd{
   border-radius: 10px;
 }

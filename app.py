@@ -1025,7 +1025,7 @@ def about_us():
 @login_required
 @require_role(role="admin", role2 = "explorer")
 def display_image():
-    navbar_items = [["Update database", url_for('update_image')], ["Upload", url_for('upload_image')]]
+    navbar_items = [ ["Upload new image", url_for('upload_image')]]
     range_h = 'none'
     if not data.dontRequest == 1:
         timezone, start_datetime, end_datetime, data.station, data.detection_type, range_h = get_records()
