@@ -136,7 +136,7 @@
         </div>
         
         <div class="card-body">
-            <div><canvas id="homepagePast7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+            <div class = "chart-wrapper"><canvas id="homepagePast7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
         </div>
         
     </div>
@@ -310,6 +310,7 @@ new Chart("homepagePast7daysChart2", {
         }]
       },
       options: {
+        maintainAspectRatio: false,
         legend: {display: true,
         labels: {
           fontColor: "white"

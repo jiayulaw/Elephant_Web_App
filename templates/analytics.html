@@ -83,7 +83,7 @@
           </form>
                 
           <div class="card-body">
-              <div><canvas id="CustomChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+              <div class = "chart-wrapper"><canvas id="CustomChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
           </div>
           
           <br><br><br>
@@ -98,7 +98,17 @@
           </div>
           
           <div class="card-body">
-              <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+            <div class="table-responsive">
+              <div></div> 
+
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="AllTimeChart2" class = "analytic_chart table"></canvas>
+
+            </div>
+       
+            
+            <!-- <div><canvas id="AllTimeChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div> -->
           </div>
           
       </div>
@@ -108,7 +118,7 @@
         </div>
         
         <div class="card-body">
-            <div><canvas id="Past7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
+            <div class = "chart-wrapper"><canvas id="Past7daysChart2" style="width:100%;max-width:600px;" class = "analytic_chart"></canvas></div>
         </div>
         
     </div>
@@ -178,6 +188,7 @@
         }]
       },
       options: {
+        maintainAspectRatio: false,
         legend: {display: true,
         labels: {
           fontColor: "white"
@@ -235,6 +246,9 @@
         }]
       },
       options: {
+
+        maintainAspectRatio: false,
+        
         legend: {display: true,
         labels: {
           fontColor: "white"
@@ -290,6 +304,7 @@
         }]
       },
       options: {
+        maintainAspectRatio: false,
         legend: {display: true,
         labels: {
           fontColor: "white"

@@ -508,3 +508,9 @@ h1 {
   height: auto;
 
 }
+
+.chart-wrapper {
+  /* border: 1px solid blue; */
+  height: 35vh;
+  width: auto;
+}
